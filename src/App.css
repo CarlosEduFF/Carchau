@@ -45,7 +45,7 @@ header {
 }
 
 .navbar .logo {
-  gap: 10px;
+  width: 30px;
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -54,8 +54,7 @@ header {
 }
 
 .navbar .logo img {
-  width: 90px;
-  height: 50px;
+  width: 7cap;
   border-radius: 50%;
 }
 
@@ -275,15 +274,15 @@ header {
 
 /*--------------------------------SOBRE NOS----------------------------------------------------------*/
 .formas {
-  height: 250px;
+  height: 210px;
 }
 
 .forma {
-  width: 30cap;
+  width: 25cap;
 }
 
 .quemsomos {
-  height: 420px;
+  height: 450px;
   background-color: #030728;
   flex-direction: column;
   justify-content: center;
@@ -301,9 +300,10 @@ header {
 }
 
 .Group-Box {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  width: 100%;
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -313,7 +313,8 @@ header {
   margin: 40px;
   padding: 15px;
   text-align: justify;
-  width: 32rem;
+  width: 18cap;
+  margin-bottom: 0px;
   height: 18rem;
   background-color: #030728;
   border: 2px solid #FFA621;
@@ -334,7 +335,7 @@ header {
 }
 
 
-@media (max-width: 1008px) {
+@media (max-width: 1215px) {
   .formas {
     height: 170px;
   }
@@ -381,7 +382,11 @@ header {
 
 @media (max-width: 640px) {
   .formas {
-    height: 180px;
+    height: 150px;
+  }
+  
+  .forma {
+    width: 18cap;
   }
   .Group-Box {
     display: grid;
@@ -482,6 +487,9 @@ text-align: justify;
 
 @media (max-width: 1008px) {
   
+.container-Donwload {
+  margin-top: 210px;
+}
 .D-Title {
   font-size: 30px;
   font-weight: bold;
@@ -543,6 +551,10 @@ text-align: justify;
 
 @media (max-width: 680px) {
  
+  .container-Donwload {
+    margin-top: 220px;
+  }
+
 .D-Title {
   font-size: 25px;
   font-weight: bold;

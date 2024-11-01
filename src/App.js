@@ -7,6 +7,10 @@ import { Navigation, Pagination } from 'swiper/modules';
 import logo from './assets/icons/Logo-Carchau.png';
 import car from './assets/img/car.png';
 import perfilana from './assets/img/ana.jpeg';
+import perfilandrei from './assets/img/andrei.jpeg';
+import perfilcamilly from './assets/img/camilly.jpeg';
+import perfilcarlos from './assets/img/carlos.jpeg';
+
 
 
 import formadireita from './assets/img/formadireita.png';
@@ -107,7 +111,7 @@ function App() {
           <div class="Group-Box">
             <div class="box">
               <div class="imgperfil">
-                <img class="fotoperfil" src={perfilana} alt="Car Image" />
+                <img class="fotoperfil" src={perfilana} alt="foto intefrante" />
               </div>
               <div classe="textsobrenos">
                 <p class="textsobrenos">Ana Beatriz Novais Pereira, de 18 anos, 
@@ -118,7 +122,7 @@ function App() {
             </div>
             <div class="box">
               <div class="imgperfil">
-                <img class="fotoperfil" src={perfilana} alt="Car Image" />
+                <img class="fotoperfil" src={perfilandrei} alt="foto intefrante" />
               </div>
               <div classe="textsobrenos">
                 <p class="textsobrenos">Andrei Nunes Pereira, de 18 anos, 
@@ -129,7 +133,7 @@ function App() {
             </div>
             <div class="box">
               <div class="imgperfil">
-                <img class="fotoperfil" src={perfilana} alt="Car Image" />
+                <img class="fotoperfil" src={perfilcamilly} alt="foto intefrante" />
               </div>
               <div classe="textsobrenos">
                 <p class="textsobrenos">Camilly Demarco dos Santos, de 18 anos, 
@@ -140,7 +144,7 @@ function App() {
             </div>
             <div class="box">
               <div class="imgperfil">
-                <img class="fotoperfil" src={perfilana} alt="Car Image" />
+                <img class="fotoperfil" src={perfilcarlos} alt="foto intefrante" />
               </div>
               <div classe="textsobrenos">
                 <p class="textsobrenos">Carlos Eduardo Fernandes Farias, de 18 anos, 
@@ -150,12 +154,12 @@ function App() {
               </div>
             </div>
           </div>
-          <div class='formas' style={{display: 'grid', justifyItems: 'right', height: 10, marginTop: -40}} >
-            <img class="forma" src={formadireita} alt="Meia lua" />
-          </div>
         </div>
       </div>
 
+      <div class='formas' style={{display: 'grid', justifyItems: 'right', height: 10, marginTop: -40}} >
+        <img class="forma" src={formadireita} alt="Meia lua" />
+      </div>
 
         <div id="Down">
           <div class="container-Donwload">
@@ -187,7 +191,7 @@ function App() {
         </div>
 
         <div class='formas'>
-          <img class="forma" src={formaesquerda} alt="Meia lua amarela" style={{marginTop: -40}} />
+          <img class="forma" src={formaesquerda} alt="Meia lua amarela" style={{marginBottom: 400}} />
         </div>
 
 
