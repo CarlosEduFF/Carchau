@@ -61,12 +61,30 @@ function App() {
       )
       .then(() => {
         console.log('SUCCESS!');
+        setShowAlert(true)
+        {showAlert && (
+          <Alert message="Este é um alerta customizado!" onClose={() => setShowAlert(false)} />
+        )}
         e.target.reset();
       })
       .catch((error) => {
         console.log('FAILED...', error.text);
       });
   };
+
+  const [showAlert, setShowAlert] = useState(false);
+
+  const Alert = ({ message, onClose }) => {
+    return (
+      <div className="alert-overlay">
+        <div className="alert-box">
+          <p>{message}</p>
+          <button onClick={onClose}>Fechar</button>
+        </div>
+      </div>
+    );
+  };
+
 
   return (
     <div>
@@ -84,7 +102,8 @@ function App() {
           </ul>
         </nav>
       </header>
-
+      
+    
       <div id="Home">
         <div class="objs">
           <div class="header">
@@ -177,13 +196,13 @@ function App() {
                 {/*<!-- Botão de download para iOS -->*/}
                 <a class="button">
                   <img alt="" src={logoApple} />
-                  Download para IOS
+                  Download
                 </a>
 
                 {/*<!-- Botão de download para Android -->*/}
                 <a style={{marginLeft: 2,}} href="https://docs.google.com/uc?export=download&id=1wliLi25b_NZqFp0T26LFMuAhfGawMZ-8"  class="button">
                   <img alt="" src={logoAndroid} />
-                  Download para android                
+                  Download                 
                 </a>
               </div>
             </div>
@@ -208,7 +227,13 @@ function App() {
                 <label for="mensagem">Mensagem:</label>
                 <textarea id="mensagem" name="message" rows="5" required></textarea>
 
-                <button type="submit">Enviar</button>
+                <div>
+                  <button class="loading" type="submit">Enviar</button>
+                    {showAlert && (
+                      <Alert message="E-mail enviado com sucesso!!" onClose={() => setShowAlert(false)} />
+                    )}
+                </div>
+
               </form>
             </div>
             <div class='text-faleconosco'>

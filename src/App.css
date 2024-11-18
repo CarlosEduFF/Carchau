@@ -199,12 +199,11 @@ header {
 
   .carhome {
    width: 42%;
-   margin-top: 0;
+   margin-top: 40;
   }
 
   .car {
     width: 40cap;
-    margin-top: 40%;
    }
 
   .Title {
@@ -245,7 +244,7 @@ header {
   }
 
   .carhome {
-    width: 36%;
+    width: 39%;
   }
 
   .car {
@@ -266,6 +265,33 @@ header {
     font-family: 'Times-Italic';
     color: #fff;
     font-weight: lighter;
+  }
+  
+
+}
+
+
+@media (max-width: 444px) {
+ 
+  .paragrafo {
+    font-size: 16px;
+    font-family: 'Times-Italic';
+    color: #fff;
+    font-weight: lighter;
+  }
+
+  .carhome {
+    width: 39%;
+  }
+
+  .car {
+    width: 20cap;
+  }
+  
+  .header {
+    justify-content: start;
+    align-items: center;
+    width: 64%;
   }
 
 }
@@ -344,7 +370,7 @@ header {
     width: 22cap;
   }
   .quemsomos {
-    height: 800px;
+    height: 890px;
     background-color: #030728;
     flex-direction: row;
     justify-content: center;
@@ -363,6 +389,7 @@ header {
 
   .box {
     width: 18cap;
+    margin: 20%;
     margin-bottom: 0px;
   }
   .fotoperfil {
@@ -380,7 +407,7 @@ header {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 599px) {
   .formas {
     height: 150px;
   }
@@ -401,6 +428,76 @@ header {
     margin-bottom: 0px;
   }
 }
+
+
+@media (max-width: 490px) {
+  .quemsomos {
+    height: 700px;
+  
+  }
+  .Group-Box {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .box {
+    width: 10cap;
+    margin-bottom: 0px;
+    height: 14rem;
+
+  }
+
+  
+.textsobrenos {
+  color: #fff;
+  margin-top: 10px;
+  font-size: 12px;
+
+}
+
+}
+
+@media (max-width: 400px) {
+  
+  .quemsomos {
+    height: 1400px;
+  
+  }
+  
+  
+  .Title {
+    font-size: 28px;
+    margin-top: 50px;
+  
+  }
+    .Group-Box {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    .box {
+      width: 16cap;
+      margin: 20%;
+      margin-bottom: 0px;
+      height: 15rem;
+  
+    }
+  
+    
+  .textsobrenos {
+    color: #fff;
+    margin-top: 10px;
+    font-size: 14px;
+  
+  }
+}
+
 
 /*------------------------------------------DOWNLOAD------------------------------------------------*/
 .Donwl {
@@ -610,6 +707,69 @@ text-align: justify;
 }
 }
 
+
+@media (max-width: 499px) {
+ 
+  .container-Donwload {
+    margin-top: 220px;
+    flex-direction: column-reverse;
+    align-items: center;
+    align-items: center;
+  }
+
+.D-Title {
+  font-size: 25px;
+  font-weight: bold;
+  font-family: 'Times-Italic';
+  font-style: italic;
+  color: #FFA621;
+}
+
+.text-down{
+  width: 70%;
+
+}
+.D-paragrafo {
+  font-size: 16px;
+  font-family: 'Times-Italic';
+  color: #fff;
+}
+
+.d-buttons {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.button {
+  width: 200px;
+  border-radius: 10px;
+  font-size: 10px;
+  text-decoration: none;
+  flex: 1;
+  margin-bottom: 10px;
+}
+
+.button img {
+  width: 46px;
+  height: 30px;
+  vertical-align: middle;
+  margin-bottom: 2px;
+}
+
+
+.img-telas {
+  margin-top: 30px;
+  align-content: center;
+
+}
+
+.telas {
+  width: 18cap;
+
+}
+}
+
 /*-----------------------------------------FALE CONOSCO---------------------------------------------------------------*/
 .Cotato {
   display: flex;
@@ -706,6 +866,50 @@ button:hover {
   background-color: #0056b3;
 }
 
+.alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.alert-box {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.alert-box button {
+  margin-top: 20px;
+}
+
+.alert-box button.loading::after {
+  content: '';
+  border: 2px solid #f3f3f3; /* Cor da borda */
+  border-top: 2px solid #3498db; /* Cor da borda superior */
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  right: 10px; /* Ajuste a posição conforme necessário */
+  top: 50%;
+  transform: translateY(-50%);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
+}
 
 @media (max-width: 1008px) {
 
@@ -767,6 +971,52 @@ button:hover {
   
   .right-side {
     width: 50%;
+    padding: 20px;
+    border: 2px solid #FFA621;
+    border-radius: 10px;
+    margin: 10px;
+  
+  }
+  .F-Title {
+    font-size: 20px;
+    font-weight: bold;
+    font-family: 'Times-Italic';
+    font-style: italic;
+    color: #FFA621;
+  }
+  
+  
+  .F-paragrafo {
+    font-size: 10px;
+    font-family: 'Times-Italic';
+    color: #fff;
+  }
+ 
+  
+}
+
+
+@media (max-width: 400px) {
+  
+  .FaleCon {
+    justify-content: space-between ;
+    flex-direction: column-reverse;
+    align-items: center;
+    margin-top: 40px;
+    flex: 1;
+  }  
+
+  .text-faleconosco {
+    width: 80%;
+    height: 290px;
+    background-color: #030728;
+    border-radius: 10px;
+    margin: 10px;
+  }
+  
+  
+  .right-side {
+    width: 70%;
     padding: 20px;
     border: 2px solid #FFA621;
     border-radius: 10px;
