@@ -1,0 +1,24 @@
+{
+  "cli": {
+    "version": ">= 13.4.1",
+   "appVersionSource": "remote"
+  },
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "apk", 
+        "autoIncrement": true,
+        "releaseChannel": "production"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./path/to/your/service-account-key.json",
+        "track": "internal"
+      }
+    }
+  }
+}
+

@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "Carchau",
+    "slug": "Carchau",
+    "version": "1.0.0",
+    "scheme": "carchau",
+    "newArchEnabled": true,
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "assets/Car-Logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-dev-launcher",
+        {
+          "launchMode": "most-recent"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "orientation": "portrait",
+    "icon": "./assets/Car-Logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/Car-Logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#022036"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/Car-Logo.png",
+        "backgroundColor": "#022036"
+      },
+      "package": "com.carloseduss.Carchau"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "14d3e81e-7c5b-450c-b0f6-d759bd3864a8"
+      }
+    },
+    "owner": "carloseduss"
+  }
+}
