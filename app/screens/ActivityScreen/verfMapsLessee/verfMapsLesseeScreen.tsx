@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import { useLocalSearchParams } from 'expo-router';
 import { Button, Alert, Dimensions } from 'react-native';
 import * as Location from 'expo-location';

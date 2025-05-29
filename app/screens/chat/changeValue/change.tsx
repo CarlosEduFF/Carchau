@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Image, TextInput, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRoute } from '@react-navigation/native';
 import styles from './StylesChange';

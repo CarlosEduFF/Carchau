@@ -16,7 +16,7 @@ export default function Layout() {
       <Stack>
         <Stack.Screen name="ViewCardList" options={{
           headerShown: false,
-          navigationBarColor: '#022036' // Apenas o navigationBarColor é mantido
+          navigationBarColor: '#022036' 
         }} />
 
         <Stack.Screen name="DeleteCard" options={{
@@ -29,25 +29,6 @@ export default function Layout() {
           navigationBarColor: '#022036'
         }} />
 
-        {/*<Stack.Screen name="auth" options={{
-          headerShown: false,
-          navigationBarColor: '#022036'
-        }} />
-
-        <Stack.Screen name="aluguel" options={{
-          headerShown: false,
-          navigationBarColor: '#022036'
-        }} />
-
-        <Stack.Screen name="chat" options={{
-          headerShown: false,
-          navigationBarColor: '#022036'
-        }} />
-
-        <Stack.Screen name="atividades" options={{
-          headerShown: false,
-          navigationBarColor: '#022036'
-        }} />*/}
       </Stack>
     </>
   );

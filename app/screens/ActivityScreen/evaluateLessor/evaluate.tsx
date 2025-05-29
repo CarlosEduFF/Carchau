@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Animated, M
 import { AirbnbRating } from '@rneui/themed';
 import { ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import styles from './StylesEvaluateLessor';

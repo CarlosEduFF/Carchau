@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import { Button, Alert, Modal, Pressable, ScrollView, FlatList } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';

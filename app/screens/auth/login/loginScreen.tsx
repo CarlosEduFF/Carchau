@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, Text, TextInput, TouchableOpacity, ScrollView, Pressable, Modal } from 'react-native';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import styles from './StylesLogin';

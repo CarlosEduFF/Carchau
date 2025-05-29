@@ -2,6 +2,7 @@
 import { Link, Stack } from 'expo-router';
 import { HeaderButton } from '~/components/HeaderButton';
 import React from 'react';
+import { routes } from '~/constants/routes';
 
 
 export default function Layout() {
@@ -15,7 +16,7 @@ export default function Layout() {
          navigationBarColor: '#022036', 
          headerTransparent: true,
          headerLeft: () => (
-          <Link href="/screens/AccountScreen/address/ViewAddress/address" asChild>
+          <Link href={routes.viewAddress} asChild>
             <HeaderButton />
           </Link>
       ),    

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Animated, M
 import { AirbnbRating } from '@rneui/themed';
 import { ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import styles from './StylesEvaluateLessee';
@@ -73,7 +73,7 @@ export default function AvaliacaoLocatario() {
         estadoavaliLT: string;
       } = {
         estadoavaliLT: estadoavaliLT,
-        
+
       };
 
       // Adiciona a avaliação com a imagem de perfil (se houver)
@@ -93,8 +93,40 @@ export default function AvaliacaoLocatario() {
         nome,
         avaliacao: text,
         estrelas: rating,
-        fotoPerfil: fotoPerfilURL || null, // Adiciona a fotoPerfil ou null
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+        fotoPerfil: fotoPerfilURL || null,
       });
+
+      // Recalcular a média de estrelas após adicionar a avaliação
+      const avaliacoesSnapshot = await firebase.firestore()
+        .collection('Locatarios')
+        .doc(locadorId)
+        .collection('carros')
+        .doc(carroId)
+        .collection('avaliacoes')
+        .get();
+
+      const avaliacoes = avaliacoesSnapshot.docs
+        .map(doc => Number(doc.data().estrelas))
+        .filter(estrela => !isNaN(estrela));
+
+
+      let novaNota = 0;
+      if (avaliacoes.length > 0) {
+        const soma = avaliacoes.reduce((a, b) => a + b, 0);
+        novaNota = parseFloat((soma / avaliacoes.length).toFixed(1));
+      }
+
+      // Atualiza o campo 'nota' no documento do carro
+      await firebase.firestore()
+        .collection('Locatarios')
+        .doc(locadorId)
+        .collection('carros')
+        .doc(carroId)
+        .update({
+          nota: novaNota,
+        });
+
 
       // Atualiza apenas o estado da solicitação (sem imagem de perfil)
       await soliciRef.update(dataToUpdate);
@@ -137,7 +169,7 @@ export default function AvaliacaoLocatario() {
     return (
       <View style={styles.loadingContainer}>
         <Animated.View style={{ transform: [{ translateX }] }}>
-        <Image style={styles.carlogo} source={require('../../../../assets/icons/Car-Logo.png')} />
+          <Image style={styles.carlogo} source={require('../../../../assets/icons/Car-Logo.png')} />
         </Animated.View>
         <Text style={{ color: 'white' }}>Carregando...</Text>
       </View>
@@ -146,7 +178,7 @@ export default function AvaliacaoLocatario() {
 
   return (
     <ScrollView style={styles.container}>
-        <View style={styles.Topo}></View>
+      <View style={styles.Topo}></View>
       <Text style={styles.header}>Locação concluída com sucesso !!!</Text>
       <Text style={styles.text}>
         Parabéns, sua locação foi concluída com sucesso. Não deixe de avaliar como foi o seu período de aluguel.

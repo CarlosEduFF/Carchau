@@ -1,43 +1,36 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Modal, Pressable, Animated } from 'react-native';
-import { launchImageLibrary, ImageLibraryOptions, Asset } from 'react-native-image-picker';
+import React, { useState } from 'react';
+import { View, Text, Image, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../../utils/firebase';
 import { router } from 'expo-router';
 import { CheckBox } from '@rneui/themed';
 import PagerView from 'react-native-pager-view';
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
-import { MaskedTextInput } from 'react-native-mask-text';
-import * as WebBrowser from 'expo-web-browser';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import styles from './StylesAddLocation';
+import images from '~/constants/images';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import { pickMultipleImages, pickPdf, pickSingleImage, removeImageByIndex } from '~/utils/handleMediaManager';
+import { routes } from '~/constants/routes';
+import CustomModal from '~/components/CustomModal';
+import { saveCar } from '~/services/carSaveService';
+import { Carro } from '~/types/Cars';
 
 
 export default function CarRegistrationScreen() {
 
-
     const pickerStyle = Platform.select({
         ios: {
             color: '#ffffff',
-
         },
-
         android: {
-            // Estilo específico para Android
             color: '#fff',
         },
     });
 
-    const [LaudImage, setLaudImage] = useState<string | null>(null); // Estado inicial como null
-    const [pdfUri, setPdfUri] = useState<string | null>(null); // URI do PDF selecionado
-    const defaultVehicleImage = require('../../../../../assets/icons/Document-Icon.png');
-    const [fotosCarro, setFotosCarro] = useState<string[]>([]); // Array de strings para armazenar várias imagens
-    const [pdfName, setPdfName] = useState<string | null>(null); // Estado para armazenar o nome do arquivo PDF
-    const upload = require('../../../../../assets/icons/Upload-Icon.png');
-
+    const [LaudImage, setLaudImage] = useState<string>('');
+    const [pdfUri, setPdfUri] = useState<string>('');
+    const [fotosCarro, setFotosCarro] = useState<string[]>([]);
+    const [pdfName, setPdfName] = useState<string>('');
     const [modelo, setModelo] = useState('');
     const [marca, setMarca] = useState('');
     const [ano, setAno] = useState('');
@@ -48,21 +41,60 @@ export default function CarRegistrationScreen() {
     const [selectedCambio, setSelectedCambio] = useState('manual');
     const [selectedStep, setSelectedStep] = useState('general');
     const [selectedAirbags, setSelectedAirbags] = useState('general');
-    const [isUploading, setIsUploading] = useState(false); // Adiciona o estado para controlar o carregamento
-
-
-    const [precoDia, setPrecoDia] = useState<number | null>(null);
-    const [precoSemana, setPrecoSemana] = useState<number | null>(null);
-    const [precoMes, setPrecoMes] = useState<number | null>(null);
-    const [caucao, setCaucao] = useState<number | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [precoDia, setPrecoDia] = useState<number>(0);
+    const [precoSemana, setPrecoSemana] = useState<number>(0);
+    const [precoMes, setPrecoMes] = useState<number>(0);
+    const [caucao, setCaucao] = useState<number>(0);
     const [pontoencontro, setPontoEncontro] = useState('');
     const [selectedPeriods, setSelectedPeriods] = useState<number[]>([]);
-
-    const [loading2, setLoading2] = useState<boolean | null>(null);
-    const [loading, setLoading] = useState<boolean | null>(null);
+    const [loading2, setLoading2] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [situ, setSitu] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
+
+    const handleSave = async () => {
+        try {
+            setLoading2(true);
+            const quantidadeLugaresNum = Number(quantidadeLugares);
+            if (isNaN(quantidadeLugaresNum)) {
+                throw new Error("Quantidade de lugares inválida");
+            }
+            const carData: Carro = {
+                modelo,
+                marca,
+                ano,
+                placa,
+                combustivel,
+                quantidadeLugares: quantidadeLugaresNum,  
+                arCondicionado: selectedAr,
+                step: selectedStep,
+                cambio: selectedCambio,
+                airbags: selectedAirbags,
+                modalidadesAluguel: selectedPeriods,
+                caucao: Number(caucao),
+                pontoencontro,
+                fotoLaud: LaudImage,
+                pdfDocumento: pdfUri,
+                pdfNome: pdfName,
+                fotosCarro,
+                precoDia: precoDia,
+                precoSemana: precoSemana,
+                precoMes: precoMes,
+            };
+
+            await saveCar(carData);
+
+            setLoading2(false);
+            setModalVisible(true); // Sucesso
+        } catch (error: any) {
+            setLoading2(false);
+            setSitu(error.message);
+            setModalVisible2(true);
+            console.error('Erro:', error);
+        }
+    };
 
     const togglePeriod = (period: number) => {
         if (selectedPeriods.includes(period)) {
@@ -72,282 +104,56 @@ export default function CarRegistrationScreen() {
         }
     };
 
-
-    const handleSave = async () => {
-
-        try {
-            const uid = await AsyncStorage.getItem('userId');
-            if (!uid) {
-                alert('Erro ao obter ID do usuário.');
-                return;
-            }
-
-
-
-            if (!modelo) {
-                setSitu('Preencha corretamente o modelo do seu carro!');
-                setModalVisible2(true);
-                return;
-            } else if (!marca) {
-                setSitu('Preencha corretamente o marca do seu carro!');
-                setModalVisible2(true);
-                return;
-            } else if (!ano) {
-                setSitu('Preencha corretamente o ano do seu carro!');
-                setModalVisible2(true);
-                return;
-            } else if (!placa) {
-                setSitu('Preencha corretamente a placa do seu carro!');
-                setModalVisible2(true);
-                return;
-            } else if (!combustivel) {
-                setSitu('Preencha corretamente o combustivel do seu carro!');
-                setModalVisible2(true);
-                return;
-            } else if (!quantidadeLugares) {
-                setSitu('Preencha corretamente a quantidade de lugares do seu carro!');
-                setModalVisible2(true);
-                return;
-            }
-            else if (!selectedAr) {
-                setSitu('Preencha corretamente o ar-condicionado do seu carro!');
-                setModalVisible2(true);
-                return;
-            }
-            else if (!selectedStep) {
-                setSitu('Preencha corretamente o step do seu carro!');
-                setModalVisible2(true);
-                return;
-            } else if (!selectedCambio) {
-                setSitu('Preencha corretamente o câmbio do seu carro!');
-                setModalVisible2(true);
-                return;
-            } else if (!selectedAirbags) {
-                setSitu('Preencha corretamente o airbag do seu carro!');
-                setModalVisible2(true);
-                return;
-            } else if (!selectedPeriods) {
-                setSitu('Preencha corretamente a modalidade do aluguel da sua locação!');
-                setModalVisible2(true);
-                return;
-            } else if (!caucao) {
-                setSitu('Preencha corretamente a caução da sua locação!');
-                setModalVisible2(true);
-                return;
-            } else if (!pontoencontro) {
-                setSitu('Preencha corretamente o ponto de encontro da sua locação!');
-                setModalVisible2(true);
-                return;
-            } else if (!LaudImage) {
-                setSitu('Faça o upload corretamente da foto do laudo da sua locação!');
-                setModalVisible2(true);
-                return;
-            } else if (!pdfUri) {
-                setSitu('Faça o upload corretamente do PDF da apólice de seguro do seu carro!');
-                setModalVisible2(true);
-                return;
-            } else if (!fotosCarro) {
-                setSitu('Faça o upload corretamente das fotos do seu carro!');
-                setModalVisible2(true);
-                return;
+    const handleCancelMedia = (type: 'pdf' | 'Laud' | 'Car', index?: number) => {
+        if (type === 'pdf') {
+            setPdfUri(''); // Limpa PDF
+            setPdfName('');
+        }
+        if (type === 'Laud') {
+            setLaudImage(''); // Limpa Laud
+        }
+        if (type === 'Car') {
+            if (typeof index === 'number') {
+                const newImages = removeImageByIndex(fotosCarro, index);
+                setFotosCarro(newImages);
             } else {
-                setLoading2(true);
+                console.warn('Index é necessário para remover uma imagem do carro');
             }
+        }
+    };
 
-            let downloadURL = null;
-            if (LaudImage) {
-                const response = await fetch(LaudImage);
-                const blob = await response.blob();
-
-                // Define o caminho no Firebase Storage
-                const laudRef = firebase.storage().ref().child(`laudoCarro/${uid}`);
-
-                // Faz o upload da imagem do laudo
-                const snapshot = await laudRef.put(blob);
-
-                // Obtém a URL de download da imagem do laudo
-                downloadURL = await snapshot.ref.getDownloadURL();
+    const handleMediaManager = async (type: 'pdf' | 'single-image' | 'multi-image') => {
+        try {
+            if (type === 'pdf') {
+                const pdf = await pickPdf();
+                if (pdf) {
+                    setPdfUri(pdf.uri);
+                    setPdfName(pdf.name);
+                    console.log('PDF selecionado:', pdf.uri);
+                }
             }
-            let pdfDownloadUrl = null;
-            if (pdfUri) {
-                const pdfResponse = await fetch(pdfUri);
-                const pdfBlob = await pdfResponse.blob();
-                const pdfRef = firebase.storage().ref().child(`documentos/${uid}/${Date.now()}_doc.pdf`);
-                const pdfSnapshot = await pdfRef.put(pdfBlob);
-                pdfDownloadUrl = await pdfSnapshot.ref.getDownloadURL();
+            if (type === 'single-image') {
+                const image = await pickSingleImage();
+                if (image) {
+                    setLaudImage(image);
+                    console.log('Imagem selecionada:', image);
+                }
             }
-
-            const downloadURLs = [];
-            for (const fotoUri of fotosCarro) {
-                const response = await fetch(fotoUri);
-                const blob = await response.blob();
-                const storageRef = firebase.storage().ref().child(`carros/${uid}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
-                const snapshot = await storageRef.put(blob);
-                const downloadURL = await snapshot.ref.getDownloadURL();
-                downloadURLs.push(downloadURL);
+            if (type === 'multi-image') {
+                const images = await pickMultipleImages();
+                if (images.length > 0) {
+                    setFotosCarro(images);
+                    console.log('Imagens selecionadas:', images);
+                }
             }
-
-            const carrosRef = firebase.firestore()
-                .collection('Locatarios')
-                .doc(uid)
-                .collection('carros');
-
-            await carrosRef.add({
-                modelo: modelo,
-                marca: marca,
-                ano: ano,
-                placa: placa,
-                combustivel: combustivel,
-                quantidadeLugares: quantidadeLugares,
-                arCondicionado: selectedAr,
-                step: selectedStep,
-                cambio: selectedCambio,
-                airbags: selectedAirbags,
-                fotosCarro: downloadURLs,
-                caucao: caucao,
-                pdfDocumento: pdfDownloadUrl, // Salvar URL do documento PDF
-                pdfNome: pdfName,
-                modalidadesAluguel: selectedPeriods,
-                precoDia: selectedPeriods.includes(0) ? precoDia : null, // Converte para número e ajusta
-                precoSemana: selectedPeriods.includes(1) ? precoSemana : null, // Converte para número e ajusta
-                precoMes: selectedPeriods.includes(2) ? precoMes : null, // Converte para número e ajusta
-                pontoencontro: pontoencontro,
-                fotoLaud: downloadURL
-            });
-
-            setLoading2(false);
-            setModalVisible(true);
         } catch (error) {
-            console.error("Erro ao salvar os dados do carro: ", error);
-            alert('Erro ao salvar os dados do carro.');
-        } finally {
-            setIsUploading(false);
-            setLoading2(false);
+            console.error('Erro no gerenciador de mídia:', error);
         }
     };
 
-    const handleImagePicker = async () => {
-        const resultLaudImage = await ImagePicker.launchImageLibraryAsync({
-            aspect: [4, 4],
-            allowsEditing: true,
-            base64: true,
-            quality: 1,
-        });
-
-        if (!resultLaudImage.canceled) {
-            setLaudImage(resultLaudImage.assets[0].uri); // Define a URI da imagem selecionada
-        }
-    };
-
-    const handleMultipleImagePicker = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsMultipleSelection: true, // Se a versão suportar múltiplas seleções
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            const selectedImages = result.assets.map(asset => asset.uri);
-            setFotosCarro(prevState => [...prevState, ...selectedImages]);
-            console.log('Imagens selecionadas:', selectedImages); // Adicione este log
-        }
-    };
-    const handleCancelLaudImage = () => {
-        setLaudImage(null); // Remove a imagem de laudo
-    };
-
-    // Função para cancelar uma imagem específica do array
-    const handleCancelCarImage = (index: number) => {
-        const newImages = fotosCarro.filter((_, i) => i !== index); // Remove a imagem do array
-        setFotosCarro(newImages);
-    };
-
-    const handlePdfPicker = async () => {
-
-        try {
-            const result = await DocumentPicker.getDocumentAsync({
-                type: 'application/pdf', // Somente arquivos PDF
-                copyToCacheDirectory: true,
-            });
-
-            if (!result.canceled && result.assets && result.assets.length > 0) {
-                const selectedFile = result.assets[0];
-                setPdfUri(selectedFile.uri); // Armazena o URI do PDF selecionado
-                setPdfName(selectedFile.name); // Armazena o nome do PDF
-                console.log('PDF selecionado:', selectedFile.uri);
-                console.log('Nome do PDF:', selectedFile.name);
-            } else {
-                console.log('Seleção de documento cancelada.');
-            }
-        } catch (err) {
-            console.error("Erro ao selecionar PDF: ", err);
-        }
-    };
-
-    const handleCancelPdf = () => {
-        setPdfUri(null);  // Remove o PDF selecionado
-    };
-
-    const handleViewPdf = async () => {
-        if (pdfUri) {
-            // Abre o PDF no navegador
-            try {
-                const result = await WebBrowser.openBrowserAsync(pdfUri);
-                console.log('PDF visualizado:', result);
-            } catch (error) {
-                console.error('Erro ao abrir o PDF:', error);
-            }
-        } else {
-            alert('Nenhum PDF selecionado para visualizar.');
-        }
-    };
-
-    const formatCurrency = (value: string) => {
-        const formattedValue = value
-            .replace(/\D/g, '') // Remove qualquer coisa que não seja número
-            .replace(/(\d)(\d{2})$/, '$1,$2') // Adiciona vírgula antes dos dois últimos dígitos
-            .replace(/(?=(\d{3})+(\D))\B/g, '.') // Adiciona pontos a cada três dígitos
-        return ` ${formattedValue}`; // Adiciona "R$" no início
-    };
-
-    const translateX = useRef(new Animated.Value(-100)).current; // Inicia fora da tela à esquerda
-
-    useEffect(() => {
-        const animation = Animated.loop(
-            Animated.sequence([
-                Animated.timing(translateX, {
-                    toValue: 100, // Mova 100 pixels para a direita
-                    duration: 1000, // Duração da animação
-                    useNativeDriver: true, // Usa a API nativa para melhor performance
-                }),
-                Animated.timing(translateX, {
-                    toValue: -100, // Retorna à posição inicial
-                    duration: 0, // Sem duração para retornar
-                    useNativeDriver: true,
-                }),
-            ])
-        );
-
-        if (loading || loading2) {
-            animation.start();
-        }
-
-        // Para parar a animação quando os carregamentos não estiverem ativos
-        return () => animation.stop();
-    }, [loading, loading2, translateX]);
-
-    if (loading || loading2) {
-        return (
-            <View style={styles.loadingContainer}>
-                <Animated.View style={{ transform: [{ translateX }] }}>
-                    <Image style={styles.carlogo} source={require('../../../../../assets/icons/Car-Logo.png')} />
-                </Animated.View>
-                <Text style={{ color: 'white' }}>Carregando...</Text>
-            </View>
-        );
-    }
     return (
         <View style={styles.container}>
+            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
             <View style={styles.Topo}></View>
             <ScrollView>
                 <Text style={styles.title}>
@@ -723,7 +529,7 @@ export default function CarRegistrationScreen() {
                                 source={{ uri: LaudImage }}
                                 onError={(error) => console.log("Erro ao carregar imagem:", error)}
                             />
-                            <TouchableOpacity onPress={handleCancelLaudImage} style={styles.cancelButton}>
+                            <TouchableOpacity onPress={() => handleCancelMedia('Laud')} style={styles.cancelButton}>
                                 <Text style={styles.cancelarText} >Cancelar</Text>
                             </TouchableOpacity>
                         </>
@@ -732,12 +538,12 @@ export default function CarRegistrationScreen() {
                     )}
 
 
-                    <TouchableOpacity style={styles.button} onPress={handleImagePicker}>
+                    <TouchableOpacity style={styles.button} onPress={() => handleMediaManager('single-image')}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                             <Text style={{ fontWeight: 'bold', color: 'white', marginRight: 8 }}>Selecione a imagem do laudo</Text>
                             <Image
                                 style={styles.iconUpl}
-                                source={upload}
+                                source={images.uploadIcon}
                             />
                         </View>
                     </TouchableOpacity>
@@ -752,7 +558,7 @@ export default function CarRegistrationScreen() {
                             <Text style={styles.pdfText}>PDF selecionado: {pdfName}</Text>
                             <View>
                                 {/* Botão para cancelar o PDF */}
-                                <TouchableOpacity onPress={handleCancelPdf} style={styles.cancelButton}>
+                                <TouchableOpacity onPress={() => handleCancelMedia('pdf')} style={styles.cancelButton}>
                                     <Text style={styles.cancelarText}>Cancelar PDF</Text>
                                 </TouchableOpacity>
                             </View>
@@ -766,12 +572,12 @@ export default function CarRegistrationScreen() {
                         />
                     )}
 
-                    <TouchableOpacity style={styles.button} onPress={handlePdfPicker}>
+                    <TouchableOpacity style={styles.button} onPress={() => handleMediaManager('pdf')}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                             <Text style={{ fontWeight: 'bold', color: 'white', marginRight: 8 }}>Selecione o PDF da Apólice</Text>
                             <Image
                                 style={styles.iconUpl}
-                                source={upload}
+                                source={images.uploadIcon}
                             />
                         </View>
                     </TouchableOpacity>
@@ -794,7 +600,7 @@ export default function CarRegistrationScreen() {
                                     />
                                     <TouchableOpacity
                                         style={styles.cancelButton}
-                                        onPress={() => handleCancelCarImage(index)} // Botão de cancelar imagem
+                                        onPress={() => () => handleCancelMedia('Car')}
                                     >
                                         <Text style={styles.cancelarText}>Cancelar </Text>
                                     </TouchableOpacity>
@@ -810,56 +616,36 @@ export default function CarRegistrationScreen() {
                         />
                     )}
 
-                    <TouchableOpacity style={styles.button} onPress={handleMultipleImagePicker}>
+                    <TouchableOpacity style={styles.button} onPress={() => handleMediaManager('multi-image')}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                             <Text style={{ fontWeight: 'bold', color: 'white', marginRight: 8 }}>Selecione imagens do carro</Text>
                             <Image
                                 style={styles.iconUpl}
-                                source={upload}
+                                source={images.uploadIcon}
                             />
                         </View>
                     </TouchableOpacity>
                 </View>
 
-                <Modal
+                <CustomModal
                     visible={modalVisible}
-                    transparent={true}
-                    animationType="slide"
-                    onRequestClose={() => setModalVisible(false)}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <Text style={styles.foco}>Locação adicionada com sucesso!</Text>
-                            <Pressable
-                                style={styles.modalButton}
-                                onPress={() => {
-                                    setModalVisible(!modalVisible);
-                                    router.push('../LocationList/location-list');
-                                }}>
-                                <Text style={styles.textStyle}>Entendi!</Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </Modal>
+                    onClose={() => setModalVisible(false)}
+                    message="Locação adicionada com sucesso!"
+                    onConfirm={() => {
+                        setModalVisible(!modalVisible);
+                        router.push(routes.viewLocation);
+                    }}
+                />
 
-
-                <Modal
+                <CustomModal
                     visible={modalVisible2}
-                    transparent={true}
-                    animationType="slide"
-                    onRequestClose={() => setModalVisible2(false)}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <Text style={styles.foco}>{situ}</Text>
-                            <Pressable
-                                style={styles.modalButton}
-                                onPress={() => {
-                                    setModalVisible2(!modalVisible2);
-                                }}>
-                                <Text style={styles.textStyle}>Entendi!</Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </Modal>
+                    onClose={() => setModalVisible2(false)}
+                    message={situ}
+                    onConfirm={() => {
+                        setModalVisible2(!modalVisible2);
+                        router.push(routes.viewLocation);
+                    }}
+                />
 
                 {/* Botão de Salvar */}
                 <View style={{ alignItems: 'center', marginBottom: 30 }}>

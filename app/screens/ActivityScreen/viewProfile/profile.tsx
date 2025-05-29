@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, Animated, Modal, Pressable, FlatList } from 'react-native';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import { CheckBox, Divider } from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
@@ -44,35 +44,6 @@ export default function InformacoesPessoais() {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  const estadosPorExtensoParaSigla = {
-    "Acre": "AC",
-    "Alagoas": "AL",
-    "Amapá": "AP",
-    "Amazonas": "AM",
-    "Bahia": "BA",
-    "Ceará": "CE",
-    "Espírito Santo": "ES",
-    "Goiás": "GO",
-    "Maranhão": "MA",
-    "Mato Grosso": "MT",
-    "Mato Grosso do Sul": "MS",
-    "Minas Gerais": "MG",
-    "Pará": "PA",
-    "Paraíba": "PB",
-    "Paraná": "PR",
-    "Pernambuco": "PE",
-    "Piauí": "PI",
-    "Rio de Janeiro": "RJ",
-    "Rio Grande do Norte": "RN",
-    "Rio Grande do Sul": "RS",
-    "Rondônia": "RO",
-    "Roraima": "RR",
-    "Santa Catarina": "SC",
-    "São Paulo": "SP",
-    "Sergipe": "SE",
-    "Tocantins": "TO",
-    "Distrito Federal": "DF"
-  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -108,8 +79,7 @@ export default function InformacoesPessoais() {
             const enderecoData = enderecoDoc.data();
             if (enderecoData) {
               setCidade(enderecoData.cidade || '');
-              const estadoExtenso: keyof typeof estadosPorExtensoParaSigla = enderecoData.estado as keyof typeof estadosPorExtensoParaSigla;
-              setEstado(estadosPorExtensoParaSigla[estadoExtenso]);
+              setEstado(enderecoData.estado || '');
 
             }
           }
@@ -132,7 +102,7 @@ export default function InformacoesPessoais() {
         if (!locatarioId) return;
         try {
           // Referência da coleção de avaliações para o locatário específico
-          const locatariosRef = firebase.firestore().collection('Locatarios').doc(locatarioId).collection('Avaliacoes');
+          const locatariosRef = firebase.firestore().collection('Locatarios').doc(locatarioId).collection('avaliacoes');
 
           // Obtém todas as avaliações
           const locatariosSnapshot = await locatariosRef.get();

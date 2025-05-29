@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Animated, FlatList, TextInput } from 'react-native';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';

@@ -1,11 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, ScrollView, View, Text, TextInput, TouchableOpacity, Animated, Image, Modal, Pressable, Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../../utils/firebase';
+import { ScrollView, View, Text, TextInput, TouchableOpacity, Animated, Image, Modal, Pressable, Platform, Linking } from 'react-native';
 import { MaskedTextInput } from 'react-native-mask-text';
 import { Picker } from '@react-native-picker/picker';
-import { router } from 'expo-router';
 import styles from './StylesAddress';
+import { salvarOuAtualizarEndereco } from '~/services/addressUpdateService';
+import { validateEndereco } from '~/utils/validators';
+import { fetchEndereco } from '~/services/addressService';
+import { buscarEnderecoPorCep } from '~/utils/cep';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal';
 
 export default function Endereco() {
     const [cep, setCep] = useState('');
@@ -14,8 +17,8 @@ export default function Endereco() {
     const [complemento, setComplemento] = useState('');
     const [bairro, setBairro] = useState('');
     const [cidade, setCidade] = useState('');
-    const [estado, setEstado] = useState('');  // Usando o mesmo estado para o Picker e exibição
-    const [loading2, setLoading2] = useState<boolean | null>(null);
+    const [estado, setEstado] = useState('');
+    const [loading2, setLoading2] = useState(false);
     const [loading, setLoading] = useState(true);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [situ, setSitu] = useState('');
@@ -23,231 +26,99 @@ export default function Endereco() {
 
     const pickerStyle = Platform.select({
         android: {
-            // Estilo específico para Android
             color: '#fff',
         },
     });
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const uid = await AsyncStorage.getItem('userId');
-
-                if (uid) {
-                    // Referência à subcoleção 'Enderecos' do locatário
-                    const enderecoSnapshot = await firebase
-                        .firestore()
-                        .collection('Locatarios')
-                        .doc(uid)
-                        .collection('endereco')
-                        .get();
-
-                    if (!enderecoSnapshot.empty) {
-                        // Supõe que haverá apenas um endereço principal (pega o primeiro documento)
-                        const enderecoDoc = enderecoSnapshot.docs[0];
-                        const enderecoData = enderecoDoc.data();
-
-                        setCep(enderecoData.cep || '');
-                        setEndereco(enderecoData.endereco || '');
-                        setNumero(enderecoData.numero || '');
-                        setComplemento(enderecoData.complemento || '');
-                        setBairro(enderecoData.bairro || '');
-                        setCidade(enderecoData.cidade || '');
-                        setEstado(enderecoData.estado || ''); // Garantir que o estado seja carregado
-                    }
-                }
-                setLoading(false);
-            } catch (error) {
-                console.error("Erro ao buscar dados do usuário: ", error);
-                setLoading(false);
-            }
-        };
-
-        fetchUserData();
+        loadEndereco();
     }, []);
 
+    const loadEndereco = async () => {
+        setLoading(true);
+        const endereco = await fetchEndereco();
+
+        if (endereco) {
+            setCep(endereco.cep);
+            setEndereco(endereco.endereco);
+            setNumero(endereco.numero);
+            setComplemento(endereco.complemento);
+            setBairro(endereco.bairro);
+            setCidade(endereco.cidade);
+            setEstado(endereco.estado);
+        }
+
+        setLoading(false);
+    };
 
     const handleSave = async () => {
         try {
-            const uid = await AsyncStorage.getItem('userId');
+            const enderecoData = {
+                cep,
+                endereco,
+                numero,
+                complemento,
+                bairro,
+                cidade,
+                estado,
+            };
 
-            if (!cep || cep.length !== 9) {
-                setSitu('Preencha corretamente o seu CEP!');
-                setModalVisible2(true);
-                return;
-            } else if (!endereco) {
-                setSitu('Preencha corretamente o seu endereço!');
-                setModalVisible2(true);
-                return;
-            } else if (!numero) {
-                setSitu('Preencha corretamente o número da sua residência');
-                setModalVisible2(true);
-                return;
-            } else if (!bairro) {
-                setSitu('Preencha corretamente o seu bairro');
-                setModalVisible2(true);
-                return;
-            } else if (!cidade) {
-                setSitu('Preencha corretamente a sua cidade.');
-                setModalVisible2(true);
-                return;
-            } else if (!estado) {
-                setSitu('Preencha corretamente o seu estado.');
-                setModalVisible2(true);
-                return;
-            } else {
-                setLoading2(true);
-            }
+            const isValid = validateEndereco(enderecoData, setSitu, setModalVisible2);
+            if (!isValid) return;
 
-            if (uid) {
-                const locatariosRef = firebase.firestore().collection('Locatarios').doc(uid);
-                const subcollectionRef = locatariosRef.collection('endereco');
+            setLoading2(true);
 
-                // Verificar se já existe um registro na subcoleção
-                const enderecoSnapshot = await subcollectionRef.get();
+            await salvarOuAtualizarEndereco(enderecoData);
 
-                if (!enderecoSnapshot.empty) {
-                    // Atualizar o primeiro registro encontrado (assumindo que há apenas um registro de endereço por usuário)
-                    const enderecoDocId = enderecoSnapshot.docs[0].id;
-                    await subcollectionRef.doc(enderecoDocId).update({
-                        cep,
-                        endereco,
-                        numero,
-                        complemento: complemento || null,
-                        bairro,
-                        cidade,
-                        estado,
-                    });
-                } else {
-                    // Criar um novo registro se não houver nenhum
-                    await subcollectionRef.add({
-                        cep,
-                        endereco,
-                        numero,
-                        complemento: complemento || null,
-                        bairro,
-                        cidade,
-                        estado,
-                    });
-                }
-
-                setModalVisible(true);
-            }
-
-            setLoading2(false);
+            setModalVisible(true);
         } catch (error) {
             console.error("Erro ao salvar os dados do usuário: ", error);
-            alert('Erro ao salvar os dados. Tente novamente.');
-            setLoading(false);
+            setSitu('Erro ao salvar os dados. Tente novamente.');
+            setModalVisible2(true);
+        } finally {
             setLoading2(false);
         }
     };
 
-    const buscarEnderecoPorCep = async (cepDigitado: string) => {
-        const cepLimpo = cepDigitado.replace(/\D/g, '');
-        if (cepLimpo.length !== 8) return; // Só continua se o CEP tiver 8 dígitos
-
+    const handleBuscarCep = async (cep : string) => {
         try {
-            const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-            const data = await response.json();
-
-            if (!data.erro) {
-                setEndereco(data.logradouro || '');
-                setBairro(data.bairro || '');
-                setCidade(data.localidade || '');
-                setEstado(data.uf || ''); // UF ex: "SP"
-            } else {
-                alert('CEP não encontrado!');
-            }
+            const dados = await buscarEnderecoPorCep(cep);
+            setEndereco(dados.endereco);
+            setBairro(dados.bairro);
+            setCidade(dados.cidade);
+            setEstado(dados.estado);
         } catch (error) {
-            alert('Erro ao buscar o CEP');
-            console.error(error);
+            setSitu('Erro ao buscar CEP');
+            setModalVisible2(true);
         }
     };
 
-    const estadosMap = [
-        { sigla: 'AC', nome: 'Acre' },
-        { sigla: 'AL', nome: 'Alagoas' },
-        { sigla: 'AP', nome: 'Amapá' },
-        { sigla: 'AM', nome: 'Amazonas' },
-        { sigla: 'BA', nome: 'Bahia' },
-        { sigla: 'CE', nome: 'Ceará' },
-        { sigla: 'ES', nome: 'Espírito Santo' },
-        { sigla: 'GO', nome: 'Goiás' },
-        { sigla: 'MA', nome: 'Maranhão' },
-        { sigla: 'MT', nome: 'Mato Grosso' },
-        { sigla: 'MS', nome: 'Mato Grosso do Sul' },
-        { sigla: 'MG', nome: 'Minas Gerais' },
-        { sigla: 'PA', nome: 'Pará' },
-        { sigla: 'PB', nome: 'Paraíba' },
-        { sigla: 'PR', nome: 'Paraná' },
-        { sigla: 'PE', nome: 'Pernambuco' },
-        { sigla: 'PI', nome: 'Piauí' },
-        { sigla: 'RJ', nome: 'Rio de Janeiro' },
-        { sigla: 'RN', nome: 'Rio Grande do Norte' },
-        { sigla: 'RS', nome: 'Rio Grande do Sul' },
-        { sigla: 'RO', nome: 'Rondônia' },
-        { sigla: 'RR', nome: 'Roraima' },
-        { sigla: 'SC', nome: 'Santa Catarina' },
-        { sigla: 'SP', nome: 'São Paulo' },
-        { sigla: 'SE', nome: 'Sergipe' },
-        { sigla: 'TO', nome: 'Tocantins' },
-        { sigla: 'DF', nome: 'Distrito Federal' }
-    ];
 
 
-    const translateX = useRef(new Animated.Value(-100)).current; // Inicia fora da tela à esquerda
 
-    useEffect(() => {
-        const animation = Animated.loop(
-            Animated.sequence([
-                Animated.timing(translateX, {
-                    toValue: 100, // Mova 100 pixels para a direita
-                    duration: 1000, // Duração da animação
-                    useNativeDriver: true, // Usa a API nativa para melhor performance
-                }),
-                Animated.timing(translateX, {
-                    toValue: -100, // Retorna à posição inicial
-                    duration: 0, // Sem duração para retornar
-                    useNativeDriver: true,
-                }),
-            ])
-        );
-
-        if (loading || loading2) {
-            animation.start();
-        }
-
-        // Para parar a animação quando os carregamentos não estiverem ativos
-        return () => animation.stop();
-    }, [loading, loading2, translateX]);
-
-    if (loading || loading2) {
-        return (
-            <View style={styles.loadingContainer}>
-                <Animated.View style={{ transform: [{ translateX }] }}>
-                    <Image style={styles.carlogo} source={require('../../../../../assets/icons/Car-Logo.png')} />
-                </Animated.View>
-                <Text style={{ color: 'white' }}>Carregando...</Text>
-            </View>
-        );
-    }
     return (
         <>
             <View style={styles.container}>
+                {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
                 <View style={{ width: '100%', marginTop: 25 }}>
-
                     <ScrollView>
-                        <Text style={styles.textocampo}>
-                            Cep:
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text style={styles.textocampo}>
+                                Cep:
+                            </Text>
+                            <TouchableOpacity onPress={() => Linking.openURL('https://buscacepinter.correios.com.br')}>
+                                <Text style={{ color: 'blue', textDecorationLine: 'underline', fontSize: 14 }}>
+                                    Não sabe seu CEP?
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
 
                         <MaskedTextInput
                             style={styles.input}
                             autoCapitalize="none"
                             autoCorrect={false}
                             onChangeText={text => setCep(text)}
-                            onBlur={() => buscarEnderecoPorCep(cep)}
+                            onBlur={() => handleBuscarCep(cep)}
                             value={cep}
                             mask="99999-999"
                             placeholder='Ex:12345-678'
@@ -334,65 +205,65 @@ export default function Endereco() {
                             <Picker
                                 selectionColor={'#ffffff'}
                                 itemStyle={{ color: '#fff', alignItems: 'center' }}
-                                selectedValue={estado}
-                                onValueChange={(itemValue) => setEstado(itemValue)}
+                                selectedValue={estado}  // Usar o mesmo estado aqui
+                                onValueChange={(itemValue) => setEstado(itemValue)}  // Atualizar diretamente o estado
                                 dropdownIconColor='#fff'
                                 style={pickerStyle}
                             >
                                 <Picker.Item style={styles.picker} label="Selecione..." value="Selecione..." />
-                                {estadosMap.map((estadoItem) => (
-                                    <Picker.Item
-                                        key={estadoItem.sigla}
-                                        style={styles.picker}
-                                        label={estadoItem.sigla}
-                                        value={estadoItem.nome}
-                                    />
-                                ))}
+                                <Picker.Item style={styles.picker} label="AC" value="AC" />
+                                <Picker.Item style={styles.picker} label="AL" value="AL" />
+                                <Picker.Item style={styles.picker} label="AP" value="AP" />
+                                <Picker.Item style={styles.picker} label="AM" value="AM" />
+                                <Picker.Item style={styles.picker} label="BA" value="BA" />
+                                <Picker.Item style={styles.picker} label="CE" value="CE" />
+                                <Picker.Item style={styles.picker} label="ES" value="ES" />
+                                <Picker.Item style={styles.picker} label="GO" value="GO" />
+                                <Picker.Item style={styles.picker} label="MA" value="MA" />
+                                <Picker.Item style={styles.picker} label="MT" value="MT" />
+                                <Picker.Item style={styles.picker} label="MS" value="MS" />
+                                <Picker.Item style={styles.picker} label="MG" value="MG" />
+                                <Picker.Item style={styles.picker} label="PA" value="PA" />
+                                <Picker.Item style={styles.picker} label="PB" value="PB" />
+                                <Picker.Item style={styles.picker} label="PR" value="PR" />
+                                <Picker.Item style={styles.picker} label="PE" value="PE" />
+                                <Picker.Item style={styles.picker} label="PI" value="PI" />
+                                <Picker.Item style={styles.picker} label="RJ" value="RJ" />
+                                <Picker.Item style={styles.picker} label="RN" value="RN" />
+                                <Picker.Item style={styles.picker} label="RS" value="RS" />
+                                <Picker.Item style={styles.picker} label="RO" value="RO" />
+                                <Picker.Item style={styles.picker} label="RR" value="RR" />
+                                <Picker.Item style={styles.picker} label="SC" value="SC" />
+                                <Picker.Item style={styles.picker} label="SP" value="SP" />
+                                <Picker.Item style={styles.picker} label="SE" value="SE" />
+                                <Picker.Item style={styles.picker} label="TO" value="TO" />
+                                <Picker.Item style={styles.picker} label="DF" value="DF" />
                             </Picker>
                         </View>
 
-                        <Modal
+                        <CustomModal
                             visible={modalVisible}
-                            transparent={true}
-                            animationType="slide"
-                            onRequestClose={() => setModalVisible(false)}>
-                            <View style={styles.centeredView}>
-                                <View style={styles.modalView}>
-                                    <Text style={styles.foco}>Endereço atualizado com Sucesso!</Text>
-                                    <Pressable
-                                        style={styles.modalButton}
-                                        onPress={() => {
-                                            setModalVisible(!modalVisible);
-                                        }}>
-                                        <Text style={styles.textStyle}>Entendi!</Text>
-                                    </Pressable>
-                                </View>
-                            </View>
-                        </Modal>
+                            onClose={() => setModalVisible(false)}
+                            message='Endereço atualizado com Sucesso!'
+                            confirmText="Entendi"
+                            onConfirm={() => {
+                                setModalVisible(!modalVisible);
+                            }}
+                        />
 
-
-                        <Modal
+                        <CustomModal
                             visible={modalVisible2}
-                            transparent={true}
-                            animationType="slide"
-                            onRequestClose={() => setModalVisible2(false)}>
-                            <View style={styles.centeredView}>
-                                <View style={styles.modalView}>
-                                    <Text style={styles.foco}>{situ}</Text>
-                                    <Pressable
-                                        style={styles.modalButton}
-                                        onPress={() => {
-                                            setModalVisible2(!modalVisible2);
-                                        }}>
-                                        <Text style={styles.textStyle}>Entendi!</Text>
-                                    </Pressable>
-                                </View>
-                            </View>
-                        </Modal>
-                        <View style={{ alignItems: 'center' }}>
-                            <TouchableOpacity style={styles.button} onPress={() => {
+                            onClose={() => setModalVisible2(false)}
+                            message={situ}
+                            confirmText="Entendi"
+                            onConfirm={() => {
+                                setModalVisible2(!modalVisible2);
+                            }}
+                        />
 
-                                handleSave();
+
+                        <View style={{ alignItems: 'center' }}>
+                            <TouchableOpacity style={styles.button} onPress={() => {handleSave();
                             }}>
                                 <Text style={{ fontWeight: 'bold', fontSize: 18, color: 'white' }}>Salvar</Text>
                             </TouchableOpacity>

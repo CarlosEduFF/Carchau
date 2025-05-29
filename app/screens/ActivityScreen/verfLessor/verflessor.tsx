@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, ScrollView, Animated, Image } from 'react-native';
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../utils/firebase'; // Importação do Firebase Firestore
+import firebase from '../../../../config/firebase'; // Importação do Firebase Firestore
 import { router, useLocalSearchParams } from 'expo-router'; // Para pegar os parâmetros passados na navegação
 import styles from './StylesVerflessor';
 

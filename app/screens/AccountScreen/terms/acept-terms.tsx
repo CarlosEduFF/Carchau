@@ -1,77 +1,64 @@
 import { router } from 'expo-router';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { CheckBox } from '@rneui/themed';
-import firebase from '../../../../utils/firebase'; // Certifique-se que a configuração do Firebase está correta
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './StylesAceptTerms';
 import { Terms } from '~/components/Terms';
+import { fetchLatestTermo } from '~/services/termsServices';
+import { routes } from '~/constants/routes';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation';
 
 export default function Privacidade() {
     const [termoAceito, setTermoAceito] = useState(false);
     const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(false);
-    const [coletaAceito, setColetaAceito] = useState(false); // Estado para coleta de dados
+    const [loading, setLoading] = useState(true);
+    const [loading2, setLoading2] = useState(false);
     const [dataAceitacao, setDataAceitacao] = useState<string | null>(null);
-    // Para armazenar a data de aceitação
 
-    // Buscar dados do usuário e verificar se ele já aceitou o termo de privacidade
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const uid = await AsyncStorage.getItem('userId');
-                if (uid) {
-                    // Buscar a subcoleção "termos" dentro do documento do Locatario
-                    const termosSnapshot = await firebase.firestore()
-                        .collection('Locatarios')
-                        .doc(uid)
-                        .collection('termos')
-                        .orderBy('dataAceitacao', 'desc') // Ordena pelos termos mais recentes
-                        .limit(1) // Obtém o termo mais recente
-                        .get();
 
-                    if (!termosSnapshot.empty) {
-                        const termoData = termosSnapshot.docs[0].data();
-                        setTermoAceito(termoData.termoAceito || false);
-                        setColetaAceito(termoData.coletaAceito || false);
-                        setDataAceitacao(termoData.dataAceitacao || null);
-                        setIsCheckboxDisabled(termoData.termoAceito || false);
-                    }
-                }
-            } catch (error) {
-                console.error("Erro ao buscar dados do usuário: ", error);
+    const carregarTermo = async () => {
+        const id = await AsyncStorage.getItem('userId');
+        if (!id) return;
+
+        try {
+            const data = await fetchLatestTermo(id);
+            if (data) {
+                setTermoAceito(data.termoAceito);
+                setDataAceitacao(data.dataAceitacao);
+                setIsCheckboxDisabled(data.termoAceito);
             }
-        };
-
-        fetchUserData();
-    }, []);
-
-
-
-    // Função para redirecionar após aceitação
-    const handleAceito = () => {
-        router.replace('../../../(tabs)/account');
+        } catch (error) {
+            console.error('Erro ao carregar termo:', error);
+        }finally{
+            setLoading(false);
+        }
     };
+
+    useEffect(() => {
+        carregarTermo();
+    }, []);
 
     return (
         <View style={styles.containerPriva}>
+            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
             <ScrollView>
                 <View style={styles.Topo}></View>
+
                 <Terms></Terms>
 
-
-                {/* Exibir a data de aceitação do termo, se houver */}
                 {dataAceitacao && (
-                    <Text style={{ color: '#fff', fontSize: 13, marginVertical: 10, paddingLeft: 10 }}>
+                    <Text style={styles.TextAceitacao}>
                         Termo aceito em: {new Date(dataAceitacao).toLocaleString()}
                     </Text>
                 )}
 
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft:10 }}>
+                <View style={styles.ViewAceitacao}>
                     <CheckBox
                         checked={termoAceito}
                         checkedColor='#F2A51A'
                         disabled={isCheckboxDisabled}
-                        containerStyle={{ backgroundColor: 'transparent', width: 0, paddingRight: 0, left: -20 }}
+                        containerStyle={styles.CheckAceitacao}
                     />
                     <Text style={{ color: '#fff', fontSize: 13 }}>Li e concordo com os termos de Privacidade,{'\n'} Uso e Coleta de informações.</Text>
                 </View>
@@ -80,7 +67,7 @@ export default function Privacidade() {
                     <TouchableOpacity
                         style={[styles.buttonPriva, { backgroundColor: termoAceito ? '#F2A51A' : '#022036', borderColor: termoAceito ? '#F2A51A' : '#888888' }]}
                         disabled={!termoAceito}
-                        onPress={handleAceito}
+                        onPress={() => router.replace(routes.account)}
                     >
                         <Text style={{ fontWeight: 'bold', color: termoAceito ? '#fff' : '#888888' }}>Entendi</Text>
                     </TouchableOpacity>

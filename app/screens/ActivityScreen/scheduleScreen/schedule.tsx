@@ -5,7 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRoute } from '@react-navigation/native';
 import styles from './StylesSchedule';

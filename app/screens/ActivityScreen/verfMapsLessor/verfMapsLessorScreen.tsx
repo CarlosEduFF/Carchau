@@ -3,7 +3,7 @@ import { View, Text, Button, Alert, StyleSheet, Dimensions } from 'react-native'
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import { useLocalSearchParams } from 'expo-router';
-import firebase from '../../../../utils/firebase'; // Importação do Firebase Firestore
+import firebase from '../../../../config/firebase'; // Importação do Firebase Firestore
 
 export default function verfMapsLessorScreen() {
   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);

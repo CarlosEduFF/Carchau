@@ -1,18 +1,23 @@
 import { FontAwesome6 } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Image, Modal, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import React, { useState, useEffect, useRef } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../../utils/firebase';
+import React, { useState, useEffect } from 'react';
 import styles from './StylesCardList';
+import { routes } from '~/constants/routes';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import { fetchCards } from '~/services/cardService';
+import CustomModal from '~/components/CustomModal';
+import { deleteCard } from '~/services/cardDeleteService';
 
 export default function Cards() {
     const [cards, setCards] = useState<{ id: string; cartaoNumero: string; cartaoData: string }[]>([]);
     const [loading, setLoading] = useState(true);
-    const [loading2, setLoading2] = useState(true);
+    const [loading2, setLoading2] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
-    // Exibe apenas os últimos 4 dígitos do cartão
+    const [modalVisible2, setModalVisible2] = useState(false);
+    const [situ, setSitu] = useState("");
+
     const maskCardNumber = (number: string) => {
         if (number.length > 4) {
             return ` ${number.slice(-4)}`; // Máscara para exibir apenas os últimos 4 dígitos
@@ -22,114 +27,46 @@ export default function Cards() {
 
     function CardsVisu(cardId: string) {
         router.push({
-            pathname: '../DeleteCard/deletecard',
+            pathname: routes.deleteCard,
             params: { cardId } // Passa o cardId como parâmetro
         });
     }
 
     function CardsAdd() {
-        router.replace('../AddCard/addcard');
+        router.replace(routes.addCard);
     }
 
     const handleDelete = async (cardId: string) => {
         setLoading2(true);
-        try {
-            const uid = await AsyncStorage.getItem('userId');
-            if (uid && cardId) {
-                await firebase.firestore()
-                    .collection('Locatarios')
-                    .doc(uid)
-                    .collection('cartoes')
-                    .doc(cardId)
-                    .delete();
-
-
-                setLoading2(false);
-                setModalVisible(true);
-
-            }
-        } catch (error) {
-            console.error("Erro ao deletar o cartão: ", error);
-            alert('Erro ao deletar o cartão.');
-            setLoading2(false);
+        const success = await deleteCard(cardId);
+        if (success) {
+            setModalVisible(true); // sucesso
+            // opcional: atualizar a lista após deletar
+            fetchCards();
+        } else {
+            setSitu('Erro ao deletar o cartão.');
+            setModalVisible2(true);
         }
+        setLoading2(false);
     };
 
+
     useEffect(() => {
-        const fetchCards = async () => {
-            try {
-                const uid = await AsyncStorage.getItem('userId');
-                if (uid) {
-                    const snapshot = await firebase.firestore()
-                        .collection('Locatarios')
-                        .doc(uid)
-                        .collection('cartoes')
-                        .get();
-
-                    const cardsData = snapshot.docs.map(doc => {
-                        const data = doc.data();
-                        if (data.cartaoNumero && data.cartaoData) {
-                            return {
-                                id: doc.id,
-                                cartaoNumero: data.cartaoNumero,
-                                cartaoData: data.cartaoData,
-                            };
-                        }
-                        return null;
-                    }).filter(Boolean); // Remove entradas nulas
-
-                    setCards(cardsData as { id: string; cartaoNumero: string; cartaoData: string }[]);
-                }
-                setLoading(false);
-                setLoading2(false)
-            } catch (error) {
-                console.error("Erro ao buscar os cartões: ", error);
-                setLoading(false);
-                setLoading2(false);
-            }
-        };
-
-        fetchCards(); // Chama a função para buscar os cartões
+        loadCards();
     }, []);
 
-    const translateX = useRef(new Animated.Value(-100)).current; // Inicia fora da tela à esquerda
-
-    useEffect(() => {
-        const animation = Animated.loop(
-            Animated.sequence([
-                Animated.timing(translateX, {
-                    toValue: 100, // Mova 100 pixels para a direita
-                    duration: 1000, // Duração da animação
-                    useNativeDriver: true, // Usa a API nativa para melhor performance
-                }),
-                Animated.timing(translateX, {
-                    toValue: -100, // Retorna à posição inicial
-                    duration: 0, // Sem duração para retornar
-                    useNativeDriver: true,
-                }),
-            ])
-        );
-
-        if (loading || loading2) {
-            animation.start();
+    const loadCards = async () => {
+        setLoading(true);
+        const result = await fetchCards();
+        if (result) {
+            setCards(result);
         }
+        setLoading(false);
+    };
 
-        // Para parar a animação quando os carregamentos não estiverem ativos
-        return () => animation.stop();
-    }, [loading, loading2, translateX]);
-
-    if (loading || loading2) {
-        return (
-            <View style={styles.loadingContainer}>
-                <Animated.View style={{ transform: [{ translateX }] }}>
-                    <Image style={styles.carlogo} source={require('../../../../../assets/icons/Car-Logo.png')} />
-                </Animated.View>
-                <Text style={{ color: 'white' }}>Carregando...</Text>
-            </View>
-        );
-    }
     return (
         <View style={styles.container}>
+            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
             <TouchableOpacity style={styles.Button} onPress={CardsAdd}>
                 <FontAwesome6 name="square-plus" size={28} color="white" />
                 <Text style={styles.text}>Adicionar cartão de crédito</Text>
@@ -149,25 +86,24 @@ export default function Cards() {
                     </View>
                 ))}
             </View>
-            <Modal
+            <CustomModal
                 visible={modalVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setModalVisible(false)}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.foco}>Cartão deletado com Sucesso!</Text>
-                        <Pressable
-                            style={styles.modalButton}
-                            onPress={() => {
-                                setModalVisible(!modalVisible);
-                                router.replace('../ViewCardList/card-list');
-                            }}>
-                            <Text style={styles.textStyle}>Entendi!</Text>
-                        </Pressable>
-                    </View>
-                </View>
-            </Modal>
+                onClose={() => setModalVisible(false)}
+                message="Cartão deletado com Sucesso!"
+                onConfirm={() => {
+                    setModalVisible(!modalVisible);
+                    router.replace(routes.viewCard);
+
+                }}
+            />
+            <CustomModal
+                visible={modalVisible2}
+                onClose={() => setModalVisible2(false)}
+                message={situ}
+                onConfirm={() => {
+                    setModalVisible2(!modalVisible2)
+                }}
+            />
         </View>
     );
 }

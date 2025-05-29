@@ -1,6 +1,6 @@
 import { StyleSheet, View, Image, Text, TextInput, TouchableOpacity, Modal, ScrollView, Pressable } from 'react-native';
 import { useState } from 'react';
-import firebase from "../../../../utils/firebase"; // Certifique-se de que firebase está corretamente configurado
+import firebase from "../../../../config/firebase"; // Certifique-se de que firebase está corretamente configurado
 import { router } from 'expo-router';
 import { CheckBox } from '@rneui/themed';
 import React from 'react';

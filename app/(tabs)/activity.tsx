@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, Modal, Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../utils/firebase';
+import firebase from '../../config/firebase';
 import { useFocusEffect } from '@react-navigation/native';
 import { Animated } from 'react-native';
 import styles from '../Styles/StylesActivity';

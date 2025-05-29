@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginLeft: 10,
-    marginTop: 60
+    
   },
   anoCarro: {
     color: '#f2a51a',

@@ -1,49 +1,42 @@
-import { router, Stack } from 'expo-router';
-import React from 'react';
+import { router } from 'expo-router';
+import React, { } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Button } from '~/components/Button';
-
- const index = () => {
-  function irparalogin() {
-    router.replace('../screens/auth/login/loginScreen');
-  }
-
-   function irparacadastro() {
-    router.replace ('../screens/auth/record/register');
-  } 
+import { routes } from '~/constants/routes';
+import images from '~/constants/images';
+const index = () => {
 
   return (
     <>
-    <SafeAreaProvider>
-      <View style={styles.container}>
-        <Image style={styles.formaAM}
-          source={require('../assets/ideia/formaAmarela.png')}
+      <SafeAreaProvider>
+        <View style={styles.container}>
+          <Image style={styles.formaAM}
+            source={images.formAmarela}
           />
-        <View >
-         <Image style={styles.carlogo}
-          source={require('../assets/ideia/logo-car.png')}
-          />
-        </View>
-        <View>
-          <Text style={styles.titulo}>
-          Bem vindos a carchau 
-          </Text>
-          <Text style={styles.texto}>
-          Inovando o sistema de aluguel de automóveis {"\n"}
-          de forma rápida e acessível 
-          </Text>
-        </View>
+          <View >
+            <Image style={styles.carlogo}
+              source={images.carLogo}
+            />
+          </View>
+          <View>
+            <Text style={styles.titulo}>
+              Bem vindos a carchau
+            </Text>
+            <Text style={styles.texto}>
+              Inovando o sistema de aluguel de automóveis {"\n"}
+              de forma rápida e acessível
+            </Text>
+          </View>
 
-        <TouchableOpacity style={styles.button}  onPress={irparalogin}>
-          <Text style={{fontWeight: 'bold', color: 'white'}}>Já tenho uma conta</Text>
-        </TouchableOpacity>  
+          <TouchableOpacity style={styles.button} onPress={() => router.replace(routes.viewLogin)}>
+            <Text style={{ fontWeight: 'bold', color: 'white' }}>Já tenho uma conta</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttoncriar}  onPress={irparacadastro}>
-          <Text style={{fontWeight: 'bold', color: 'white'}}>Criar nova conta!</Text>
-        </TouchableOpacity>  
-        
-      </View>
+          <TouchableOpacity style={styles.buttoncriar} onPress={() => router.replace(routes.viewRegister)}>
+            <Text style={{ fontWeight: 'bold', color: 'white' }}>Criar nova conta!</Text>
+          </TouchableOpacity>
+
+        </View>
       </SafeAreaProvider>
     </>
   );
@@ -61,23 +54,23 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 
-  formaAM:{
+  formaAM: {
     width: 400,
     height: 400,
     marginTop: 10,
-        
+
   },
 
-  carlogo:{
+  carlogo: {
     width: 250,
     height: 230,
     marginTop: -350,
     bottom: 0,
-    left: 0,  
+    left: 0,
   },
 
 
-  titulo:{
+  titulo: {
     color: '#F2A51A',
     fontSize: 18,
     fontWeight: 'bold',
@@ -85,7 +78,7 @@ const styles = StyleSheet.create({
 
   },
 
-  texto:{
+  texto: {
     color: '#F2A51A',
     fontSize: 16,
     marginTop: 2,

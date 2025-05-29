@@ -3,7 +3,7 @@ import { FontAwesome6, MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, Pressable, Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../utils/firebase';
+import firebase from '../../../../config/firebase';
 import { router, useLocalSearchParams } from 'expo-router';
 import styles from './StylesCaucao';
 

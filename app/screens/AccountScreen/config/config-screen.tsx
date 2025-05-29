@@ -1,88 +1,145 @@
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Linking } from 'react-native';
 import { router } from 'expo-router';
 import { Switch } from '@rneui/themed';
 import React, { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../utils/firebase';
 import 'firebase/firestore';
 import styles from './StylesConfig';
+import colors from '~/constants/colors';
+import * as Notifications from 'expo-notifications';
+import * as Location from 'expo-location';
 
 const SwitchComponent = () => {
+  const [notificationsChecked, setNotificationsChecked] = useState(false);
+  const [locationChecked, setLocationChecked] = useState(false);
+
+  const [notificationsAllowed, setNotificationsAllowed] = useState(false);
+  const [locationAllowed, setLocationAllowed] = useState(false);
 
   function Deslogar() {
     router.replace('/');
   }
 
-  const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    checkPermissions();
+  }, []);
 
-  // Função para buscar as preferências do usuário no Firestore
-  const fetchUserData = async () => {
-    try {
-      const uid = await AsyncStorage.getItem('userId');
-      if (uid) {
-        const userDoc = await firebase.firestore().collection('Locatarios').doc(uid).get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          // Verifica se o campo 'notificacoesAtivadas' existe no Firestore e atualiza o estado
-          if (userData && userData.notificacoesAtivadas !== undefined) {
-            setChecked(userData.notificacoesAtivadas);
-          }
-        }
+  const checkPermissions = async () => {
+    // Notificações
+    const { status: notificationStatus } = await Notifications.getPermissionsAsync();
+    const notificationGranted = notificationStatus === 'granted';
+    setNotificationsAllowed(notificationGranted);
+    setNotificationsChecked(notificationGranted);
+
+    // Localização
+    const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
+    const locationGranted = locationStatus === 'granted';
+    setLocationAllowed(locationGranted);
+    setLocationChecked(locationGranted);
+  };
+
+  const handleToggleNotifications = async (value: boolean) => {
+    if (value) {
+      const { status } = await Notifications.requestPermissionsAsync();
+      const granted = status === 'granted';
+      setNotificationsAllowed(granted);
+      setNotificationsChecked(granted);
+      if (!granted) {
+        Alert.alert(
+          'Permissão Necessária',
+          'Ative as notificações nas configurações do dispositivo.',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            { text: 'Abrir Configurações', onPress: () => Linking.openSettings() },
+          ]
+        );
       }
-    } catch (error) {
-      console.error("Erro ao buscar dados do usuário: ", error);
+    } else {
+      Alert.alert(
+        'Desativar Notificações',
+        'As notificações precisam ser desativadas manualmente nas configurações do dispositivo.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Abrir Configurações', onPress: () => Linking.openSettings() },
+        ]
+      );
     }
   };
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  // Função para salvar a preferência de notificações no Firestore
-  const handleToggleNotifications = async (value: boolean | ((prevState: boolean) => boolean)) => {
-    try {
-      const uid = await AsyncStorage.getItem('userId');
-      if (!uid) {
-        throw new Error("Usuário não encontrado. Faça login novamente.");
+  const handleToggleLocation = async (value: boolean) => {
+    if (value) {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      const granted = status === 'granted';
+      setLocationAllowed(granted);
+      setLocationChecked(granted);
+      if (!granted) {
+        Alert.alert(
+          'Permissão Necessária',
+          'Ative a localização nas configurações do dispositivo.',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            { text: 'Abrir Configurações', onPress: () => Linking.openSettings() },
+          ]
+        );
       }
-
-      // Atualiza o estado do switch localmente
-      setChecked(value);
-
-      // Atualiza a preferência de notificações no Firestore
-      await firebase.firestore().collection('Locatarios').doc(uid).update({
-        notificacoesAtivadas: value,
-      });
-
-      console.log('Preferências de notificações atualizadas.');
-    } catch (error) {
-      console.error("Erro ao atualizar preferências de notificações: ", error);
-      alert('Erro ao atualizar preferências de notificações. Tente novamente.');
+    } else {
+      Alert.alert(
+        'Desativar Localização',
+        'A localização precisa ser desativada manualmente nas configurações do dispositivo.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Abrir Configurações', onPress: () => Linking.openSettings() },
+        ]
+      );
     }
   };
 
   return (
     <View style={styles.container}>
-<View
- style={styles.Topo}></View>
+      <View style={styles.Topo}></View>
+
+      {/* Notificações */}
       <View style={styles.opcao}>
-        <Text style={styles.text}>Permitir Notificações</Text>
+        <View>
+          <Text style={styles.text}>Permitir Notificações</Text>
+          {!notificationsAllowed && (
+            <Text style={{ color: 'red', fontSize: 12 }}>
+              As notificações estão desativadas no dispositivo
+            </Text>
+          )}
+        </View>
+
         <Switch
-          value={checked}
+          value={notificationsChecked}
           onValueChange={handleToggleNotifications}
-          thumbColor={checked ? '#ffffff' : '#ffffff'}
-          trackColor={{ false: '#888888', true: '#FFCD1B' }}
+          thumbColor={notificationsChecked ? colors.branco : colors.branco}
+          trackColor={{ false: colors.cinza, true: colors.amareloClaro }}
+        />
+      </View>
+
+      {/* Localização */}
+      <View style={styles.opcao}>
+        <View>
+          <Text style={styles.text}>Permitir Localização</Text>
+          {!locationAllowed && (
+            <Text style={{ color: 'red', fontSize: 12 }}>
+              A localização está desativada no dispositivo
+            </Text>
+          )}
+        </View>
+
+        <Switch
+          value={locationChecked}
+          onValueChange={handleToggleLocation}
+          thumbColor={locationChecked ? colors.branco : colors.branco}
+          trackColor={{ false: colors.cinza, true: colors.amareloClaro }}
         />
       </View>
 
       <TouchableOpacity style={styles.opcao} onPress={Deslogar}>
         <Text style={{ color: 'white' }}>Sair da conta</Text>
       </TouchableOpacity>
-
     </View>
   );
 };
-
-
 
 export default SwitchComponent;
