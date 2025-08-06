@@ -1,92 +1,221 @@
 import firebase from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SolicitacaoContato } from '../types/Contato';
+import { SolicitacaoContato } from '../types/Contact';
 
-const contatoService = {
+const contactService = {
+  async criarOuBuscarChat(
+    locadorId: string,
+    locatarioId: string,
+    locadornome: string,
+    locadorperfilImage: string | null,
+    locatarionome: string,
+    locatarioperfilImage: string | null
+  ) {
+    try {
+      const [id1, id2] = [locadorId, locatarioId].sort(); // ordena os dois
+      const chatId = `${id1}_${id2}`;
+
+      await contactService.criarOuAtualizarContato({
+        locadorId,
+        locatarioId,
+        locadornome,
+        locadorperfilImage,
+        locatarionome,
+        locatarioperfilImage,
+      });
+
+      return chatId;
+    } catch (error) {
+      console.error('Erro ao criar ou buscar chat:', error);
+      throw error;
+    }
+  },
+
   /**
-   * Escuta em tempo real os contatos onde o usuário é locador ou locatário,
-   * evitando contatos duplicados.
-   * @param callback Função que recebe a lista de contatos atualizados.
-   * @returns Função para cancelar os listeners (unsubscribe).
+   * Escuta em tempo real os contatos do usuário logado.
    */
   async listenContatos(
     callback: (contatos: SolicitacaoContato[]) => void
   ) {
     try {
       const userId = await AsyncStorage.getItem('userId');
-      if (!userId) {
-        throw new Error('Usuário não está logado.');
-      }
+      if (!userId) throw new Error('Usuário não está logado.');
 
-      const contatosRef = firebase.firestore().collection('Contatos');
+      const contatosLocadorRef = firebase
+        .firestore()
+        .collection('Contatos')
+        .where('locadorId', '==', userId);
 
-      const processSnapshot = (snapshot: firebase.firestore.QuerySnapshot) => {
-        return snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            locadorId: data.locadorId || '',
-            locatarioId: data.locatarioId || '',
-            locatarionome: data.locatarionome || '',
-            locatarioperfilImage: data.locatarioperfilImage || null,
-            locadornome: data.locadornome || '',
-            locadorperfilImage: data.locadorperfilImage || null,
-            estado: data.estado || '',
-          } as SolicitacaoContato;
-        });
-      };
+      const contatosLocatarioRef = firebase
+        .firestore()
+        .collection('Contatos')
+        .where('locatarioId', '==', userId);
 
-      // Variáveis para armazenar os contatos de cada listener
-      let contatosLocatario: SolicitacaoContato[] = [];
       let contatosLocador: SolicitacaoContato[] = [];
+      let contatosLocatario: SolicitacaoContato[] = [];
 
-      // Função para mesclar os dois arrays sem duplicatas
-      const mergeAndRemoveDuplicates = (
-        arr1: SolicitacaoContato[],
-        arr2: SolicitacaoContato[]
-      ) => {
-        const map = new Map<string, SolicitacaoContato>();
-        [...arr1, ...arr2].forEach((item) => {
-          map.set(item.id, item);
-        });
-        return Array.from(map.values());
-      };
-
-      // Sempre que houver alteração em qualquer listener, chama o callback atualizado
-      const notify = () => {
-        const contatosAtualizados = mergeAndRemoveDuplicates(
-          contatosLocatario,
-          contatosLocador
+      const mergeAndSend = () => {
+        const todosContatos = [...contatosLocador, ...contatosLocatario];
+        const contatosUnicos = todosContatos.filter(
+          (contato, index, self) =>
+            index === self.findIndex((c) => c.id === contato.id)
         );
-        callback(contatosAtualizados);
+        callback(contatosUnicos);
       };
 
-      // Listener para locatário
-      const unsubscribeLocatario = contatosRef
-        .where('locatarioId', '==', userId)
-        .onSnapshot((snapshot) => {
-          contatosLocatario = processSnapshot(snapshot);
-          notify();
-        });
+      const unsubscribeLocador = contatosLocadorRef.onSnapshot((snapshot) => {
+        contatosLocador = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        } as SolicitacaoContato));
+        mergeAndSend();
+      });
 
-      // Listener para locador
-      const unsubscribeLocador = contatosRef
-        .where('locadorId', '==', userId)
-        .onSnapshot((snapshot) => {
-          contatosLocador = processSnapshot(snapshot);
-          notify();
-        });
+      const unsubscribeLocatario = contatosLocatarioRef.onSnapshot((snapshot) => {
+        contatosLocatario = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        } as SolicitacaoContato));
+        mergeAndSend();
+      });
 
-      // Retorna a função de unsubscribe para parar os listeners
       return () => {
-        unsubscribeLocatario();
         unsubscribeLocador();
+        unsubscribeLocatario();
       };
     } catch (error) {
       console.error('Erro ao escutar contatos:', error);
       throw error;
     }
   },
-};
 
-export default contatoService;
+
+
+
+  /**
+   * Escuta as solicitações aceitas e cria automaticamente os contatos.
+   */
+  async listenSolicitacoesAceitas(
+    callback: (solicitacoes: SolicitacaoContato[]) => void
+  ) {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) throw new Error('Usuário não está logado.');
+
+      const solicitacoesRef = firebase
+        .firestore()
+        .collection(`Locatarios/${userId}/solicitacoes`)
+        .where('estado', '==', 'Aceito');
+
+      const unsubscribe = solicitacoesRef.onSnapshot(async (snapshot) => {
+        const solicitacoesPromises = snapshot.docs.map(async (doc) => {
+          const data = doc.data();
+
+          if (data.locadorId === userId || data.locatarioId === userId) {
+            const [id1, id2] = [data.locadorId, data.locatarioId].sort();
+            const chatId = `${id1}_${id2}`;
+
+            const solicitacao: SolicitacaoContato = {
+              id: chatId,
+              locadorId: data.locadorId,
+              locatarioId: data.locatarioId,
+              locatarionome: data.locatarionome,
+              locatarioperfilImage: data.locatarioperfilImage || null,
+              locadornome: data.locadornome,
+              locadorperfilImage: data.locadorperfilImage || null,
+              estado: data.estado,
+            };
+
+            // ✅ Garante que o contato existe
+            await contactService.verificarOuCriarContato(solicitacao);
+
+            return solicitacao;
+          }
+          return null;
+        });
+
+        const solicitacoesAceitas = await Promise.all(solicitacoesPromises);
+
+        const filtradas = solicitacoesAceitas.filter(
+          (item): item is SolicitacaoContato => item !== null
+        );
+
+        callback(filtradas);
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error('Erro ao escutar solicitações aceitas:', error);
+      throw error;
+    }
+  },
+
+  async criarOuAtualizarContato({
+    locadorId,
+    locatarioId,
+    locadornome,
+    locadorperfilImage,
+    locatarionome,
+    locatarioperfilImage,
+  }: {
+    locadorId: string;
+    locatarioId: string;
+    locadornome: string;
+    locadorperfilImage: string | null;
+    locatarionome: string;
+    locatarioperfilImage: string | null;
+  }): Promise<string> {
+    const [id1, id2] = [locadorId, locatarioId].sort(); // ordena os dois
+    const chatId = `${id1}_${id2}`;
+
+    const contatoRef = firebase.firestore().collection('Contatos').doc(chatId);
+
+    await firebase.firestore().runTransaction(async (transaction) => {
+      const doc = await transaction.get(contatoRef);
+
+      if (!doc.exists) {
+        transaction.set(contatoRef, {
+          id: chatId,
+          locadorId,
+          locatarioId,
+          locadornome,
+          locadorperfilImage: locadorperfilImage || null,
+          locatarionome,
+          locatarioperfilImage: locatarioperfilImage || null,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      } else {
+        transaction.set(
+          contatoRef,
+          {
+            locadornome,
+            locadorperfilImage: locadorperfilImage || null,
+            locatarionome,
+            locatarioperfilImage: locatarioperfilImage || null,
+          },
+          { merge: true }
+        );
+      }
+    });
+
+    return chatId;
+  },
+
+  async verificarOuCriarContato(solicitacao: SolicitacaoContato) {
+    try {
+      await contactService.criarOuAtualizarContato({
+        locadorId: solicitacao.locadorId,
+        locatarioId: solicitacao.locatarioId,
+        locadornome: solicitacao.locadornome,
+        locadorperfilImage: solicitacao.locadorperfilImage || null,
+        locatarionome: solicitacao.locatarionome,
+        locatarioperfilImage: solicitacao.locatarioperfilImage || null,
+      });
+    } catch (error) {
+      console.error('Erro ao verificar ou criar contato:', error);
+      throw error;
+    }
+  }
+}
+
+export default contactService;

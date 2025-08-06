@@ -11,9 +11,9 @@ export interface EnderecoData {
     estado: string;
 }
 
-export const fetchEndereco = async (): Promise<EnderecoData | null> => {
+export const fetchEndereco = async (id?: string): Promise<EnderecoData | null> => {
     try {
-        const uid = await AsyncStorage.getItem('userId');
+        const uid = id || await AsyncStorage.getItem('userId');
         if (!uid) {
             console.error('Usuário não encontrado.');
             return null;
@@ -49,3 +49,4 @@ export const fetchEndereco = async (): Promise<EnderecoData | null> => {
         return null;
     }
 };
+

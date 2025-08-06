@@ -6,9 +6,7 @@ import { routes } from '~/constants/routes';
 
 
 export default function Layout() {
-  return (
-
-    
+  return (    
     <Stack>
       <Stack.Screen name="ads" options={{ 
         title: 'Veículo',  

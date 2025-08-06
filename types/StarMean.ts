@@ -1,0 +1,1 @@
+export const starMeanings = ['Péssimo', 'Ruim', 'OK', 'Bom', 'Ótimo'];

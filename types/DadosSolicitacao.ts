@@ -1,0 +1,1 @@
+DadosSolicitacao = Partial<Omit<Request, 'status'>> & Partial<StatusRequest> & { locatarioperfilImage?: string }

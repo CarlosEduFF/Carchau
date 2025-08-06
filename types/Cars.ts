@@ -1,3 +1,5 @@
+import firebase from '~/config/firebase'; // seu caminho de configuração
+
 export type Carro = {
   id?: string;
   modelo: string;
@@ -9,7 +11,7 @@ export type Carro = {
   precoMes: number;
   nota?: number;
   primeiraFoto?: string | null;
-  ano: string;
+  ano: number;
   arCondicionado: string;
   cambio: string;
   caucao: number;
@@ -17,9 +19,10 @@ export type Carro = {
   fotoLaud: string;
   fotosCarro: string[];
   modalidadesAluguel: number[];
-  pdfDocumento: string ;
+  pdfDocumento: string;
   pdfNome: string;
   placa: string;
   step: string;
   airbags: string;
-}
+  dataCriacao?: firebase.firestore.Timestamp | firebase.firestore.FieldValue | null;
+};

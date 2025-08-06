@@ -9,6 +9,7 @@ import LoadingCarAnimation from '~/components/LoadingCarAnimation';
 import { fetchCards } from '~/services/cardService';
 import CustomModal from '~/components/CustomModal';
 import { deleteCard } from '~/services/cardDeleteService';
+import { CardsVisu } from '~/services/navigationService';
 
 export default function Cards() {
     const [cards, setCards] = useState<{ id: string; cartaoNumero: string; cartaoData: string }[]>([]);
@@ -25,16 +26,6 @@ export default function Cards() {
         return number;
     };
 
-    function CardsVisu(cardId: string) {
-        router.push({
-            pathname: routes.deleteCard,
-            params: { cardId } // Passa o cardId como parâmetro
-        });
-    }
-
-    function CardsAdd() {
-        router.replace(routes.addCard);
-    }
 
     const handleDelete = async (cardId: string) => {
         setLoading2(true);
@@ -67,7 +58,7 @@ export default function Cards() {
     return (
         <View style={styles.container}>
             {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
-            <TouchableOpacity style={styles.Button} onPress={CardsAdd}>
+            <TouchableOpacity style={styles.Button} onPress={() => router.replace(routes.addCard)}>
                 <FontAwesome6 name="square-plus" size={28} color="white" />
                 <Text style={styles.text}>Adicionar cartão de crédito</Text>
             </TouchableOpacity>

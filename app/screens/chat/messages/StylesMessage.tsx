@@ -15,16 +15,6 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
 
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#022036',
-    },
-    carlogo: {
-        width: 50, // Altere para o tamanho desejado
-        height: 50, // Altere para o tamanho desejado
-    },
     SolButton: {
         backgroundColor: '#F2A51A',
         width: '55%',
@@ -34,61 +24,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 10
     },
-    myMessageContainer: {
-        justifyContent: 'flex-end',
-        alignItems: 'flex-end',
-        marginVertical: 5,
-    },
-    messageContainer: {
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        marginVertical: 5,
-    },
-    myMessageContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-    },
-    messageContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-    },
-    messageTextContainer: {
-        maxWidth: '80%',
-        backgroundColor: '#f0f0f0',
-        borderStyle: 'solid',
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        borderRadius: 10,
-        padding: 10,
-        marginHorizontal: 10, // Adiciona espaço entre a mensagem e a imagem
-    },
 
-    messageText: {
-        fontSize: 16,
-    },
-    messageAndImageContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 5,
-    },
-
-    sendButton: {
-        backgroundColor: '#f2a51a',
-        borderRadius: 10,
-        padding: 5,
-        marginLeft: 10,
-        marginRight: 10,
-
-        alignItems: 'center',
-    },
-
-    sendButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
     header: {
         paddingRight: 5,
         borderBottomColor: '#2A4559',
@@ -116,9 +52,6 @@ const styles = StyleSheet.create({
     Topo: {
         marginTop: 28
     },
-
-
-
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',

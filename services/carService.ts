@@ -3,16 +3,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Carro } from '../types/Cars';
 
 
-export const fetchCarroById = async (carroId: string): Promise<Carro | null> => {
+export const fetchCarroById = async (locadorId: string, carroId: string): Promise<Carro | null> => {
   try {
-    const uid = await AsyncStorage.getItem('userId');
-    if (!uid) {
-      throw new Error('Usuário não autenticado');
+    if (!locadorId) {
+      throw new Error('Locador não especificado');
     }
 
     const carroDoc = await firebase.firestore()
       .collection('Locatarios')
-      .doc(uid)
+      .doc(locadorId)
       .collection('carros')
       .doc(carroId)
       .get();
@@ -56,3 +55,4 @@ export const fetchCarroById = async (carroId: string): Promise<Carro | null> => 
     throw error;
   }
 };
+

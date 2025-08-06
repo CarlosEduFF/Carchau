@@ -3,6 +3,7 @@ export const routes = {
     home: '/(tabs)/home',
     activity: '/(tabs)/activity',
     account: '/(tabs)/account',
+    contact: '/(tabs)/contact',
 
     //Account Screen
     termos: '/screens/AccountScreen/terms/acept-terms',
@@ -24,14 +25,26 @@ export const routes = {
     //Activity Screen
     viewAds: '/screens/ActivityScreen/adsScreen/ads',
     viewSchedule: '/screens/ActivityScreen/scheduleScreen/schedule',
-    viewOtherProfile:'/screens/ActivityScreen/viewProfile/profile',
-    
+    viewOtherProfile: '/screens/ActivityScreen/viewProfile/profile',
+    viewLessorRequest: '/screens/ActivityScreen/lessorRequiScreen/lessorrequi',
+    viewLesseeRequest: '/screens/ActivityScreen/lesseeRequiScreen/lesseerequi',
+    payCaucao: '/screens/ActivityScreen/pyCaucao/caucao',
+    payRent: '/screens/ActivityScreen/pyRent/rent',
+    verfLessor: '/screens/ActivityScreen/verfLessor/verflessor',
+    verfLessee: '/screens/ActivityScreen/verfLessee/verflessee',
+    evaluateLessor: '/screens/ActivityScreen/evaluateLessor/evaluate',
+    evaluateLessee: '/screens/ActivityScreen/evaluateLessee/evaluate',
+    mapsLessor: '/screens/ActivityScreen/verfMapsLessor/verfMapsLessorScreen',
+    mapsLessee: '/screens/ActivityScreen/verfMapsLessee/verfMapsLesseeScreen',
+    confirmScreen: '/screens/ActivityScreen/soliciConfirmScreen/solici-confirm',
+
     //Auth
     viewLogin: '/screens/auth/login/loginScreen',
     viewRegister: '/screens/auth/record/register',
-    
+
     //chat
     ViewMenssage: '/screens/chat/messages/message',
+
 } as const;
 
 export type RouteKeys = keyof typeof routes;

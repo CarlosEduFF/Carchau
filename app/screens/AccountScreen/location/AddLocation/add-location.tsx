@@ -14,6 +14,7 @@ import { routes } from '~/constants/routes';
 import CustomModal from '~/components/CustomModal';
 import { saveCar } from '~/services/carSaveService';
 import { Carro } from '~/types/Cars';
+import firebase from '~/config/firebase';
 
 
 export default function CarRegistrationScreen() {
@@ -64,10 +65,10 @@ export default function CarRegistrationScreen() {
             const carData: Carro = {
                 modelo,
                 marca,
-                ano,
+                ano: Number(ano),
                 placa,
                 combustivel,
-                quantidadeLugares: quantidadeLugaresNum,  
+                quantidadeLugares: quantidadeLugaresNum,
                 arCondicionado: selectedAr,
                 step: selectedStep,
                 cambio: selectedCambio,
@@ -82,6 +83,7 @@ export default function CarRegistrationScreen() {
                 precoDia: precoDia,
                 precoSemana: precoSemana,
                 precoMes: precoMes,
+                dataCriacao: firebase.firestore.FieldValue.serverTimestamp(),
             };
 
             await saveCar(carData);

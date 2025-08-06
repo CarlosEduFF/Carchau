@@ -16,6 +16,7 @@ import colors from '~/constants/colors';
 import { fetchUserData } from '~/services/userService';
 import { fetchCnhData } from '~/services/cnhService';
 import { fetchEndereco } from '~/services/addressService';
+import { validarCampos } from '~/utils/validators';
 
 export default function Account() {
   const [nome, setNome] = useState('');
@@ -41,7 +42,7 @@ export default function Account() {
   const [loading, setLoading] = useState(true);
   const [loading2, setLoading2] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  
+
   const loadCnhData = async () => {
     const data = await fetchCnhData();
     if (data) {
@@ -63,7 +64,7 @@ export default function Account() {
     }
     setLoading(false);
   };
-  
+
   const loadEndereco = async () => {
     setLoading(true);
     const endereco = await fetchEndereco();
@@ -89,6 +90,18 @@ export default function Account() {
     setLoading2(false);
   }, []);
 
+  const { valido: dadosPessoaisValidos } = validarCampos(
+    { nome, nacionalidade, telefone, email, profissao, cpf },
+    ['nome', 'nacionalidade', 'telefone', 'email', 'profissao', 'cpf']
+  );
+
+  const { valido: enderecoValido } = validarCampos(
+    { endereco, cep, numero, bairro, cidade, estado },
+    ['endereco', 'cep', 'numero', 'bairro', 'cidade', 'estado']
+  );
+
+  const cnhIncompleta = !existingImages?.front || !existingImages?.back;
+
 
 
   return (
@@ -97,16 +110,17 @@ export default function Account() {
       <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewProfile)}>
         <FontAwesome6 style={{ padding: 4 }} name="user-pen" size={20} color={colors.amareloClaro} />
         <Text style={styles.text}>Dados Pessoais</Text>
-        {(nome === '' || nacionalidade === '' || telefone === '' || email === '' || profissao === '' || cpf === '') && (
+        {!dadosPessoaisValidos && (
           <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.imageRight}>
             <Image style={styles.imageRight} source={images.alertImage} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
+
       <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewAddress)}>
         <Entypo style={{ padding: 4 }} name="location" size={24} color={colors.amareloClaro} />
         <Text style={styles.text}>Endereço</Text>
-        {(endereco === '' || cep === '' || numero === '' || bairro === '' || cidade === '' || estado === '') && (
+        {!enderecoValido && (
           <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.imageRight}>
             <Image style={styles.imageRight} source={images.alertImage} />
           </TouchableOpacity>
@@ -116,12 +130,14 @@ export default function Account() {
       <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewCnh)}>
         <FontAwesome style={{ padding: 4 }} name="id-card" size={24} color={colors.amareloClaro} />
         <Text style={styles.text}>CNH</Text>
-        {(!existingImages?.front || !existingImages?.back) && (
+        {cnhIncompleta && (
           <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.imageRight}>
             <Image style={styles.imageRight} source={images.alertImage} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
+
+
 
       <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewCard)}>
         <MaterialIcons style={{ padding: 4 }} name="add-card" size={28} color={colors.amareloClaro} />
@@ -151,7 +167,7 @@ export default function Account() {
       <CustomModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        message='Antes de começar a usufruir do Aplicativo e de{"\n"} nossos serviços, regularize sua conta!'
+        message='Antes de começar a usufruir do Aplicativo e de nossos serviços, regularize sua conta!'
         confirmText="Entendi"
         onConfirm={() => {
           setModalVisible(false);

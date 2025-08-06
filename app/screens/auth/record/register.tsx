@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, Text, TextInput, TouchableOpacity, Modal, ScrollView, Pressable } from 'react-native';
+import { View, Image, Text, TextInput, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { useState } from 'react';
 import firebase from "../../../../config/firebase"; // Certifique-se de que firebase está corretamente configurado
 import { router } from 'expo-router';
@@ -8,6 +8,9 @@ import { MaskedTextInput } from 'react-native-mask-text';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './StylesRegister';
 import { Terms } from '~/components/Terms';
+import images from '~/constants/images';
+import CustomModal from '~/components/CustomModal';
+import { routes } from '~/constants/routes';
 
 export default function Cadastro() {
   const [nome, setNome] = useState("");
@@ -20,13 +23,8 @@ export default function Cadastro() {
   const [modalVisible2, setModalVisible2] = useState(false);
   const [situ, setSitu] = useState("");
   const [termoAceito, setTermoAceito] = useState(false);
-  const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // Estado para controlar a visibilidade da senha
 
-
-  const showImage = require('../../../../assets/icons/Eye-Show.png');
-  const hideImage = require('../../../../assets/icons/Eye-Hide.png');
-  const BackImage = require('../../../../assets/icons/Back-Arrow.png');
 
 
   const handleOpenModal = () => {
@@ -207,7 +205,7 @@ export default function Cadastro() {
       setModalVisible(false);
 
       // Redireciona para a página Home
-      router.replace('../../../(tabs)/home');
+      router.replace(routes.home);
     } catch (error) {
       console.error("Erro ao criar usuário: ", error);
       alert("Erro ao cadastrar o usuário: " + error);
@@ -220,8 +218,8 @@ export default function Cadastro() {
     <ScrollView>
       <View style={styles.container}>
         <View>
-          <Image style={styles.circuloam} source={require('../../../../assets/ideia/circulo-amarelo.png')} />
-          <Image style={styles.segundocirculo} source={require('../../../../assets/ideia/circulo-amarelo.png')} />
+          <Image style={styles.circuloam} source={images.circuloAmarelo} />
+          <Image style={styles.segundocirculo} source={images.circuloAmarelo} />
         </View>
         <View style={styles.caixalogin}>
           <Text style={styles.title}>Criar perfil</Text>
@@ -276,7 +274,7 @@ export default function Cadastro() {
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ marginLeft: 10, marginTop: 40 }}>
                 {/* Alterado para usar o componente Image */}
                 <Image
-                  source={showPassword ? hideImage : showImage}
+                  source={showPassword ? images.hideImage : images.showImage}
                   style={{ width: 24, height: 24 }} // Ajuste o tamanho conforme necessário
                 />
               </TouchableOpacity>
@@ -299,13 +297,13 @@ export default function Cadastro() {
               <View style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: 10 }}>
                 <TouchableOpacity onPress={handleCloseModal}>
                   <Image
-                    source={BackImage}
+                    source={images.BackImage}
                     style={{ width: 24, height: 24 }} // Ajuste o tamanho conforme necessário
                   />
                 </TouchableOpacity>
               </View><ScrollView>
-                <Terms></Terms>
 
+                <Terms></Terms>
 
                 {/* CheckBox para aceitação do termo */}
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -330,32 +328,62 @@ export default function Cadastro() {
               </ScrollView>
             </View>
           </View>
-
         </Modal>
       </View >
 
-      <Modal
-        visible={modalVisible2}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => { setModalVisible2(false), setModalVisible(false) }}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.foco}>Cadastro Inválido</Text>
-            <Text style={styles.modalText}>
-              {errocpf} {situ}
+      <CustomModal
+        visible={modalVisible}
+        onClose={handleCloseModal}
+        showHeaderBack={true} // Suporte para botão de "voltar", se seu CustomModal permitir
+        message={''}      >
+        <ScrollView>
+          <Terms />
+
+          {/* CheckBox para aceitação do termo */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+            <CheckBox
+              checked={termoAceito}
+              checkedColor="#F2A51A"
+              onPress={() => setTermoAceito(!termoAceito)}
+              containerStyle={{
+                backgroundColor: 'transparent',
+                width: 0,
+                paddingRight: 0,
+                left: -20,
+              }}
+            />
+            <Text style={{ color: '#fff', fontSize: 13 }}>
+              Li e concordo com os termos de Privacidade, Uso e Coleta de informações.
             </Text>
-            <Text style={styles.modalText}>
-              {erroemail}
-            </Text>
-            <Pressable
-              style={[styles.modalButton]}
-              onPress={() => setModalVisible2(false)}>
-              <Text style={styles.textStyle}>Entendi!</Text>
-            </Pressable>
           </View>
-        </View>
-      </Modal>
+
+          <View style={{ alignItems: 'center', marginBottom: 10 }}>
+            <TouchableOpacity
+              style={[
+                styles.buttonPriva,
+                {
+                  backgroundColor: termoAceito ? '#F2A51A' : '#022036',
+                  borderColor: termoAceito ? '#F2A51A' : '#888888',
+                },
+              ]}
+              disabled={!termoAceito}
+              onPress={handleCadastro}
+            >
+              <Text style={{ fontWeight: 'bold', color: termoAceito ? '#fff' : '#888888' }}>
+                Concordo e Cadastrar
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </CustomModal>
+
+      <CustomModal
+        visible={modalVisible2}
+        onClose={() => setModalVisible2(false)}
+        message={errocpf && erroemail}
+        confirmText="Entendi"
+        onConfirm={() => setModalVisible2(false)}
+      />
 
     </ScrollView>
 

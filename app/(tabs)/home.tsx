@@ -32,50 +32,53 @@ export default function HomeScreen() {
   }, []);
 
   const fetchRealTimeCars = () => {
-    try {
-      const unsubscribe = firebase.firestore()
-        .collection('Locatarios')
-        .onSnapshot(async () => {
-          try {
-            const locatariosDetails = await fetchLocatariosDetails();
+  try {
+    const unsubscribe = firebase.firestore()
+      .collection('Locatarios')
+      .onSnapshot(async () => {
+        try {
+          const locatariosDetails = await fetchLocatariosDetails();
 
-            const carrosPorLocatario = await Promise.all(
-              locatariosDetails.map(async (locatario) => {
-                const carros = await fetchCarrosByLocatario(locatario);
+          const carrosPorLocatario = await Promise.all(
+            locatariosDetails.map(async (locatario) => {
+              const carros = await fetchCarrosByLocatario(locatario);
 
-                return carros.map(carro => ({
-                  ...carro,
-                  owner: locatario.nome,
-                  fotoLoca: locatario.fotoPerfil,
-                  address: locatario.endereco,
-                  LocaId: locatario.id,
-                }));
-              })
-            );
+              return carros.map(carro => ({
+                ...carro,
+                owner: locatario.nome,
+                fotoLoca: locatario.fotoPerfil,
+                address: locatario.endereco,
+                LocaId: locatario.id,
+              }));
+            })
+          );
 
-            const allCars = carrosPorLocatario.flat();
+          const allCars = carrosPorLocatario.flat();
 
+          // 🔥 Ordenando por dataCriacao (mais recente primeiro)
+          const sortedCars = allCars.sort((a, b) => {
+            const dateA = a.dataCriacao?.toMillis?.() || 0;
+            const dateB = b.dataCriacao?.toMillis?.() || 0;
+            return dateB - dateA;
+          });
 
+          setCarros(sortedCars);
+          setLoading(false);
 
-            setCarros(allCars);
+        } catch (error) {
+          console.error('Erro ao processar locatários e carros:', error);
+          setLoading(false);
+        }
+      });
 
+    return unsubscribe;
 
+  } catch (error) {
+    console.error('Erro ao iniciar listener dos locatários:', error);
+    setLoading(false);
+  }
+};
 
-            setLoading(false);
-
-          } catch (error) {
-            console.error('Erro ao processar locatários e carros:', error);
-            setLoading(false);
-          }
-        });
-
-      return unsubscribe; // ✅ Correto retornar unsubscribe direto
-
-    } catch (error) {
-      console.error('Erro ao iniciar listener dos locatários:', error);
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     let filtered = carros;
@@ -123,21 +126,13 @@ export default function HomeScreen() {
     setNotificationsAllowed(status === 'granted');
   };
 
-  const startLocationTracking = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      setSitu('Permissão negada para acessar a localização.');
-      setModalVisible(true);
-      return;
-    }
-  };
+
 
   useEffect(() => {
-  if (!loading) {
-    requestPermissions();
-    startLocationTracking();
-  }
-}, [loading]);
+    if (!loading) {
+      requestPermissions();
+    }
+  }, [loading]);
 
   return (
 

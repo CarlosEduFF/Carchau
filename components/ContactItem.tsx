@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
-import { SolicitacaoContato } from '../types/Contato';
+import { SolicitacaoContato } from '../types/Contact';
 import images from '../constants/images';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Divider } from '@rneui/base';

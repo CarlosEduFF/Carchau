@@ -16,7 +16,7 @@ export default function Layout() {
          navigationBarColor: '#022036', 
          headerTransparent: true,
          headerLeft: () => (
-          <Link href={routes.viewPerfil} asChild>
+          <Link href={routes.viewProfile} asChild>
             <HeaderButton />
           </Link>
       ),    

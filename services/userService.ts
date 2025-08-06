@@ -1,12 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '~/config/firebase'; // ajuste conforme seu caminho de configuração
+import firebase from '~/config/firebase'; 
 import { UserData } from '~/types/User';
 
-
-
-export const fetchUserData = async (): Promise<UserData | null> => {
+export const fetchUserData = async (id?: string | null): Promise<UserData | null> => {
   try {
-    const uid = await AsyncStorage.getItem('userId');
+    const uid = id || await AsyncStorage.getItem('userId');
     if (uid) {
       const userDoc = await firebase.firestore().collection('Locatarios').doc(uid).get();
 

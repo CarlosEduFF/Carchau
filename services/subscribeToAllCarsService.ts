@@ -44,6 +44,7 @@ export const fetchCarrosByLocatario = async (locatario: Locatario): Promise<Car[
         precoMes: carroData.precoMes ? String(carroData.precoMes) : '',
         fotoLoca: locatario.fotoPerfil || '',
         LocaId: locatario.id,
+        dataCriacao: carroData.dataCriacao || null,
       };
     });
 

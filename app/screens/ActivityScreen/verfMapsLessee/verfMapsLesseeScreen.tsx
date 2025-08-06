@@ -1,150 +1,98 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import firebase from '../../../../config/firebase';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Button, Alert, Dimensions } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
+import styles from './StylesMapsLessee';
+import { useLocationSync } from '~/services/mapsService';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal';
 
 
-const VerfMapsLesseeScreen = () => {
-    const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
-    const [loading, setLoading] = useState(true);
+export default function VerfMapsLesseeScreen() {
     const soliciIdParam = useLocalSearchParams()?.soliciId;
     const soliciId = Array.isArray(soliciIdParam) ? soliciIdParam[0] : soliciIdParam;
     const locadorIdParam = useLocalSearchParams()?.locadorId;
     const locadorId = Array.isArray(locadorIdParam) ? locadorIdParam[0] : locadorIdParam;
     const locatarioIdParam = useLocalSearchParams()?.locatarioId;
     const locatarioId = Array.isArray(locatarioIdParam) ? locatarioIdParam[0] : locatarioIdParam;
-
+    const [modalVisible, setModalVisible] = useState(false);
     const [locadorCoords, setLocadorCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+    const [situ, setSitu] = useState("");
+    const { ownCoords, loading, approveLocation } = useLocationSync('locatario', {
+        soliciId: soliciId!,
+        locadorId: locadorId!,
+        locatarioId: locatarioId!
+    }, (coords) => {
+        setLocadorCoords(coords); // Atualiza a localização do locador
+    });
+    const [role, setRole] = useState<'locador' | 'locatario'>('locatario');
 
-    // 1. Captura a localização atual do locatário
-    useEffect(() => {
-        let locationWatcher: ReturnType<typeof setInterval>;
-
-
-        const startLocationTracking = async () => {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Permissão negada para acessar a localização.');
-                return;
-            }
-
-            // Atualiza continuamente a localização
-            locationWatcher = setInterval(async () => {
-                const loc = await Location.getCurrentPositionAsync({});
-                setLocation(loc.coords);
-                setLoading(false); // <- Isso estava faltando!
-                await salvarLocalizacao(loc.coords);
-                await buscarLocalizacaoLocador();
-            }, 5000);
-
-        };
-
-        startLocationTracking();
-
-        return () => clearInterval(locationWatcher);
-    }, []);
-
-    // 2. Salva a localização do locatário no Firestore
-    const salvarLocalizacao = async (coords: { latitude: any; longitude: any; altitude?: number | null; accuracy?: number | null; altitudeAccuracy?: number | null; heading?: number | null; speed?: number | null; }) => {
-        try {
-            const docRef = firebase.firestore().collection('Localizacoes').doc(soliciId);
-            await docRef.set({
-                locatarioId: locatarioId,
-                LocatarioLatitude: coords.latitude,
-                LocatarioLongitude: coords.longitude,
-                timestamp: new Date().toISOString(),
-            }, { merge: true });
-        } catch (error) {
-            console.error('Erro ao salvar localização no Firestore:', error);
-        }
+    const handleAprovarLocalizacao = async () => {
+        await approveLocation({
+            ids: { locatarioId: locatarioId, soliciId: soliciId },
+            role,
+            setModalVisible,
+            setSitu
+        });
     };
 
-    // 3. Carrega a localização do locador do Firestore
-    const buscarLocalizacaoLocador = async () => {
-        try {
-            const docRef = await firebase.firestore().collection('Localizacoes').doc(soliciId).get();
-            const data = docRef.data();
-
-            if (data?.LocadorLatitude && data?.LocadorLongitude) {
-                setLocadorCoords({
-                    latitude: data.LocadorLatitude,
-                    longitude: data.LocadorLongitude,
-                });
-            }
-        } catch (error) {
-            console.error('Erro ao buscar localização do locatário:', error);
-        }
-    };
-
-    const AprovarLocalizacao = async () => {
-        try {
-
-            const LocaliRef = firebase.firestore()
-                .collection('Locatarios')
-                .doc(locatarioId)
-                .collection('solicitacoes').doc(soliciId);
-
-            await LocaliRef.update({
-                LocalizLocatarioAcei: true
-            });
-
-
-        } catch (error) {
-            console.error("Erro ao salvar Localização Aprovada: ", error);
-            alert('Erro ao salvar Localização Aprovada.');
-        }
+    if (!ownCoords) {
+        return (
+            <View style={styles.container}>
+                <LoadingCarAnimation loading={true} />
+            </View>
+        );
     }
-
-    if (loading || !location) return <Text>Carregando localização do locatário...</Text>;
 
     return (
         <View style={styles.container}>
             <MapView
                 style={styles.map}
                 initialRegion={{
-                    latitude: location.latitude,
-                    longitude: location.longitude,
+                    latitude: ownCoords.latitude,
+                    longitude: ownCoords.longitude,
                     latitudeDelta: 0.01,
                     longitudeDelta: 0.01,
                 }}
             >
                 {/* Locatário */}
-                <Marker coordinate={location} title="Você (Locatário)" pinColor="red" />
+                <Marker coordinate={ownCoords} title="Você (Locatário)"
+                    description="Sua posição atual"
+                    pinColor="red" />
 
                 {/* Locador (se disponível) */}
                 {locadorCoords && (
-                    <Marker coordinate={locadorCoords} title="Locador" pinColor="blue" />
+                    <Marker
+                        coordinate={{
+                            latitude: locadorCoords.latitude + 0.00015,
+                            longitude: locadorCoords.longitude,
+                        }}
+                        title="Locador"
+                        description="Posição do locador"
+                        pinColor="blue"
+                    />
                 )}
             </MapView>
 
             <View style={styles.infoContainer}>
-                <Text>Latitude: {location.latitude}</Text>
-                <Text>Longitude: {location.longitude}</Text>
-                <Button title="Aprovar Localização" onPress={() => AprovarLocalizacao()} />
+                <Text>Latitude: {ownCoords.latitude}</Text>
+                <Text>Longitude: {ownCoords.longitude}</Text>
+                <Button title="Aprovar Localização" onPress={handleAprovarLocalizacao} />
             </View>
+
+            <CustomModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                message="A confirmação de localização do locador foi realizada, a segurança de localização foi garantida."
+                confirmText="Entendi"
+                onConfirm={() => router.push("/(tabs)/activity")}
+            />
         </View>
     );
 };
 
-export default VerfMapsLesseeScreen;
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#022036',
-        padding: 20,
-    },
-    map: {
-        width: Dimensions.get('window').width * 0.9,
-        height: Dimensions.get('window').height * 0.4,
-    },
-    infoContainer: {
-        padding: 16,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        gap: 8,
-    },
-});
+

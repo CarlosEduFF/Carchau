@@ -1,21 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, Animated, Modal, Pressable, FlatList } from 'react-native';
-import firebase from '../../../../config/firebase';
-import { CheckBox, Divider } from '@rneui/themed';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, FlatList } from 'react-native';
+import { Divider } from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
-import { MaskedTextInput } from 'react-native-mask-text';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import styles from './StylesProfile';
+import { Avaliacao } from '~/types/Evalue';
+import { fetchUserData } from '~/services/userService';
+import { fetchEndereco } from '~/services/addressService';
+import { fetchAvaliacoes } from '~/services/evalueServices';
+import AvaliacaoItem from '~/components/EvalueItem';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import images from '~/constants/images';
+import { useLocalSearchParams } from 'expo-router';
 
-interface Avaliacao {
-  id: string,
-  nome: string,
-  avaliacao: string,
-  estrelas: number,
-  fotoPerfil: string,
-}
 export default function InformacoesPessoais() {
   const [selectedIndex, setIndex] = useState<number | null>(null);
   const [nome, setNome] = useState('');
@@ -27,16 +24,10 @@ export default function InformacoesPessoais() {
   const [estado, setEstado] = useState('');
   const [perfilImage, setPerfilImage] = useState<string | null>(null); // Estado inicial como null
   const [loading, setLoading] = useState(true);
-  const [loading2, setLoading2] = useState<boolean | null>(null);
-  const defaultProfileImage = require('../../../../assets/icons/Profile-Icon.png'); // Caminho local da imagem padrão
-  const [modalVisible2, setModalVisible2] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [situ, setSitu] = useState('');
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]); // Estado para armazenar as avaliações
   const [userId, setUserId] = useState<string | null>(null); // Definição do estado para userId
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
-
   const locatarioIdParam = useLocalSearchParams()?.locatarioId;
   const locatarioId = Array.isArray(locatarioIdParam) ? locatarioIdParam[0] : locatarioIdParam;
 
@@ -44,186 +35,52 @@ export default function InformacoesPessoais() {
     setExpandedId(expandedId === id ? null : id);
   };
 
+  const loadUser = async () => {
+    const userData = await fetchUserData(locatarioId);
+    if (userData) {
+      setNome(userData.nome);
+      setNacionalidade(userData.nacionalidade);
+      setTelefone(userData.telefone);
+      setEmail(userData.email);
+      setProfissao(userData.profissao);
+      setIndex(userData.sexo === 'Masculino' ? 0 : 1);
+      setPerfilImage(userData.fotoPerfil);
+    }
+    setLoading(false);
+  };
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        if (locatarioId) {
-          // Dados do locatário
-          const userDoc = await firebase.firestore().collection('Locatarios').doc(locatarioId).get();
-          if (userDoc.exists) {
-            const userData = userDoc.data();
-            if (userData) {
-              setNome(userData.nome || '');
-              setTelefone(userData.telefone || '');
-              setEmail(userData.email || '');
-              setProfissao(userData.profissao || '');
+  const loadEndereco = async () => {
+    setLoading(true);
+    const endereco = await fetchEndereco(locatarioId);
+    if (endereco) {
+      setCidade(endereco.cidade);
+      setEstado(endereco.estado);
+    }
 
-              if (userData.fotoPerfil) {
-                setPerfilImage(userData.fotoPerfil);
-              }
-            }
-          }
+    setLoading(false);
+  };
 
-          // Dados do endereço (pega o primeiro documento da subcoleção)
-          const enderecoSnapshot = await firebase
-            .firestore()
-            .collection('Locatarios')
-            .doc(locatarioId)
-            .collection('endereco')
-            .limit(1)
-            .get();
-
-          if (!enderecoSnapshot.empty) {
-            const enderecoDoc = enderecoSnapshot.docs[0];
-            const enderecoData = enderecoDoc.data();
-            if (enderecoData) {
-              setCidade(enderecoData.cidade || '');
-              setEstado(enderecoData.estado || '');
-
-            }
-          }
-        }
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Erro ao buscar dados do usuário: ", error);
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchSolicitacoesLocador = async () => {
-        if (!locatarioId) return;
-        try {
-          // Referência da coleção de avaliações para o locatário específico
-          const locatariosRef = firebase.firestore().collection('Locatarios').doc(locatarioId).collection('avaliacoes');
-
-          // Obtém todas as avaliações
-          const locatariosSnapshot = await locatariosRef.get();
-
-          // Cria uma array de promessas para buscar os dados de cada documento
-          const solicitacoesPromises = locatariosSnapshot.docs.map(async (doc) => {
-            const data = doc.data();
-            return {
-              id: doc.id,
-              nome: data.nome || '',
-              avaliacao: data.avaliacao || '',
-              estrelas: data.estrelas || 0,
-              fotoPerfil: data.fotoPerfil || '',
-            } as Avaliacao;
-          });
-
-          // Espera por todas as avaliações e as organiza em um array
-          const solicitacoes = await Promise.all(solicitacoesPromises);
-          setAvaliacoes(solicitacoes); // Define as avaliações no estado
-
-        } catch (error) {
-          console.error('Erro ao buscar solicitações do locador: ', error);
-          alert('Erro ao buscar solicitações do locador.');
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchSolicitacoesLocador();
-    }, [userId])
-  );
-
-  const renderItem = ({ item }: { item: Avaliacao }) => (
-    <View style={styles.reviewItem}>
-      <TouchableOpacity onPress={() => toggleExpand(item.id)} style={styles.reviewHeader}>
-        <Image
-          source={
-            item.fotoPerfil && item.fotoPerfil.startsWith('http')
-              ? { uri: item.fotoPerfil }
-              : defaultProfileImage
-          }
-          style={styles.avatar}
-        />
-        <View style={styles.reviewInfo}>
-          <Text style={styles.name}>{item.nome}</Text>
-          <View style={styles.ratingRow}>
-            {Array.from({ length: 5 }).map((_, index) => (
-              <FontAwesome
-                key={index}
-                name={index < Math.floor(item.estrelas) ? 'star' : 'star-o'}
-                size={16}
-                color='#FFCD1B'
-              />
-            ))}
-            <Text style={styles.rating}>{item.estrelas.toFixed(1)}</Text>
-          </View>
-        </View>
-        <FontAwesome
-          name={expandedId === item.id ? 'chevron-up' : 'chevron-down'}
-          size={16}
-          color='#fff'
-        />
-      </TouchableOpacity>
-
-      {/* Exibe os detalhes apenas se a avaliação estiver expandida */}
-      {expandedId === item.id && (
-        <View style={styles.reviewDetails}>
-          <Text style={styles.detailsText}>{item.avaliacao}</Text>
-        </View>
-      )}
-    </View>
-  );
-  const handleImagePicker = async () => {
-    const resultPerfilImage = await ImagePicker.launchImageLibraryAsync({
-      aspect: [4, 4],
-      allowsEditing: true,
-      base64: true,
-      quality: 1,
-    });
-
-    if (!resultPerfilImage.canceled) {
-      setPerfilImage(resultPerfilImage.assets[0].uri); // Define a URI da imagem selecionada
+  const carregarAvaliacoes = async () => {
+    const id = await AsyncStorage.getItem('userId');
+    if (!id) return; // Checa o id, não o estado
+    setUserId(id); // Atualiza o estado se quiser usar em outros lugares
+    try {
+      const data = await fetchAvaliacoes(locatarioId);
+      setAvaliacoes(data);
+    } catch (error) {
+      console.error('Erro ao carregar avaliações:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const translateX = useRef(new Animated.Value(-100)).current; // Inicia fora da tela à esquerda
-
   useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(translateX, {
-          toValue: 100, // Mova 100 pixels para a direita
-          duration: 1000, // Duração da animação
-          useNativeDriver: true, // Usa a API nativa para melhor performance
-        }),
-        Animated.timing(translateX, {
-          toValue: -100, // Retorna à posição inicial
-          duration: 0, // Sem duração para retornar
-          useNativeDriver: true,
-        }),
-      ])
-    );
+    loadUser();
+    loadEndereco();
+    carregarAvaliacoes();
+  }, []);
 
-    if (loading || loading2) {
-      animation.start();
-    }
-
-    // Para parar a animação quando os carregamentos não estiverem ativos
-    return () => animation.stop();
-  }, [loading, loading2, translateX]);
-
-  if (loading || loading2) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Animated.View style={{ transform: [{ translateX }] }}>
-          <Image style={styles.carlogo} source={require('../../../../assets/icons/Car-Logo.png')} />
-        </Animated.View>
-        <Text style={{ color: 'white' }}>Carregando...</Text>
-      </View>
-    );
-  }
+  { (loading) && <LoadingCarAnimation loading={true} /> }
 
   return (
     <View style={styles.container}>
@@ -232,14 +89,13 @@ export default function InformacoesPessoais() {
         {/* Verifica se há uma imagem selecionada, caso contrário usa a imagem padrão */}
         <Image
           style={styles.profileImage}
-          source={perfilImage ? { uri: perfilImage } : defaultProfileImage}
+          source={perfilImage ? { uri: perfilImage } : images.defaultProfileImage}
         />
       </View>
       <View style={styles.caracteristicaLinha}>
         <MaterialCommunityIcons name="account" size={30} color="#f2a51a" />
         <Text style={styles.caracteristicaTexto}>{nome}</Text>
       </View>
-
 
       <View style={styles.caracteristicaLinha}>
         <MaterialCommunityIcons name="cellphone" size={30} color="#f2a51a" />
@@ -266,26 +122,25 @@ export default function InformacoesPessoais() {
           <Text style={styles.textoexi}>{estado}</Text>
         </View>
       </View>
-
-
-
       <Divider style={{ marginBottom: 20, marginTop: 10 }} />
-
       <View>
         <Text style={styles.caracteristicasTitle}>Avaliações</Text>
       </View>
-
       {loading ? (
         <Text>Carregando avaliações...</Text>
       ) : (
         <FlatList
           data={avaliacoes}
-          renderItem={renderItem}
           keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <AvaliacaoItem
+              item={item}
+              expanded={expandedId === item.id}
+              onToggleExpand={toggleExpand}
+            />
+          )}
         />
       )}
-
-
     </View>
   );
 }

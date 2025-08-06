@@ -1,30 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Image, TextInput, TouchableOpacity, Modal, Pressable } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firebase from '../../../../config/firebase';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRoute } from '@react-navigation/native';
 import styles from './StylesChange';
-
-// Defina a interface para a solicitação
-interface Solicitacoes {
-    locadorId: string;
-    id: string;
-    modelo: string;
-    marca: string;
-    ano: string;
-    valorTotal: string;
-    dataInicio: string;
-    dataTermino: string;
-    totalDias: string;
-    pontoencontro: string;
-    modalidadesAluguel: string;
-}
+import { Request } from '~/types/Request';
+import { getSolicitacoesByLocador, updateSolicitacaoValor } from '~/services/changeService';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal';
+import { fetchCarroById } from '~/services/carService';
 
 export default function AluguelVeiculo() {
     const [valorTotal, setValorTotal] = useState<number | null>(null);
-    const [selectedSolicitacao, setSelectedSolicitacao] = useState<Solicitacoes | null>(null);
+    const [selectedSolicitacao, setSelectedSolicitacao] = useState<Request | null>(null);
     const route = useRoute();
 
     const locadorIdParam = useLocalSearchParams()?.locadorId;
@@ -33,150 +23,134 @@ export default function AluguelVeiculo() {
     const locatarioId = Array.isArray(locatarioIdParam) ? locatarioIdParam[0] : locatarioIdParam;
     const [userId, setUserId] = useState<string | null>(null); // Definição do estado para userId
     const [modalVisible, setModalVisible] = useState(false);
-    const [solicitacoes, setSolicitacoes] = useState<Solicitacoes[]>([]);
+    const [solicitacoes, setSolicitacoes] = useState<Request[]>([]);
     const [loading, setLoading] = useState(true);
-    const [loading2, setLoading2] = useState<boolean | null>(null);
+    const [loading2, setLoading2] = useState(false);
+    const [modelo, setModelo] = useState('');
+    const [marca, setMarca] = useState('');
+    const [ano, setAno] = useState('');
+    const [caucao, setCaucao] = useState<number | null>(null);
+    const [dataInicio, setdataInicio] = useState<string>("Não avaliado");
+    const [dataTermino, setdataTermino] = useState<string>("Não avaliado");
+    const [totalDias, settotalDias] = useState<string>("Não avaliado");
 
+    const fetchUserId = async () => {
+        const id = await AsyncStorage.getItem('userId');
+        setUserId(id); // Armazena o userId no estado
+    };
+    const [solicitacoesComCarro, setSolicitacoesComCarro] = useState<
+        (Request & { marca?: string; modelo?: string; ano?: string })[]
+    >([]);
 
+    const fetchSolicitacoesByLocador = async () => {
+        setLoading(true);
+        const data = await getSolicitacoesByLocador(locatarioId, locadorId);
 
-    useEffect(() => {
-        const fetchUserId = async () => {
-            const id = await AsyncStorage.getItem('userId');
-            setUserId(id); // Armazena o userId no estado
-        };
-
-        fetchUserId();
-    }, []);
-
-    useEffect(() => {
-        const fetchSolicitacoes = async () => {
-            setLoading(true);
-            try {
-                // Recupera o userId do AsyncStorage para verificar o locador
-                const id = await AsyncStorage.getItem('userId');
-                setUserId(id); // Armazena o userId no estado
-
-                if (!id || id !== locadorId) {
-                    console.warn('Usuário não autorizado a visualizar estas solicitações.');
-                    setSolicitacoes([]); // Define a lista de solicitações como vazia
-                    return;
+        // Buscar dados de cada carro
+        const solicitacoesEnriquecidas = await Promise.all(
+            data.map(async (solicitacao) => {
+                try {
+                    const carro = await fetchCarroById(solicitacao.locadorId, solicitacao.carroId);
+                    return {
+                        ...solicitacao,
+                        marca: carro?.marca ?? '',
+                        modelo: carro?.modelo ?? '',
+                        ano: carro?.ano ? String(carro.ano) : '',
+                    };
+                } catch {
+                    return solicitacao; // retorna como está se der erro
                 }
+            })
+        );
 
-                const solicitacoesSnapshot = await firebase.firestore()
-                    .collection('Locatarios')
-                    .doc(locatarioId)
-                    .collection('solicitacoes')
-                    .where('estadoPGAluguel', '==', 'Aluguel não pago')
-                    .where('estado', '==', 'Aceito')
-                    .get();
+        setSolicitacoesComCarro(solicitacoesEnriquecidas);
+        setLoading(false);
+    };
 
-                const solicitacoesData = solicitacoesSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                })) as Solicitacoes[];
-
-                // Filtra as solicitações para incluir apenas aquelas do locador atual
-                const filteredSolicitacoes = solicitacoesData.filter(solicitacao =>
-                    solicitacao.locadorId === id // Verifica se o locadorId da solicitação corresponde ao userId
-                );
-
-                setSolicitacoes(filteredSolicitacoes);
-            } catch (error) {
-                console.error("Erro ao buscar Solicitações: ", error);
-            } finally {
-                setLoading(false);
+    const fetchCarroData = async (solicitacao: Request) => {
+        try {
+            if (!solicitacao.carroId) {
+                console.warn("carroId não encontrado na solicitação.");
+                return;
             }
-        };
 
-        fetchSolicitacoes();
-    }, [locatarioId, locadorId]); // Adicione locadorId como dependência
+            const carro = await fetchCarroById(solicitacao.locadorId, solicitacao.carroId);
+
+            if (carro) {
+                setModelo(carro.modelo);
+                setMarca(carro.marca);
+                setAno(String(carro.ano));
+                setCaucao(carro.caucao);
+            } else {
+                console.warn("Carro não encontrado.");
+            }
+        } catch (error) {
+            console.error("Erro ao buscar dados do carro:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     const handleUpdate = async () => {
-        if (!selectedSolicitacao) return;
+        if (!selectedSolicitacao || !locatarioId) return;
 
         try {
-            if (locatarioId) {
-                const carroRef = firebase.firestore()
-                    .collection('Locatarios')
-                    .doc(locatarioId)
-                    .collection('solicitacoes')
-                    .doc(selectedSolicitacao.id); // Corrigido para 'doc'
+            setLoading2(true);
 
-                await carroRef.update({
-                    valorTotal, // Atualiza o valor total
-                });
+            await updateSolicitacaoValor({
+                locatarioId,
+                solicitacaoId: selectedSolicitacao.id,
+                valorTotal,
+                caucao,
+            });
 
-                console.log('Atualização realizada com sucesso!');
-                setModalVisible(true);
-                setLoading2(false);
-            }
-        } catch (error) {
-            console.error("Erro ao salvar as edições do carro: ", error);
+            setModalVisible(true);
+        } catch {
             alert('Erro ao salvar as edições do carro.');
+        } finally {
             setLoading2(false);
         }
     };
 
-    const translateX = useRef(new Animated.Value(-100)).current;
 
     useEffect(() => {
-        const animation = Animated.loop(
-            Animated.sequence([
-                Animated.timing(translateX, {
-                    toValue: 100,
-                    duration: 1000,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(translateX, {
-                    toValue: -100,
-                    duration: 0,
-                    useNativeDriver: true,
-                }),
-            ])
-        );
-
-        if (loading || loading2) {
-            animation.start();
-        }
-
-        return () => animation.stop();
-    }, [loading, loading2, translateX]);
-
-    if (loading || loading2) {
-        return (
-            <View style={styles.loadingContainer}>
-                <Animated.View style={{ transform: [{ translateX }] }}>
-                    <Image style={styles.carlogo} source={require('../../../../assets/icons/Car-Logo.png')} />
-                </Animated.View>
-                <Text style={{ color: 'white' }}>Carregando...</Text>
-            </View>
-        );
-    }
+        const fetchAll = async () => {
+            await fetchUserId(); // 1. Garante que o usuário esteja disponível
+            await fetchSolicitacoesByLocador(); // 2. Busca as solicitações
+        };
+        fetchAll();
+    }, [locatarioId, locadorId]);
 
     return (
         <View style={styles.container}>
+            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
             <View style={styles.Topo}></View>
             <Text style={styles.textocampo}>
                 Selecione a solicitação a ser alterada
             </Text>
             <View style={styles.pickerContainer}>
-                {solicitacoes.length > 0 ? (
+                {solicitacoesComCarro.length > 0 ? (
                     <Picker
                         selectedValue={selectedSolicitacao?.id}
                         dropdownIconColor={'#fff'}
                         onValueChange={(itemValue) => {
-                            const solicitacao = solicitacoes.find(s => s.id === itemValue);
+                            const solicitacao = solicitacoesComCarro.find(s => s.id === itemValue);
                             if (solicitacao) {
                                 setSelectedSolicitacao(solicitacao);
                                 setValorTotal(solicitacao.valorTotal ? Number(solicitacao.valorTotal) : 0);
+                                fetchCarroData(solicitacao);
                             }
                         }}
                         style={styles.picker}
                     >
                         <Picker.Item label="Selecione a solicitação" value="" />
-                        {solicitacoes.map((solicitacao) => (
-                            <Picker.Item key={solicitacao.id} label={`${solicitacao.id.slice(0, 6)} - ${solicitacao.marca} - ${solicitacao.modelo} - ${solicitacao.ano}`} value={solicitacao.id} />
+                        {solicitacoesComCarro.map((solicitacao) => (
+                            <Picker.Item
+                                key={solicitacao.id}
+                                label={`${solicitacao.id.slice(0, 6)} - ${solicitacao.marca} - ${solicitacao.modelo} - ${solicitacao.ano}`}
+                                value={solicitacao.id}
+                            />
                         ))}
                     </Picker>
                 ) : (
@@ -187,13 +161,13 @@ export default function AluguelVeiculo() {
             {selectedSolicitacao && (
                 <View>
                     <Text style={styles.textocampo}>
-                        Modelo: {selectedSolicitacao.modelo}
+                        Modelo: {modelo}
                     </Text>
                     <Text style={styles.textocampo}>
-                        Marca: {selectedSolicitacao.marca}
+                        Marca: {marca}
                     </Text>
                     <Text style={styles.textocampo}>
-                        Ano: {selectedSolicitacao.ano}
+                        Ano: {ano}
                     </Text>
                     <Text style={styles.textocampo}>
                         Valor Total:
@@ -216,6 +190,24 @@ export default function AluguelVeiculo() {
                         />
                     </View>
 
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, width: '100%' }}>
+                        <Text style={{ fontSize: 20, color: '#fff', marginRight: 5 }}>R$</Text>
+                        <TextInput
+                            style={styles.input}
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            placeholder='Altere aqui...'
+                            placeholderTextColor="#888888"
+                            onChangeText={(text) => {
+                                const numericValue = text.replace(/\D/g, '');
+                                const valueAsNumber = Number(numericValue) / 100;
+                                setCaucao(valueAsNumber);
+                            }}
+                            value={typeof caucao === 'number' && !isNaN(caucao) ? caucao.toFixed(2).replace('.', ',') : ''}
+                            keyboardType="numeric"
+                        />
+                    </View>
+
                     <Text style={styles.textocampo}>
                         Data de Início: {selectedSolicitacao.dataInicio}
                     </Text>
@@ -228,25 +220,14 @@ export default function AluguelVeiculo() {
                 </View>
             )}
 
-            <Modal
+
+            <CustomModal
                 visible={modalVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setModalVisible(false)}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.foco}>Solicitação editada com sucesso!</Text>
-                        <Pressable
-                            style={styles.modalButton}
-                            onPress={() => {
-                                setModalVisible(!modalVisible);
-                                router.push('/(tabs)/contact');
-                            }}>
-                            <Text style={styles.textStyle}>Entendi!</Text>
-                        </Pressable>
-                    </View>
-                </View>
-            </Modal>
+                onClose={() => setModalVisible(false)}
+                message="Solicitação editada com sucesso!"
+                confirmText="Entendi"
+                onConfirm={() => { setModalVisible(false), router.push('/(tabs)/contact'); }}
+            />
 
             <View style={{ alignItems: 'center', marginBottom: 30 }}>
                 {selectedSolicitacao && (

@@ -80,72 +80,11 @@ const styles = StyleSheet.create({
       top: 20,
       marginBottom: 50,
     },
-    iconContainer: {
-      backgroundColor: '#2b4354',
-      borderRadius: 80,
-      padding: 20,
-      marginBottom: 20,
-      marginTop:90
-    },
-    icon: {
-      color: '#f2a51a',
-    },
-    instructionText: {
-      fontSize: 16,
-      color: '#fff',
-      textAlign: 'justify',
-      marginBottom: 20,
-      display: 'flex'
-    },
-    codeText: {
-      fontWeight: 'bold',
-      color: '#f2a51a',
-      fontSize: 18,
-    },
-    codeDisplayContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 20,
-    },
-    codeCircle: {
-      borderWidth: 2,
-      borderColor: '#92acdf',
-      borderRadius: 25,
-      width: 50,
-      height: 50,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginHorizontal: 10,
-    },
-    codeDigit: {
-      fontSize: 24,
-      color: '#fff',
-    },
-    timerText: {
-      fontSize: 24,
-      color: '#fff',
-      marginBottom: 20,
-    },
-    numberPad: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-      width: '80%',
-    },
-    numberButton: {
-      width: '30%',
-      padding: 15,
-      marginVertical: 10,
-      backgroundColor: '#022036',
-      borderRadius: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    numberText: {
-      fontSize: 30,
-      color: '#fff',
-      fontWeight: 'bold',
-    },
+    
+    
+    
+    
+    
   });
 
   export default styles;

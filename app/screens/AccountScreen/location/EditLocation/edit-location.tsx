@@ -13,7 +13,8 @@ import { clearFile, pickMultipleImages, pickSingleImage, removeImageByIndex } fr
 import { fetchCarroById } from '~/services/carService';
 import { getUserId, updateCarData, uploadImage, uploadMultipleImages, uploadPDF } from '~/services/carUpdateService';
 import { routes } from '~/constants/routes';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import firebase from '~/config/firebase';
 export default function CarRegistrationScreen() {
     const [loading, setLoading] = useState(true);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -44,11 +45,29 @@ export default function CarRegistrationScreen() {
     const [modalVisible2, setModalVisible2] = useState(false);
     const [situ, setSitu] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
+    const [locadorId, setLocadorId] = useState('');
 
     useEffect(() => {
-        if (!carroId) return;
-        fetchCarroData();
+        const carregarDados = async () => {
+            try {
+                setLoading2(true);
+                const uid = await AsyncStorage.getItem('userId');
+                if (uid) {
+                    setLocadorId(uid);  // Atualiza para o app todo, se precisar
+                    await fetchCarroData(uid);
+                } else {
+                    console.error('ID do locador não encontrado');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            } finally {
+                setLoading2(false);
+            }
+        };
+        carregarDados();
     }, [carroId]);
+
+
 
     const togglePeriod = (period: number) => {
         if (selectedPeriods.includes(period)) {
@@ -81,6 +100,7 @@ export default function CarRegistrationScreen() {
     };
 
     const handleUpdate = async () => {
+        setLoading2(true);
         try {
             const uid = await getUserId();
             const laudURL = await uploadImage(LaudImage, `laudoCarro/${uid}`);
@@ -108,7 +128,9 @@ export default function CarRegistrationScreen() {
                 pdfDocumento: pdfURL,
                 pontoencontro,
                 pdfNome: pdfName,
+                dataCriacao: firebase.firestore.FieldValue.serverTimestamp(), // 🔥 Aqui adiciona a data
             });
+
             setModalVisible(true);
             setLoading2(false);
         } catch (error) {
@@ -120,14 +142,16 @@ export default function CarRegistrationScreen() {
         }
     };
 
-    const fetchCarroData = async () => {
+
+    const fetchCarroData = async (uid: string) => {
         try {
             if (carroId) {
-                const carro = await fetchCarroById(carroId);
+                const carro = await fetchCarroById(uid, carroId);
+
                 if (carro) {
                     setModelo(carro.modelo);
                     setMarca(carro.marca);
-                    setAno(carro.ano);
+                    setAno(String(carro.ano));
                     setPlaca(carro.placa);
                     setCombustivel(carro.combustivel);
                     setQuantidadeLugares(carro.quantidadeLugares);
@@ -154,6 +178,7 @@ export default function CarRegistrationScreen() {
             setLoading(false);
         }
     };
+
 
     return (
 

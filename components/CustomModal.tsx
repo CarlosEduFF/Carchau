@@ -7,6 +7,7 @@ interface CustomModalProps {
   message: string;
   confirmText?: string;
   onConfirm?: () => void;
+  children?: React.ReactNode;
 }
 
 const CustomModal: React.FC<CustomModalProps> = ({
@@ -15,6 +16,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
   message,
   confirmText = 'Entendi!',
   onConfirm,
+  children,
 }) => {
   const handlePress = () => {
     if (onConfirm) {
@@ -32,7 +34,11 @@ const CustomModal: React.FC<CustomModalProps> = ({
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text style={styles.foco}>{message}</Text>
+          {children ? (
+            children
+          ) : (
+            <Text style={styles.foco}>{message}</Text>
+          )}
           <Pressable
             style={styles.modalButton}
             onPress={handlePress}

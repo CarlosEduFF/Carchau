@@ -10,6 +10,7 @@ import CustomModal from '~/components/CustomModal';
 import { Carro } from '~/types/Cars';
 import CarCard from '~/components/CarCard';
 import deleteCarById from '~/services/carDeleteService';
+import { ViewCars } from '~/services/navigationService';
 
 export default function LocacaoList() {
 
@@ -61,12 +62,7 @@ export default function LocacaoList() {
         router.replace(routes.addLocation);
     }
 
-    function Cards(carro: { id: any; }) {
-        router.push({
-            pathname: routes.editLocation,
-            params: { carroId: carro.id }
-        });
-    }
+    
 
 
     return (
@@ -87,7 +83,7 @@ export default function LocacaoList() {
                             key={carro.id}
                             carro={carro}
                             type="edit"
-                            onEdit={(id) => Cards({ id })}
+                            onEdit={(id) => ViewCars({ id })}
                             onDelete={(id) => handleDelete(id)}
                         />
                     ))}

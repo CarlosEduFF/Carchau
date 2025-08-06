@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Image, Text, TextInput, TouchableOpacity, ScrollView, Pressable, Modal } from 'react-native';
+import { View, Image, Text, TextInput, TouchableOpacity, ScrollView, Pressable, Modal } from 'react-native';
 import firebase from '../../../../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import styles from './StylesLogin';
+import images from '~/constants/images';
+import { routes } from '~/constants/routes';
+import CustomModal from '~/components/CustomModal';
 
 export default function Login() {
-
-  const showImage = require('../../../../assets/icons/Eye-Show.png');
-  const hideImage = require('../../../../assets/icons/Eye-Hide.png');
-  const BackImage = require('../../../../assets/icons/Back-Arrow.png');
-
 
   const [email, setEmail] = useState(""); // Mudou de CPF para email
   const [senha, setSenha] = useState("");
@@ -34,14 +32,6 @@ export default function Login() {
   const isValidPassword = (senha: string) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     return regex.test(senha);
-  };
-  const validateSenha = (text: string) => {
-    if (isValidPassword(text)) {
-      setSenhaError('');
-    } else {
-      setSenhaError('A senha deve ter pelo menos 8 caracteres, incluindo letras maiúsculas, números e símbolos.');
-    }
-    setSenha(text);
   };
 
   const handleLogin = async () => {
@@ -69,7 +59,7 @@ export default function Login() {
       await AsyncStorage.setItem('userId', userId);
       await AsyncStorage.setItem('userName', userCredential.user.displayName || 'Nome não disponível');
 
-      router.replace('../../../(tabs)/home');
+      router.replace(routes.home);
     } catch (error) {
       setResu("Erro ao autenticar usuário: Senha Incorreta.");
       setModalVisible(true);
@@ -101,8 +91,8 @@ export default function Login() {
     <ScrollView>
       <View style={styles.container}>
         <View>
-          <Image style={styles.circuloam} source={require('../../../../assets/ideia/circulo-amarelo.png')} />
-          <Image style={styles.segundocirculo} source={require('../../../../assets/ideia/circulo-amarelo.png')} />
+          <Image style={styles.circuloam} source={images.circuloAmarelo} />
+          <Image style={styles.segundocirculo} source={images.circuloAmarelo} />
         </View>
         <View style={styles.caixalogin}>
           <Text style={styles.title}>Acessar minha conta</Text>
@@ -133,9 +123,8 @@ export default function Login() {
                 multiline={false} // Adiciona esta linha
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ marginLeft: 10, marginTop: 40 }}>
-
                 <Image
-                  source={showPassword ? hideImage : showImage}
+                  source={showPassword ? images.hideImage : images.showImage}
                   style={{ width: 24, height: 24 }} // Ajuste o tamanho conforme necessário
                 />
               </TouchableOpacity>
@@ -153,25 +142,13 @@ export default function Login() {
         </View>
       </View>
 
-      <Modal
+      <CustomModal
         visible={modalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.foco}>Atenção</Text>
-            <Text style={styles.modalText}>
-              {resu}
-            </Text>
-            <Pressable
-              style={[styles.modalButton]}
-              onPress={() => setModalVisible(false)}>
-              <Text style={styles.textStyle}>Entendi!</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setModalVisible(false)}
+        message={resu}
+        confirmText="Entendi"
+        onConfirm={() => setModalVisible(false)}
+      />
     </ScrollView>
   );
 }

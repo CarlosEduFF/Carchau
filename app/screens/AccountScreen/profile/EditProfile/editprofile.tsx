@@ -79,8 +79,6 @@ export default function InformacoesPessoais() {
         }
     };
 
-
-
     return (
         <View style={styles.container}>
             {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
@@ -178,7 +176,7 @@ export default function InformacoesPessoais() {
                     confirmText="Entendi!"
                     onConfirm={() => {
                         setModalVisible(!modalVisible);
-                        router.push(routes.viewPerfil);
+                        router.push(routes.viewProfile);
                     }}
                 />
 
