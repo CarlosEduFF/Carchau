@@ -40,7 +40,7 @@ export const routes = {
 
     //Auth
     viewLogin: '/screens/auth/login/loginScreen',
-    viewRegister: '/screens/auth/record/register',
+    viewRegister: '/screens/auth/record/registerScreen',
 
     //chat
     ViewMenssage: '/screens/chat/messages/message',

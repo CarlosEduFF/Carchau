@@ -3,9 +3,9 @@ import { View } from 'react-native';
 import { ScrollView } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import styles from './StylesEvaluateLessor';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import CustomModal from '~/components/CustomModal';
-import { fetchUserData } from '~/services/userService';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal/CustomModal';
+import { fetchUserData } from '~/services/UserService/GetUserService';
 import { salvarAvaliacaoPLocador } from '~/services/evalueServices';
 import AvaliacaoLocacao from '~/components/Evalue';
 

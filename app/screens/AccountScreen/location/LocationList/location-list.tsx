@@ -3,19 +3,20 @@ import { router } from 'expo-router';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import styles from './StylesLocationList';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import { subscribeToCarros } from '~/services/subscribeToMyCarsService';
 import { routes } from '~/constants/routes';
-import CustomModal from '~/components/CustomModal';
-import { Carro } from '~/types/Cars';
-import CarCard from '~/components/CarCard';
+import CustomModal from '~/components/CustomModal/CustomModal';
+import { Car } from '~/types/';
+
 import deleteCarById from '~/services/carDeleteService';
 import { ViewCars } from '~/services/navigationService';
+import { Components } from '~/components';
 
 export default function LocacaoList() {
 
     const [loading, setLoading] = useState(true);
-    const [carros, setCarros] = useState<Carro[]>([]);
+    const [carros, setCarros] = useState<Car[]>([]);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [situ, setSitu] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
@@ -62,7 +63,7 @@ export default function LocacaoList() {
         router.replace(routes.addLocation);
     }
 
-    
+
 
 
     return (
@@ -79,12 +80,12 @@ export default function LocacaoList() {
                 <View style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
                     {carros.map(carro => (
-                        <CarCard
+                        <Components.CarCard
                             key={carro.id}
                             carro={carro}
                             type="edit"
-                            onEdit={(id) => ViewCars({ id })}
-                            onDelete={(id) => handleDelete(id)}
+                            onEdit={(id: any) => ViewCars({ id })}
+                            onDelete={(id: string) => handleDelete(id)}
                         />
                     ))}
                 </View>

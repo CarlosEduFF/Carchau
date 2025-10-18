@@ -7,14 +7,6 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#022036',
     },
-    carlogo: {
-        width: 50, // Altere para o tamanho desejado
-        height: 50, // Altere para o tamanho desejado
-    },
-    picker: {
-        color: '#F2A51A',
-
-    },
     button: {
         backgroundColor: '#F2A51A',
         width: '40%',
@@ -24,6 +16,21 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginTop: 20,
         marginBottom: 60,
+    },
+    updateButtonText: {
+        fontWeight: 'bold',
+        color: '#fff',
+        fontSize: 18,
+    },
+    viewUpdateButton: {
+        alignItems: 'center',
+        marginBottom: 30
+    },
+    textocampo: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 20,
     },
     input: {
         color: '#fff',
@@ -37,6 +44,20 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    ViewInput: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+        width: '100%'
+    },
+    ViewInputText: { 
+        fontSize: 20, 
+        color: '#fff', 
+        marginRight: 5 
+    },
+    picker: {
+        color: '#F2A51A'
+    },
     pickerContainer: {
         borderWidth: 1,
         justifyContent: 'center',
@@ -47,64 +68,6 @@ const styles = StyleSheet.create({
         height: 45,
         top: 5,
         marginBottom: 5,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#022036',
-    },
-    textocampo: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginTop: 20,
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 22,
-    },
-    modalView: {
-        margin: 20,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 35,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    foco: {
-        color: '#f2a51a',
-        fontSize: 15
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: 'justify',
-    },
-    textStyle: {
-        color: 'white',
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    modalButton: {
-        backgroundColor: '#f2a51a',
-        width: 75,
-        height: 50,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2,
-        borderColor: '#F2A51A',
-        borderRadius: 10,
-        top: 20,
-        marginBottom: 50,
     },
     Topo: {
         marginTop: 60

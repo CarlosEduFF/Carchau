@@ -9,14 +9,13 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import styles from '../Styles/StylesAccount';
 import { routes } from '~/constants/routes';
-import CustomModal from '~/components/CustomModal';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal/CustomModal';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import images from '~/constants/images';
 import colors from '~/constants/colors';
-import { fetchUserData } from '~/services/userService';
-import { fetchCnhData } from '~/services/cnhService';
-import { fetchEndereco } from '~/services/addressService';
-import { validarCampos } from '~/utils/validators';
+import {Services} from '~/services/index';
+import { validarCampos } from '~/utils/Validators/RequiredFieldsValidator';
+
 
 export default function Account() {
   const [nome, setNome] = useState('');
@@ -44,7 +43,7 @@ export default function Account() {
   const [modalVisible, setModalVisible] = useState(false);
 
   const loadCnhData = async () => {
-    const data = await fetchCnhData();
+    const data = await Services.fetchCnhData();
     if (data) {
       setExistingImages({ front: data.fotoFront, back: data.fotoBack });
     }
@@ -52,7 +51,7 @@ export default function Account() {
   };
 
   const loadUser = async () => {
-    const userData = await fetchUserData();
+    const userData = await Services.fetchUserData();
     if (userData) {
       setNome(userData.nome);
       setNacionalidade(userData.nacionalidade);
@@ -67,7 +66,7 @@ export default function Account() {
 
   const loadEndereco = async () => {
     setLoading(true);
-    const endereco = await fetchEndereco();
+    const endereco = await Services.fetchEndereco();
 
     if (endereco) {
       setCep(endereco.cep);

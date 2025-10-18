@@ -3,9 +3,9 @@ import { View, Text, ImageBackground, ScrollView, TouchableOpacity } from 'react
 import Svg, { Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import styles from './StylesDeleteCard';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import { deleteCard } from '~/services/cardDeleteService';
-import CustomModal from '~/components/CustomModal';
+import CustomModal from '~/components/CustomModal/CustomModal';
 import { routes } from '~/constants/routes';
 import { fetchCards } from '~/services/cardService';
 import { formatCardNumber } from '~/utils/validators';

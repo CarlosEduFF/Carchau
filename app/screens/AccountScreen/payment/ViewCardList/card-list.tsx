@@ -5,9 +5,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React, { useState, useEffect } from 'react';
 import styles from './StylesCardList';
 import { routes } from '~/constants/routes';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import { fetchCards } from '~/services/cardService';
-import CustomModal from '~/components/CustomModal';
+import CustomModal from '~/components/CustomModal/CustomModal';
 import { deleteCard } from '~/services/cardDeleteService';
 import { CardsVisu } from '~/services/navigationService';
 

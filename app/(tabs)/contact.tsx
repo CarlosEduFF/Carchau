@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, FlatList, Text } from 'react-native';
-import { SolicitacaoContato } from '~/types/Contact';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
 import styles from '../Styles/StylesContact';
-import contatoService from '~/services/contactService';
-import ContactItem from '~/components/ContactItem';
-import { ViewChat } from '~/services/navigationService';
+import { ViewChat } from '~/utils/navigations/';
 import { useFocusEffect } from 'expo-router';
+import { SolicitacaoContato } from '~/types';
+import { Components } from '~/components';
+import { Services } from '~/services';
 
 export default function Contatos() {
   const [solicitacoes, setSolicitacoes] = useState<SolicitacaoContato[]>([]);
@@ -21,12 +20,12 @@ export default function Contatos() {
 
       const fetchData = async () => {
         try {
-          unsubscribeSolicitacoes = await contatoService.listenSolicitacoesAceitas((dados) => {
+          unsubscribeSolicitacoes = await Services.GetAceptedRequest((dados) => {
             const unicos = removeDuplicatasPorId(dados);
             setSolicitacoes(unicos);
           });
 
-          unsubscribeContatos = await contatoService.listenContatos((dados) => {
+          unsubscribeContatos = await Services.GetContacts((dados) => {
             const unicos = removeDuplicatasPorId(dados);
             setContatos(unicos);
             setLoading(false);
@@ -46,7 +45,6 @@ export default function Contatos() {
     }, [])
   );
 
-
   const listaUnica = Array.from(
     new Map(
       [...solicitacoes, ...contatos].map((item) => [item.id, item])
@@ -60,12 +58,12 @@ export default function Contatos() {
   return (
     <View style={styles.containerFull}>
       {loading ? (
-        <LoadingCarAnimation loading={loading} />
+        <Components.LoadingCarAnimation loading={loading} />
       ) : listaUnica.length > 0 ? (
         <FlatList
           data={listaUnica}
           renderItem={({ item }) => (
-            <ContactItem
+            <Components.ContactItem
               item={item}
               onPress={() => ViewChat(item.id, item.locadorId, item.locatarioId)}
             />
@@ -73,18 +71,11 @@ export default function Contatos() {
           keyExtractor={(item) => item.id}
         />
       ) : (
-        <View
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            width: '100%',
-            paddingTop: 20,
-          }}
-        >
+        <View style={styles.EmptyMessage}>
           <Text style={styles.foco}>{emptyMessage}</Text>
         </View>
-      )}
-    </View>
+      )
+      }
+    </View >
   );
 }

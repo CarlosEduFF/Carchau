@@ -35,6 +35,11 @@ export default function Layout() {
           navigationBarColor: '#022036'
         }} />
 
+        <Stack.Screen name="AppScreen" options={{
+          headerShown: false,
+          navigationBarColor: '#022036'
+        }} />
+
       </Stack>
     </>
   );

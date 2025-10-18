@@ -1,15 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from '../Styles/StylesActivity';
-import { Request } from '~/types/Request';
-import { StatusRequest } from '~/types/StatusRequest';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import CustomModal from '~/components/CustomModal';
-import { listenSolicitacoesDoLocador } from '~/services/requestsLessorService';
-import { listenSolicitacoesDoLocatario } from '~/services/requestsLesseeService';
-import SolicitacaoItem from '~/components/RequestItem';
+import { Request, StatusRequest } from '~/types/index';
+import { Services } from '~/services';
+import { Components } from '~/components';
+
 export default function AtividadeScreen() {
   type RequestComStatus = Request & { status: StatusRequest };
   const [solicitacoesLocador, setSolicitacoesLocador] = useState<RequestComStatus[]>([]);
@@ -24,7 +20,6 @@ export default function AtividadeScreen() {
   const solicitacoesData = activeTab === 'suas' ? solicitacoesLocatario : solicitacoesLocador;
   const emptyMessage = 'Nenhuma solicitação encontrada';
 
-  // Toggle expand for solicitacoes accepted
   const toggleExpand = (id: string) => {
     setExpandedId((prevId) => {
       const novoId = prevId === id ? null : id;
@@ -32,33 +27,25 @@ export default function AtividadeScreen() {
     });
   };
 
-  // Load userId from AsyncStorage once on mount
+  const loadUserId = async () => {
+    const id = await Services.StorageService.getUserId();
+    if (id) {
+      setUserId(id);
+    } else {
+      console.warn("Nenhum userId encontrado no AsyncStorage");
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadUserId = async () => {
-      try {
-        const id = await AsyncStorage.getItem('userId');
-        if (id) {
-          setUserId(id);
-        } else {
-          console.warn('Nenhum userId encontrado no AsyncStorage');
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar userId:', error);
-        setLoading(false);
-      }
-    };
     loadUserId();
   }, []);
 
-  // Listen to solicitacoes updates when userId is ready
   useFocusEffect(
     useCallback(() => {
       if (!userId) return;
-
       setLoading(true);
-
-      const unsubscribeLocador = listenSolicitacoesDoLocador(
+      const unsubscribeLocador = Services.listenRequestLessor(
         userId,
         (solicitacoesFiltradas) => {
           setSolicitacoesLocador(solicitacoesFiltradas);
@@ -73,7 +60,7 @@ export default function AtividadeScreen() {
         }
       );
 
-      const unsubscribeLocatario = listenSolicitacoesDoLocatario(
+      const unsubscribeLocatario = Services.listenRequestLesse(
         userId,
         (solicitacoes) => {
           setSolicitacoesLocatario(solicitacoes);
@@ -98,7 +85,7 @@ export default function AtividadeScreen() {
 
   return (
     <View style={styles.container}>
-      {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
+      {(loading || loading2) && <Components.LoadingCarAnimation loading={loading} loading2={loading2} />}
 
       <View style={styles.tabsContainer}>
         <TouchableOpacity
@@ -120,7 +107,7 @@ export default function AtividadeScreen() {
           data={solicitacoesData}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <SolicitacaoItem
+            <Components.RequestItem
               item={item}
               expandedId={expandedId}
               toggleExpand={toggleExpand}
@@ -130,13 +117,13 @@ export default function AtividadeScreen() {
           contentContainerStyle={{ paddingBottom: 100 }}
         />
       ) : (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', width: '100%' }}>
+        <View style={styles.EmptyList}>
           <Text style={styles.foco}>{emptyMessage}</Text>
         </View>
       )}
 
       {selectedRequest && (
-        <CustomModal
+        <Components.CustomModal
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           message={`A solicitação foi enviada e está em processo de análise pelo locador, aguarde a resposta.\n\nSolicitante: ${selectedRequest.locatarionome}\nDescrição: ${selectedRequest.descricao}`}

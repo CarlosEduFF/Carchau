@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, FlatList, TouchableOpacity } from 'react-native';
-import firebase from '../../config/firebase';
-import { router } from 'expo-router';
-import { AntDesign, Foundation } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import styles from '../Styles/StylesHome';
-import CarCard from '~/components/CarCard';
-import { routes } from '~/constants/routes';
-import { fetchLocatariosDetails } from '~/services/userAllService';
-import { fetchCarrosByLocatario } from '~/services/subscribeToAllCarsService';
-import { Car } from '~/types/CarAds';
-import HeaderBrands from '~/components/HeaderBrands';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import * as Notifications from 'expo-notifications';
-import * as Location from 'expo-location';
-import CustomModal from '~/components/CustomModal';
+import { requestPermissions, Services } from '~/services/index';
+import { Car } from '~/types/Ads/CarAds';
+import { viewAds } from '~/utils/navigations/';
+import { Components } from '~/components';
 
 export default function HomeScreen() {
   const [carros, setCarros] = useState<Car[]>([]);
@@ -22,63 +14,23 @@ export default function HomeScreen() {
   const [loading2, setLoading2] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [carrosF, setCarrosF] = useState(carros);
-  const [notificationsAllowed, setNotificationsAllowed] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [situ, setSitu] = useState('');
 
   useEffect(() => {
-    const unsubscribe = fetchRealTimeCars();
+    const unsubscribe = Services.listenRealTimeCars(
+      (sortedCars) => {
+        setCarros(sortedCars);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Erro no listener:', error);
+        setLoading(false);
+      }
+    );
+
     return () => unsubscribe && unsubscribe();
   }, []);
-
-  const fetchRealTimeCars = () => {
-  try {
-    const unsubscribe = firebase.firestore()
-      .collection('Locatarios')
-      .onSnapshot(async () => {
-        try {
-          const locatariosDetails = await fetchLocatariosDetails();
-
-          const carrosPorLocatario = await Promise.all(
-            locatariosDetails.map(async (locatario) => {
-              const carros = await fetchCarrosByLocatario(locatario);
-
-              return carros.map(carro => ({
-                ...carro,
-                owner: locatario.nome,
-                fotoLoca: locatario.fotoPerfil,
-                address: locatario.endereco,
-                LocaId: locatario.id,
-              }));
-            })
-          );
-
-          const allCars = carrosPorLocatario.flat();
-
-          // 🔥 Ordenando por dataCriacao (mais recente primeiro)
-          const sortedCars = allCars.sort((a, b) => {
-            const dateA = a.dataCriacao?.toMillis?.() || 0;
-            const dateB = b.dataCriacao?.toMillis?.() || 0;
-            return dateB - dateA;
-          });
-
-          setCarros(sortedCars);
-          setLoading(false);
-
-        } catch (error) {
-          console.error('Erro ao processar locatários e carros:', error);
-          setLoading(false);
-        }
-      });
-
-    return unsubscribe;
-
-  } catch (error) {
-    console.error('Erro ao iniciar listener dos locatários:', error);
-    setLoading(false);
-  }
-};
-
 
   useEffect(() => {
     let filtered = carros;
@@ -96,16 +48,15 @@ export default function HomeScreen() {
     setCarrosF(filtered);
   }, [selectedBrand, searchQuery, carros]);
 
+  useEffect(() => {
+    if (!loading) {
+      requestPermissions();
+    }
+  }, [loading]);
+
   const clearSearch = () => {
     setSearchQuery('');
   };
-
-  function Veiculo(carroId: string, LocadorId: string | undefined) {
-    router.push({
-      pathname: routes.viewAds,
-      params: { carroId: carroId, LocadorId: LocadorId },
-    });
-  }
 
   const footer = () => (
     <View style={{ margin: 90 }}>
@@ -113,31 +64,10 @@ export default function HomeScreen() {
   );
 
 
-
-
-
-  const requestPermissions = async () => {
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== 'granted') {
-      setSitu('Permissão negada para acessar as notificações.');
-      setModalVisible(true);
-      return;
-    }
-    setNotificationsAllowed(status === 'granted');
-  };
-
-
-
-  useEffect(() => {
-    if (!loading) {
-      requestPermissions();
-    }
-  }, [loading]);
-
   return (
 
     <View style={styles.container}>
-      {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
+      {(loading || loading2) && <Components.LoadingCarAnimation loading={loading} loading2={loading2} />}
       <View style={{ padding: 10, marginTop: 50 }}>
         <View style={styles.navigation}>
           <View style={styles.containerInput}>
@@ -160,21 +90,21 @@ export default function HomeScreen() {
           data={carrosF}  // <-- usa a lista filtrada
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
-            <HeaderBrands selectedBrand={selectedBrand} onSelectBrand={setSelectedBrand} />
+            <Components.HeaderBrands selectedBrand={selectedBrand} onSelectBrand={setSelectedBrand} />
           }
           ListFooterComponent={footer}
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <CarCard
+            <Components.CarCard
               carro={item}
               type="view"
-              onPress={() => Veiculo(item.id, item.LocaId)}
+              onPress={() => viewAds(item.id, item.LocaId)}
             />
           )}
         />
 
-        <CustomModal
+        <Components.CustomModal
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           message={situ}

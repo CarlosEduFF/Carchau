@@ -7,10 +7,10 @@ import firebase from '../../../../config/firebase';
 import { router, useLocalSearchParams } from 'expo-router';
 import styles from './StylesRent';
 import { fetchCards } from '~/services/cardService';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import { pagarRent } from '~/services/paymentService';
 import { routes } from '~/constants/routes';
-import CustomModal from '~/components/CustomModal';
+import CustomModal from '~/components/CustomModal/CustomModal';
 
 export default function PagamentoScreen() {
 

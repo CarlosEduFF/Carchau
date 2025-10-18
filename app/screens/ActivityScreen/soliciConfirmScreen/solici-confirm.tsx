@@ -3,14 +3,15 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import styles from './StylesSoliciConfirm';
 import images from '~/constants/images';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import { fetchCarroById } from '~/services/carService';
-import { fetchUserData } from '~/services/userService';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
+
+import { fetchUserData } from '~/services/UserService/GetUserService';
 import { BackSchedule } from '~/services/navigationService';
-import CustomModal from '~/components/CustomModal';
+import CustomModal from '~/components/CustomModal/CustomModal';
 import { routes } from '~/constants/routes';
 import { salvarSolicitacaoAluguel } from '~/services/requestService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Services } from '~/services';
 
 
 export default function AluguelScreen() {
@@ -57,7 +58,7 @@ export default function AluguelScreen() {
   const fetchCarroData = async () => {
     try {
       if (carroId) {
-        const carro = await fetchCarroById(locadorId, carroId);
+        const carro = await Services.fetchCarById(locadorId, carroId);
 
         if (carro) {
           setModelo(carro.modelo);

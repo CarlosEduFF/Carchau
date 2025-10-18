@@ -3,8 +3,8 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import styles from './StylesVerfLessee';
 import VerificationCodeInput from '~/components/VerificationCodeInput';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import CustomModal from '~/components/CustomModal';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal/CustomModal';
 import { handleVerificationCode, verifyCodeServiceDevolucao, verifyCodeServiceEntr } from '~/services/verfifyCodeService';
 
 export default function VerificacaoLocatario() {

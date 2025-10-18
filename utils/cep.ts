@@ -1,4 +1,4 @@
-interface EnderecoResponse {
+interface AddressResponse {
     logradouro: string;
     bairro: string;
     localidade: string;
@@ -6,7 +6,7 @@ interface EnderecoResponse {
     erro?: boolean;
 }
 
-export const buscarEnderecoPorCep = async (cepDigitado: string) => {
+export const findAddressbyCep = async (cepDigitado: string) => {
     const cepLimpo = cepDigitado.replace(/\D/g, '');
     if (cepLimpo.length !== 8) {
         throw new Error('CEP inválido. Deve conter 8 dígitos.');
@@ -14,7 +14,7 @@ export const buscarEnderecoPorCep = async (cepDigitado: string) => {
 
     try {
         const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-        const data: EnderecoResponse = await response.json();
+        const data: AddressResponse = await response.json();
 
         if (data.erro) {
             throw new Error('CEP não encontrado.');

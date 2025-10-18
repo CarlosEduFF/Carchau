@@ -1,7 +1,7 @@
 import firebase from '~/config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Request } from '../types/Request';
-import { StatusRequest } from '~/types/StatusRequest';
+import { StatusRequest } from '~/types/Request/StatusRequest';
 
 export const fetchSolicitacaoById = async (
   locatarioId: string,

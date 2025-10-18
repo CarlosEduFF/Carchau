@@ -7,8 +7,8 @@ import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import styles from './StylesMapsLessee';
 import { useLocationSync } from '~/services/mapsService';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import CustomModal from '~/components/CustomModal';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal/CustomModal';
 
 
 export default function VerfMapsLesseeScreen() {

@@ -6,8 +6,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import firebase from '../../../../config/firebase'; // Importação do Firebase Firestore
 import styles from './StylesMapsLessor';
 import { useLocationSync } from '~/services/mapsService';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import CustomModal from '~/components/CustomModal';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal/CustomModal';
 
 export default function VerfMapsLessorScreen() {
   const soliciIdParam = useLocalSearchParams()?.soliciId;

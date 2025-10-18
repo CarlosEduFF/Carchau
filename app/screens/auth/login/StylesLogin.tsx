@@ -2,129 +2,137 @@
 import { StyleSheet } from 'react-native';
 
 const Styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#022036',
-    flex: 1,
+   scrollContainer: {
+    flexGrow: 1,
     padding: 24,
+    backgroundColor: '#022036',
+    justifyContent: 'center', // centraliza verticalmente quando conteúdo é menor que a tela
     alignItems: 'center',
-  },
-  errorText: {
-    color: 'red',
-    marginTop: 15, // Espaçamento acima da mensagem de erro
-    fontSize: 12, // Tamanho da fonte da mensagem de erro
-  },
-  foco: {
-    color: '#f2a51a'
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
 
-  buttonClose: {
-    backgroundColor: '#2196F3',
+  // container não ocupa 100% da altura por padrão (evita conflitos com ScrollView)
+  container: {
+    width: '100%',
+    alignItems: 'center',
   },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'justify',
+
+  // wrapper para imagens decorativas (absolute)
+  decorations: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 260, // ajuste conforme necessário
+    zIndex: 0,
   },
   circuloam: {
-    width: 300,
-    height: 300,
-    marginTop: 10,
-    left: 180,
-    bottom: 90,
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    right: -40,
+    top: -40,
+    opacity: 0.9,
   },
   segundocirculo: {
-    width: 300,
-    height: 300,
-    marginTop: 10,
-    top: 200,
-    right: 170,
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    left: -50,
+    top: 160,
+    opacity: 0.9,
   },
+
+  // caixa principal - sem height % nem bottom/top absolutos
   caixalogin: {
     backgroundColor: '#022036',
     borderRadius: 15,
     borderWidth: 5,
     borderColor: '#FFCD1B',
     width: '85%',
-    height: '40%',
-    bottom: 460,
+    paddingVertical: 20,
+    paddingHorizontal: 18,
+    alignItems: 'center',
+    zIndex: 1, // garante que fique sobre as imagens decorativas
+    // opcional: sombra
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  form: {
+    width: '100%',
+    marginTop: 8,
+  },
+
+  row: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  form: {
-    flex: 1,
-    width: '80%',
-    top: 20,
+
+  showHideButton: {
+    marginLeft: 10,
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+
   input: {
     backgroundColor: '#022036',
-    width: '85%',
-    marginBottom: 20,
+    width: '100%',
     color: '#fff',
     fontSize: 14,
     borderRadius: 7,
-    padding: 5,
-    top: 30,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
     borderWidth: 2,
     borderColor: '#fff',
-    height: 40, // Defina uma altura fixa
+    height: 44,
+    marginTop: 6,
+    marginBottom: 10,
   },
+
   title: {
     color: '#FFCD1B',
     fontSize: 22,
     fontWeight: 'bold',
-    top: 10,
-    bottom: 20,
+    marginBottom: 6,
   },
+
   textocampo: {
     color: '#FFCD1B',
     fontSize: 16,
     fontWeight: 'bold',
-    top: 20,
+    marginTop: 10,
   },
+
+  errorText: {
+    color: 'red',
+    marginTop: 6,
+    fontSize: 12,
+  },
+
+  forgot: {
+    alignSelf: 'flex-end',
+    marginTop: 6,
+  },
+
+  forgotText: {
+    color: 'white',
+    textDecorationLine: 'underline',
+  },
+
   button: {
     backgroundColor: '#F2A51A',
     width: '60%',
-    height: 40,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
-    bottom: 15,
+    marginTop: 16,
   },
-  modalButton: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    marginBottom: 40,
-    backgroundColor: '#F2A51A',
-    width: 200,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
+  
 });
 
 export default Styles;

@@ -7,14 +7,16 @@ import { CheckBox, Divider } from '@rneui/themed';
 import { Entypo, FontAwesome, FontAwesome6, MaterialCommunityIcons } from '@expo/vector-icons';
 import styles from './StylesEditLocation';
 import images from '~/constants/images';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import CustomModal from '~/components/CustomModal';
+
 import { clearFile, pickMultipleImages, pickSingleImage, removeImageByIndex } from '~/utils/handleMediaManager';
-import { fetchCarroById } from '~/services/carService';
+
 import { getUserId, updateCarData, uploadImage, uploadMultipleImages, uploadPDF } from '~/services/carUpdateService';
 import { routes } from '~/constants/routes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firebase from '~/config/firebase';
+import { Services } from '~/services';
+import { Components } from '~/components';
+
 export default function CarRegistrationScreen() {
     const [loading, setLoading] = useState(true);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -146,8 +148,7 @@ export default function CarRegistrationScreen() {
     const fetchCarroData = async (uid: string) => {
         try {
             if (carroId) {
-                const carro = await fetchCarroById(uid, carroId);
-
+                const carro = await Services.fetchCarById(uid, carroId);
                 if (carro) {
                     setModelo(carro.modelo);
                     setMarca(carro.marca);
@@ -183,7 +184,7 @@ export default function CarRegistrationScreen() {
     return (
 
         <View style={styles.container}>
-            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
+            {(loading || loading2) && <Components.LoadingCarAnimation loading={loading} loading2={loading2} />}
             <View style={styles.Topo}></View>
             <ScrollView>
                 <Text style={styles.title}>
@@ -710,7 +711,7 @@ export default function CarRegistrationScreen() {
                     </TouchableOpacity>
                 </View>
 
-                <CustomModal
+                <Components.CustomModal
                     visible={modalVisible}
                     onClose={() => setModalVisible(false)}
                     message="Locação editada com sucesso!"
@@ -719,7 +720,7 @@ export default function CarRegistrationScreen() {
                     }}
                 />
 
-                <CustomModal
+                <Components.CustomModal
                     visible={modalVisible2}
                     onClose={() => setModalVisible2(false)}
                     message={situ}

@@ -8,12 +8,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import styles from './StylesAddLocation';
 import images from '~/constants/images';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import { pickMultipleImages, pickPdf, pickSingleImage, removeImageByIndex } from '~/utils/handleMediaManager';
 import { routes } from '~/constants/routes';
-import CustomModal from '~/components/CustomModal';
+import CustomModal from '~/components/CustomModal/CustomModal';
 import { saveCar } from '~/services/carSaveService';
-import { Carro } from '~/types/Cars';
+import { Carro } from '~/types/Cars/Cars';
 import firebase from '~/config/firebase';
 
 

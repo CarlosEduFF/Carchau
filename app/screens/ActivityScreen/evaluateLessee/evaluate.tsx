@@ -3,11 +3,11 @@ import { View } from 'react-native';
 import { ScrollView } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import styles from './StylesEvaluateLessee';
-import CustomModal from '~/components/CustomModal';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal/CustomModal';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import { saveAvaliacaoLocatario } from '~/services/evalueServices';
 import AvaliacaoLocacao from '~/components/Evalue';
-import { fetchUserData } from '~/services/userService';
+import { fetchUserData } from '~/services/UserService/GetUserService';
 
 export default function AvaliacaoLocatario() {
   const soliciIdParam = useLocalSearchParams()?.soliciId;

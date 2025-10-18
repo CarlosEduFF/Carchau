@@ -36,6 +36,12 @@ const styles = StyleSheet.create({
     foco: {
         color: colors.amareloClaro
     },
+    EmptyList: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        width: '100%'
+    }
 });
 
 export default styles;

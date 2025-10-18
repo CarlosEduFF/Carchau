@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../config/firebase';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRoute } from '@react-navigation/native';
 import styles from './StylesChange';
-import { Request } from '~/types/Request';
-import { getSolicitacoesByLocador, updateSolicitacaoValor } from '~/services/changeService';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import CustomModal from '~/components/CustomModal';
-import { fetchCarroById } from '~/services/carService';
+import { Request } from '~/types/';
+import { Components } from '~/components';
+import { Services } from '~/services';
 
 export default function AluguelVeiculo() {
     const [valorTotal, setValorTotal] = useState<number | null>(null);
@@ -35,22 +31,21 @@ export default function AluguelVeiculo() {
     const [totalDias, settotalDias] = useState<string>("Não avaliado");
 
     const fetchUserId = async () => {
-        const id = await AsyncStorage.getItem('userId');
-        setUserId(id); // Armazena o userId no estado
+        const id = await Services.StorageService.getUserId();
+        setUserId(id);
     };
+
     const [solicitacoesComCarro, setSolicitacoesComCarro] = useState<
         (Request & { marca?: string; modelo?: string; ano?: string })[]
     >([]);
 
     const fetchSolicitacoesByLocador = async () => {
         setLoading(true);
-        const data = await getSolicitacoesByLocador(locatarioId, locadorId);
-
-        // Buscar dados de cada carro
+        const data = await Services.getRequestByLessor(locatarioId, locadorId);
         const solicitacoesEnriquecidas = await Promise.all(
             data.map(async (solicitacao) => {
                 try {
-                    const carro = await fetchCarroById(solicitacao.locadorId, solicitacao.carroId);
+                    const carro = await Services.fetchCarById(solicitacao.locadorId, solicitacao.carroId);
                     return {
                         ...solicitacao,
                         marca: carro?.marca ?? '',
@@ -58,7 +53,7 @@ export default function AluguelVeiculo() {
                         ano: carro?.ano ? String(carro.ano) : '',
                     };
                 } catch {
-                    return solicitacao; // retorna como está se der erro
+                    return solicitacao;
                 }
             })
         );
@@ -73,9 +68,7 @@ export default function AluguelVeiculo() {
                 console.warn("carroId não encontrado na solicitação.");
                 return;
             }
-
-            const carro = await fetchCarroById(solicitacao.locadorId, solicitacao.carroId);
-
+            const carro = await Services.fetchCarById(solicitacao.locadorId, solicitacao.carroId);
             if (carro) {
                 setModelo(carro.modelo);
                 setMarca(carro.marca);
@@ -91,20 +84,16 @@ export default function AluguelVeiculo() {
         }
     };
 
-
     const handleUpdate = async () => {
         if (!selectedSolicitacao || !locatarioId) return;
-
         try {
             setLoading2(true);
-
-            await updateSolicitacaoValor({
+            await Services.UpdateRequestValue({
                 locatarioId,
                 solicitacaoId: selectedSolicitacao.id,
                 valorTotal,
                 caucao,
             });
-
             setModalVisible(true);
         } catch {
             alert('Erro ao salvar as edições do carro.');
@@ -113,18 +102,17 @@ export default function AluguelVeiculo() {
         }
     };
 
-
     useEffect(() => {
         const fetchAll = async () => {
-            await fetchUserId(); // 1. Garante que o usuário esteja disponível
-            await fetchSolicitacoesByLocador(); // 2. Busca as solicitações
+            await fetchUserId(); 
+            await fetchSolicitacoesByLocador(); 
         };
         fetchAll();
     }, [locatarioId, locadorId]);
 
     return (
         <View style={styles.container}>
-            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
+            {(loading || loading2) && <Components.LoadingCarAnimation loading={loading} loading2={loading2} />}
             <View style={styles.Topo}></View>
             <Text style={styles.textocampo}>
                 Selecione a solicitação a ser alterada
@@ -172,8 +160,8 @@ export default function AluguelVeiculo() {
                     <Text style={styles.textocampo}>
                         Valor Total:
                     </Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, width: '100%' }}>
-                        <Text style={{ fontSize: 20, color: '#fff', marginRight: 5 }}>R$</Text>
+                    <View style={styles.ViewInput}>
+                        <Text style={styles.ViewInputText}>R$</Text>
                         <TextInput
                             style={styles.input}
                             autoCapitalize="none"
@@ -190,8 +178,8 @@ export default function AluguelVeiculo() {
                         />
                     </View>
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, width: '100%' }}>
-                        <Text style={{ fontSize: 20, color: '#fff', marginRight: 5 }}>R$</Text>
+                    <View style={styles.ViewInput}>
+                        <Text style={styles.ViewInputText}>R$</Text>
                         <TextInput
                             style={styles.input}
                             autoCapitalize="none"
@@ -221,7 +209,7 @@ export default function AluguelVeiculo() {
             )}
 
 
-            <CustomModal
+            <Components.CustomModal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 message="Solicitação editada com sucesso!"
@@ -229,10 +217,10 @@ export default function AluguelVeiculo() {
                 onConfirm={() => { setModalVisible(false), router.push('/(tabs)/contact'); }}
             />
 
-            <View style={{ alignItems: 'center', marginBottom: 30 }}>
+            <View style={styles.viewUpdateButton}>
                 {selectedSolicitacao && (
                     <TouchableOpacity style={styles.button} onPress={() => { handleUpdate(), setLoading2(true) }}>
-                        <Text style={{ fontWeight: 'bold', color: '#fff', fontSize: 18, }}>Alterar</Text>
+                        <Text style={styles.updateButtonText}>Alterar</Text>
                     </TouchableOpacity>
                 )}
             </View>

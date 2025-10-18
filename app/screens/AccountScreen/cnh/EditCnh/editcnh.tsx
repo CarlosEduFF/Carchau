@@ -4,11 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import styles from './StylesEditcnh';
 import images from '~/constants/images';
-import CustomModal from '~/components/CustomModal';
+import CustomModal from '~/components/CustomModal/CustomModal';
 import { routes } from '~/constants/routes';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import { pickImageFromCamera } from '~/utils/handleMediaManager';
-import { fetchCnhData } from '~/services/cnhService';
+import { fetchCnhData } from '~/services/CnhService/CnhService';
 import { validateCNHImages } from '~/utils/validators';
 import { uploadAndSaveCNH } from '~/services/cnhUpdateService';
 

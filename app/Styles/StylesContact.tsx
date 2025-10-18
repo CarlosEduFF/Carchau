@@ -8,6 +8,13 @@ const styles = StyleSheet.create({
   foco: {
     color: colors.amareloClaro
   },
+  EmptyMessage: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: '100%',
+    paddingTop: 20,
+  }
 });
 
 export default styles;

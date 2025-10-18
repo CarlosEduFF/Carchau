@@ -4,11 +4,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 import styles from './StylesLesseeRequi';
 import images from '~/constants/images';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import CustomModal from '~/components/CustomModal';
-import { fetchCarroById } from '~/services/carService';
-import { fetchUserData } from '~/services/userService';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal/CustomModal';
+import { fetchUserData } from '~/services/UserService/GetUserService';
 import { deleteSolicitacao } from '~/services/requestService';
+import { Services } from '~/services';
 
 export default function AluguelScreen() {
 
@@ -57,7 +57,7 @@ export default function AluguelScreen() {
     const fetchCarroData = async (uid: string) => {
         try {
             if (carroId) {
-                const carro = await fetchCarroById(locadorId, carroId);
+                const carro = await Services.fetchCarById(locadorId, carroId);
 
                 if (carro) {
                     setModelo(carro.modelo);

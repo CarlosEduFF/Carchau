@@ -1,24 +1,25 @@
 {
   "cli": {
-    "version": ">= 13.4.1",
-   "appVersionSource": "remote"
+    "version": ">= 16.18.1",
+    "appVersionSource": "remote"
   },
   "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
     "production": {
       "android": {
-        "buildType": "apk", 
+        "buildType": "apk",
         "autoIncrement": true,
         "releaseChannel": "production"
       }
     }
   },
   "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "./path/to/your/service-account-key.json",
-        "track": "internal"
-      }
-    }
+    "production": {}
   }
 }
-

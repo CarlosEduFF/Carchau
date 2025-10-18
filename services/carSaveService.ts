@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Carro } from "~/types/Cars";
+import { Carro } from "~/types/Cars/Cars";
 import { validateCarData } from "~/utils/validators";
 import firebase from "~/config/firebase";
 import { uploadFile } from "~/utils/handleMediaManager";

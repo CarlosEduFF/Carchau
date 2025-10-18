@@ -4,14 +4,15 @@ import { Divider } from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import styles from './StylesProfile';
-import { Avaliacao } from '~/types/Evalue';
-import { fetchUserData } from '~/services/userService';
-import { fetchEndereco } from '~/services/addressService';
+import { Evalue } from '~/types/';
+import { fetchUserData } from '~/services/UserService/GetUserService';
+
 import { fetchAvaliacoes } from '~/services/evalueServices';
 import AvaliacaoItem from '~/components/EvalueItem';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import images from '~/constants/images';
 import { useLocalSearchParams } from 'expo-router';
+import { Services } from '~/services';
 
 export default function InformacoesPessoais() {
   const [selectedIndex, setIndex] = useState<number | null>(null);
@@ -25,7 +26,7 @@ export default function InformacoesPessoais() {
   const [perfilImage, setPerfilImage] = useState<string | null>(null); // Estado inicial como null
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]); // Estado para armazenar as avaliações
+  const [avaliacoes, setAvaliacoes] = useState<Evalue[]>([]); // Estado para armazenar as avaliações
   const [userId, setUserId] = useState<string | null>(null); // Definição do estado para userId
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const locatarioIdParam = useLocalSearchParams()?.locatarioId;
@@ -51,7 +52,7 @@ export default function InformacoesPessoais() {
 
   const loadEndereco = async () => {
     setLoading(true);
-    const endereco = await fetchEndereco(locatarioId);
+    const endereco = await Services.fetchAddress(locatarioId);
     if (endereco) {
       setCidade(endereco.cidade);
       setEstado(endereco.estado);

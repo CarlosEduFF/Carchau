@@ -3,12 +3,11 @@ import { View, Text, Image, TouchableOpacity, FlatList, TextInput } from 'react-
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './StylesMessage';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
 import images from '~/constants/images';
-import { Troca } from '~/services/navigationService';
-import { Message } from '~/types/Message';
-import MessageItem from '~/components/MessageItem';
-import { listenToMessages, loadChatUserData, sendMessageToChat } from '~/services/messageService';
+import { Message } from '~/types/';
+import { Components } from '~/components';
+import { Services } from '~/services';
+import { changeValue } from '~/utils/navigations';
 
 export default function Chat() {
     const [perfilImage, setPerfilImage] = useState<string | null>(null);
@@ -27,17 +26,17 @@ export default function Chat() {
     const [messages, setMessages] = useState<Message[]>([]);
     const flatListRef = useRef<FlatList>(null);
     const [messageText, setMessageText] = useState('');
-
     const previousContactId = useRef<string | null>(null);
 
     useFocusEffect(
         useCallback(() => {
             let isUnmount = false;
-            loadChatUserData({
+            Services.loadChatUserData({
                 locadorId,
                 locatarioId,
                 ContatoId,
                 recipientId,
+                userId,
                 setUserId,
                 setRecipientId,
                 setNome,
@@ -47,6 +46,7 @@ export default function Chat() {
                 previousContactId,
             });
 
+
             return () => {
                 isUnmount = true;
             };
@@ -54,7 +54,7 @@ export default function Chat() {
     );
 
     useEffect(() => {
-        const unsubscribe = listenToMessages({
+        const unsubscribe = Services.GetMessage({
             userId,
             recipientId,
             onMessagesUpdate: setMessages,
@@ -66,7 +66,7 @@ export default function Chat() {
 
     return (
         <View style={styles.container}>
-            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
+            {(loading || loading2) && <Components.LoadingCarAnimation loading={loading} loading2={loading2} />}
             <View style={styles.Topo}></View>
             <View style={styles.header}>
                 <Text style={styles.headerText}>{nome ? nome : 'Carregando...'}</Text>
@@ -76,7 +76,7 @@ export default function Chat() {
                 />
             </View>
             <View style={styles.Solicita}>
-                <TouchableOpacity style={styles.SolButton} onPress={() => Troca(locadorId, locatarioId)}>
+                <TouchableOpacity style={styles.SolButton} onPress={() => changeValue(locadorId, locatarioId)}>
                     <Text style={{ color: 'white' }}>Alterar solicitações</Text>
                 </TouchableOpacity>
             </View>
@@ -86,7 +86,7 @@ export default function Chat() {
                 data={messages}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => (
-                    <MessageItem
+                    <Components.MessageItem
                         item={item}
                         userId={userId}
                         UserImage={UserImage}
@@ -107,7 +107,7 @@ export default function Chat() {
                     placeholderTextColor={'white'}
                 />
                 <TouchableOpacity onPress={() => {
-                    sendMessageToChat({
+                    Services.sendMessageToChat({
                         userId,
                         recipientId,
                         text: messageText,

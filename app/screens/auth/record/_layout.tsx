@@ -9,7 +9,7 @@ export default function Layout() {
 
     
     <Stack>
-      <Stack.Screen name="register" options={{ 
+      <Stack.Screen name="registerScreen" options={{ 
         title: 'Cadastrar',  
          headerTintColor: "#fff", 
          navigationBarColor: '#022036', 

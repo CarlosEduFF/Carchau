@@ -1,4 +1,4 @@
-import { StatusRequest } from "~/types/StatusRequest";
+import { StatusRequest } from "~/types/Request/StatusRequest";
 
 export const statusInicial: StatusRequest = {
   visto: false,
@@ -10,4 +10,6 @@ export const statusInicial: StatusRequest = {
   confirDevoLocata: 'pendente',
   estadoavaliLD: 'pendente',
   estadoavaliLT: 'pendente',
+  confirlocationlocador: 'pendente',   
+  confirlocationlocatario: 'pendente',
 };

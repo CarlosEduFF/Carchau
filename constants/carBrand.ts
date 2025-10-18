@@ -1,4 +1,4 @@
-import { CarBrand } from '~/types/CarBrand';
+import { CarBrand } from '~/types/Ads/CarBrand';
 
 export const carBrands: CarBrand[] = [
   { id: '1', name: 'BMW', image: require('~/assets/brands/BMW.png') },

@@ -1,6 +1,6 @@
 import firebase from '~/config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Carro } from '../types/Cars';
+import { Carro } from '../types/Cars/Cars';
 
 export const subscribeToCarros = async (
   onUpdate: (carros: Carro[]) => void,

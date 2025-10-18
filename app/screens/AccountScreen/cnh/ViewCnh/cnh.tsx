@@ -5,11 +5,11 @@ import { CheckBox } from '@rneui/themed';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './StylesCnh';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import { routes } from '~/constants/routes';
 import colors from '~/constants/colors';
 import { fetchLatestTermo } from '~/services/termsServices';
-import { fetchCnhData } from '~/services/cnhService';
+import { fetchCnhData } from '~/services/CnhService/CnhService';
 
 export default function CNH() {
   const [frontCNH, setFrontCNH] = useState<string>('');

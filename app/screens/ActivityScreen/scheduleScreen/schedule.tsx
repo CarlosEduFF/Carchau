@@ -6,12 +6,13 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { useLocalSearchParams } from 'expo-router';
 import styles from './StylesSchedule';
-import { fetchCarroById } from '~/services/carService';
+
 import { CustomMarkedDate } from '~/types/MarkedDate';
-import CustomModal from '~/components/CustomModal';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal/CustomModal';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import { Requisitar } from '~/services/navigationService';
 import { fetchOccupiedDates, marcarIntervalo } from '~/services/calendarService';
+import { Services } from '~/services';
 
 
 export default function AluguelVeiculo() {
@@ -104,7 +105,7 @@ export default function AluguelVeiculo() {
   const fetchCarroData = async () => {
     try {
       if (carroId) {
-        const carro = await fetchCarroById(locadorId, carroId);
+        const carro = await Services.fetchCarById(locadorId, carroId);
 
         if (carro) {
 

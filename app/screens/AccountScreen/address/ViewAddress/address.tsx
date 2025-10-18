@@ -1,15 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Animated, Image, Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../../config/firebase';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { router } from 'expo-router';
 import styles from './StylesAddress';
-
 import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import images from '~/constants/images';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
 import { routes } from '~/constants/routes';
-import { fetchEndereco } from '~/services/addressService';
+import { Services } from '~/services';
+import { Components } from '~/components';
 
 export default function Endereco() {
     const [cep, setCep] = useState('');
@@ -20,9 +17,6 @@ export default function Endereco() {
     const [cidade, setCidade] = useState('');
     const [estado, setEstado] = useState('');
     const [loading, setLoading] = useState(true);
-    const [loading2, setLoading2] = useState(false);
-    const [situ, setSitu] = useState('');
-
 
     useEffect(() => {
         loadEndereco();
@@ -30,8 +24,7 @@ export default function Endereco() {
 
     const loadEndereco = async () => {
         setLoading(true);
-        const endereco = await fetchEndereco();
-
+        const endereco = await Services.fetchAddress();
         if (endereco) {
             setCep(endereco.cep);
             setEndereco(endereco.endereco);
@@ -41,14 +34,13 @@ export default function Endereco() {
             setCidade(endereco.cidade);
             setEstado(endereco.estado);
         }
-
         setLoading(false);
     };
     
 
     return (
         <View style={styles.container}>
-            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
+            {(loading) && <Components.LoadingCarAnimation loading={loading} />}
             <View>
                 <View style={{
                     display: 'flex',
@@ -106,4 +98,3 @@ export default function Endereco() {
         </View>
     );
 }
-

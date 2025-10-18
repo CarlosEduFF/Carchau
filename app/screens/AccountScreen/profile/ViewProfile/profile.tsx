@@ -5,14 +5,14 @@ import { router } from 'expo-router';
 import styles from './StylesProfile';
 import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import images from '~/constants/images'
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import { fetchUserData } from '~/services/userService';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
+import { fetchUserData } from '~/services/UserService/GetUserService';
 import AvaliacaoItem from '~/components/EvalueItem';
 import { fetchAvaliacoes } from '~/services/evalueServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { routes } from '~/constants/routes';
 import colors from '~/constants/colors';
-import { Avaliacao } from '~/types/Evalue';
+import { Avaliacao } from '~/types/Evalue/Evalue';
 
 
 

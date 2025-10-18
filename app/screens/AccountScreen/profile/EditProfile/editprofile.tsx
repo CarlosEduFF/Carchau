@@ -5,10 +5,10 @@ import { MaskedTextInput } from 'react-native-mask-text';
 import { router } from 'expo-router';
 import styles from './StylesEdit.';
 import { pickSingleImage } from '~/utils/handleMediaManager';
-import { fetchUserData } from '~/services/userService';
+import { fetchUserData } from '~/services/UserService/GetUserService';
 import images from '~/constants/images'
-import LoadingCarAnimation from '~/components/LoadingCarAnimation';
-import CustomModal from '~/components/CustomModal';
+import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
+import CustomModal from '~/components/CustomModal/CustomModal';
 import { routes } from '~/constants/routes';
 import { updateUserProfile } from '~/services/userUpdateService';
 import { validateUserData } from '~/utils/validators';

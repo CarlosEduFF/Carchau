@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firebase from '~/config/firebase'; // ajuste conforme seu projeto
-import { Avaliacao } from '~/types/Evalue';
+import { Avaliacao } from '~/types/Evalue/Evalue';
 
 
 
@@ -214,3 +214,5 @@ export const saveAvaliacaoLocatario = async ({
     setLoading(false);
   }
 };
+
+export { Avaliacao };
