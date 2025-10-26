@@ -1,0 +1,246 @@
+/* control.css
+   Estilos auxiliares para a tela de chat.
+   Uso: importe './control.css' no seu componente (já está feito).
+*/
+
+/* -------------------------
+   Variáveis de tema (light / dark)
+   ------------------------- */
+:root {
+  --bg-light: #f7f8fb;            /* background-light */
+  --bg-dark: #0f1720;             /* background-dark (fallback) */
+  --panel-light: #ffffff;         /* cards/painéis claros */
+  --panel-dark: #19222c;          /* painel escuro usado no markup */
+  --text-default: #1f2937;        /* cinza escuro */
+  --text-muted: #6b7280;
+  --primary: #0ea5a4;             /* cor primaria -- ajuste conforme necessário */
+  --primary-200: rgba(14,165,164,0.85);
+  --border: #e5e7eb;
+  --border-dark: #111827;
+  --success: #10b981;
+}
+
+/* .dark ancestor controls palette (aplique <html class="dark"> ou <body class="dark">) */
+.dark {
+  --bg-body: var(--bg-dark);
+  --panel: var(--panel-dark);
+  --text-default: #e6eef3;
+  --text-muted: #9ca3af;
+  --border: #0f1720;
+}
+
+/* default (light) */
+:root {
+  --bg-body: var(--bg-light);
+  --panel: var(--panel-light);
+}
+
+/* -------------------------
+   Reset / base
+   ------------------------- */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+               Roboto, "Helvetica Neue", Arial;
+  background: var(--bg-body);
+  color: var(--text-default);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* helper to replicate Tailwind-like classes used in JSX */
+.bg-background-light { background-color: var(--bg-body); }
+.dark .bg-background-dark { background-color: var(--bg-body); }
+
+.font-display { font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+/* -------------------------
+   Layout helpers (flex/grid/spacing usados)
+   ------------------------- */
+.flex { display:flex; }
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-3 { gap: .75rem; }
+.gap-4 { gap: 1rem; }
+.h-screen { height: 100vh; }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.px-2 { padding-left: .5rem; padding-right: .5rem; }
+.px-3 { padding-left: .75rem; padding-right: .75rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.p-3 { padding: .75rem; }
+.p-6 { padding: 1.5rem; }
+.p-2 { padding: .5rem; }
+.p-4 { padding: 1rem; }
+.pl-3 { padding-left: .75rem; }
+
+/* -------------------------
+   Colors, borders e estados
+   ------------------------- */
+.bg-white { background-color: var(--panel); }
+.dark .bg-white { background-color: var(--panel); }
+
+.text-gray-900 { color: #111827; }
+.dark .text-gray-900 { color: var(--text-default); }
+.text-gray-500 { color: var(--text-muted); }
+.dark .text-gray-500 { color: var(--text-muted); }
+
+.border-r { border-right: 1px solid var(--border); }
+.border-b { border-bottom: 1px solid var(--border); }
+.border-t { border-top: 1px solid var(--border); }
+.border { border: 1px solid var(--border); }
+.dark .border { border-color: var(--border); }
+
+.bg-primary { background-color: var(--primary); }
+
+/* badge small */
+.bg-green-500 { background-color: var(--success); }
+
+/* -------------------------
+   Avatar / imagem de fundo
+   ------------------------- */
+/* Utilitários de background */
+.bg-center { background-position: center; }
+.bg-no-repeat { background-repeat: no-repeat; }
+.bg-cover { background-size: cover; }
+
+/* aspect-square usa aspect-ratio quando disponível */
+.aspect-square { aspect-ratio: 1 / 1; }
+
+/* classes de tamanho usadas: size-10, size-12 (ajuste conforme escala) */
+.size-10 { width: 40px; height: 40px; min-width: 40px; min-height: 40px; }
+.size-12 { width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
+
+/* rounded utilities */
+.rounded-full { border-radius: 9999px; }
+.rounded-lg { border-radius: 0.5rem; }
+.rounded-xl { border-radius: 1rem; }
+.rounded-bl-none { border-bottom-left-radius: 0; }
+.rounded-br-none { border-bottom-right-radius: 0; }
+
+/* small avatar status dot */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.bottom-0 { bottom: 0; }
+.right-0 { right: 0; }
+
+/* the status dot style (overrides on .dark if necessary) */
+.block { display: block; }
+.h-3 { height: 12px; width: 12px; }
+.w-3 { width: 12px; }
+.h-2\.5 { height: 10px; width: 10px; }
+.w-2\.5 { width: 10px; }
+.rounded-full { border-radius: 9999px; }
+.border-2 { border-width: 2px; border-style: solid; border-color: #fff; }
+.dark .border-2 { border-color: var(--panel); }
+
+/* -------------------------
+   Text / typography helpers
+   ------------------------- */
+.text-base { font-size: 1rem; line-height: 1.25rem; }
+.text-sm { font-size: .875rem; }
+.text-xs { font-size: .75rem; }
+.font-medium { font-weight: 500; }
+.font-normal { font-weight: 400; }
+.leading-normal { line-height: 1.25rem; }
+
+/* small utility when a text must be truncated to single line */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+/* -------------------------
+   Inputs / form
+   ------------------------- */
+.form-input {
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+}
+
+/* Input container visual */
+input[placeholder] {
+  font-family: inherit;
+  font-size: .9375rem;
+}
+
+/* focus helpers */
+.focus\:outline-none:focus { outline: none; }
+
+/* -------------------------
+   Chat bubbles / messages
+   ------------------------- */
+.bg-white { background-color: var(--panel); }
+.dark .bg-white { background-color: var(--panel); }
+
+.bg-primary { background-color: var(--primary); color: #fff; }
+
+/* bubble shadows */
+.shadow {
+  box-shadow: 0 6px 18px rgba(13, 26, 38, 0.06);
+}
+
+/* small utility to position timestamp inside bubble */
+.relative .text-xs { font-size: .75rem; }
+
+/* -------------------------
+   Buttons and controls
+   ------------------------- */
+button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* rounded buttons icons */
+button.p-2 { padding: .5rem; border-radius: 9999px; }
+
+/* send button */
+.bg-primary { background-color: var(--primary); }
+.bg-primary:hover { filter: brightness(.95); }
+
+/* -------------------------
+   Helpers específicos usados no markup
+   ------------------------- */
+/* em alguns lugares o markup usa classes tipo dark:hover:bg-background-dark */
+.dark .dark\:hover\:bg-background-dark:hover { background-color: var(--panel); }
+
+/* small badge count */
+.h-5 { height: 20px; width: 20px; border-radius: 9999px; display:inline-flex; align-items:center; justify-content:center; }
+
+/* text colors for small muted */
+.text-primary { color: var(--primary); }
+.text-primary-200 { color: var(--primary-200); }
+
+/* utility to mimic px widths like min-w-40 */
+.min-w-40 { min-width: 10rem; }
+
+/* helper overflow for the conversation list */
+.overflow-x-hidden { overflow-x: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-hidden { overflow: hidden; }
+
+/* small responsive niceties */
+@media (max-width: 768px) {
+  .w-80 { width: 220px; } /* sidebar smaller on mobile */
+}
+
+/* -------------------------
+   Observações e notas
+   ------------------------- */
+
+/* - Para aplicar modo escuro, adicione a classe "dark" em um ancestor (ex: <html class="dark"> ou <body class="dark">)
+   - As classes de background-image foram deixadas para serem usadas via inline style (style={{ backgroundImage: 'url(...)' }})
+   - Se preferir, use um atributo data-img e defina por CSS com: [data-img="..."] { background-image: url(...); } mas inline style é mais simples quando a URL chega dinamicamente.
+*/
