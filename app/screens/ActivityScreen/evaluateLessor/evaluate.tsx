@@ -76,7 +76,7 @@ export default function AvaliacaoLocador() {
         onClose={() => setModalVisible(false)}
         message="Avaliação realizada com Sucesso!"
         confirmText="Entendi"
-        onConfirm={() => { setModalVisible(false), router.push('/(tabs)/activity'); }}
+        onConfirm={() => { setModalVisible(false), router.replace('/(tabs)/activity'); }}
       />
 
       <CustomModal
@@ -84,7 +84,7 @@ export default function AvaliacaoLocador() {
         onClose={() => setModalVisible2(false)}
         message="Ocorreu algum erro, por favor, tente novamente!"
         confirmText="Entendi"
-        onConfirm={() => { setModalVisible2(false), router.push('/(tabs)/activity'); }}
+        onConfirm={() => { setModalVisible2(false), router.replace('/(tabs)/activity'); }}
       />
 
     </ScrollView >

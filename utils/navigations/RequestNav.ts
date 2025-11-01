@@ -36,9 +36,9 @@ export async function RequestNav({
     };
 
     if (userId === LocadorId) {
-      router.push({ pathname: routes.viewLessorRequest, params });
+      router.replace({ pathname: routes.viewLessorRequest, params });
     } else if (userId === LocatarioId) {
-      router.push({ pathname: routes.viewLesseeRequest, params });
+      router.replace({ pathname: routes.viewLesseeRequest, params });
     }
   } catch (error) {
     console.error("Erro ao obter o ID do usuário: ", error);

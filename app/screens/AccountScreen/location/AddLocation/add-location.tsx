@@ -13,7 +13,7 @@ import { pickMultipleImages, pickPdf, pickSingleImage, removeImageByIndex } from
 import { routes } from '~/constants/routes';
 import CustomModal from '~/components/CustomModal/CustomModal';
 import { saveCar } from '~/services/carSaveService';
-import { Carro } from '~/types/Cars/Cars';
+import { Car } from '~/types/Cars/Cars';
 import firebase from '~/config/firebase';
 
 
@@ -62,7 +62,7 @@ export default function CarRegistrationScreen() {
             if (isNaN(quantidadeLugaresNum)) {
                 throw new Error("Quantidade de lugares inválida");
             }
-            const carData: Carro = {
+            const carData: Car = {
                 modelo,
                 marca,
                 ano: Number(ano),
@@ -635,7 +635,7 @@ export default function CarRegistrationScreen() {
                     message="Locação adicionada com sucesso!"
                     onConfirm={() => {
                         setModalVisible(!modalVisible);
-                        router.push(routes.viewLocation);
+                        router.replace(routes.viewLocation);
                     }}
                 />
 
@@ -645,7 +645,7 @@ export default function CarRegistrationScreen() {
                     message={situ}
                     onConfirm={() => {
                         setModalVisible2(!modalVisible2);
-                        router.push(routes.viewLocation);
+                        router.replace(routes.viewLocation);
                     }}
                 />
 

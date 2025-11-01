@@ -24,6 +24,8 @@ export default function CNH() {
     const [situ, setSitu] = useState('');
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
+    const [cnhvalida, setCNHValida] = useState(false);
+
     useEffect(() => {
         loadCnhData();
     }, []);
@@ -34,7 +36,7 @@ export default function CNH() {
 
         setLoading2(true);
 
-        const result = await uploadAndSaveCNH(frontCNH, backCNH);
+        const result = await uploadAndSaveCNH(frontCNH, backCNH, cnhvalida);
 
         if (result.success) {
             setModalVisible(true);

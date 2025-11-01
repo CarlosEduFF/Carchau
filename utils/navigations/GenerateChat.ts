@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { routes } from "~/constants/routes";
 
 export const GenerateChat = async (chatId: string, LocadorId: string, LocatarioId: string) => {
-    router.push({
+    router.replace({
         pathname: routes.ViewMenssage,
         params: {
             id: chatId,

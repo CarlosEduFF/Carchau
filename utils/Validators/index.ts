@@ -20,6 +20,6 @@ const Validators = {
     isAvaliacaoDisabled,
     isLocacaoFinalizada,
     validarCampos,
-    validateUserData
+    validateUserData,
 };
 export default Validators;

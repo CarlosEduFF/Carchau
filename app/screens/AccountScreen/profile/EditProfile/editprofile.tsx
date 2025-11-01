@@ -11,7 +11,7 @@ import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnim
 import CustomModal from '~/components/CustomModal/CustomModal';
 import { routes } from '~/constants/routes';
 import { updateUserProfile } from '~/services/userUpdateService';
-import { validateUserData } from '~/utils/validators';
+
 
 
 export default function InformacoesPessoais() {
@@ -176,7 +176,7 @@ export default function InformacoesPessoais() {
                     confirmText="Entendi!"
                     onConfirm={() => {
                         setModalVisible(!modalVisible);
-                        router.push(routes.viewProfile);
+                        router.replace(routes.viewProfile);
                     }}
                 />
 

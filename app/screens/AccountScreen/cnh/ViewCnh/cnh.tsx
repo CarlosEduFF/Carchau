@@ -11,6 +11,31 @@ import colors from '~/constants/colors';
 import { fetchLatestTermo } from '~/services/termsServices';
 import { fetchCnhData } from '~/services/CnhService/CnhService';
 
+
+const CnhStatusBadge: React.FC<{ cnhvalida: boolean | null }> = ({ cnhvalida }) => {
+  let text = 'Não enviada';
+  let bg = '#9ca3af'; // cinza
+  let textColor = '#fff';
+
+  if (cnhvalida === true) {
+    text = 'CNH válida';
+    bg = '#16a34a'; // verde
+    textColor = '#fff';
+  } else if (cnhvalida === false) {
+    text = 'CNH inválida';
+    bg = '#dc2626'; // vermelho
+    textColor = '#fff';
+  }
+
+  return (
+    <View style={[styles.containerBadge]}>
+      <View style={[styles.dotBadge, { backgroundColor: bg }]} />
+      <Text style={[styles.textBadge, { color: textColor }]}>{text}</Text>
+    </View>
+  );
+};
+
+
 export default function CNH() {
   const [frontCNH, setFrontCNH] = useState<string>('');
   const [backCNH, setBackCNH] = useState<string>('');
@@ -18,6 +43,7 @@ export default function CNH() {
     front: null,
     back: null,
   });
+  const [cnhvalida, setCNHValida] = useState<boolean | null>(null);
   const [termoAceito, setTermoAceito] = useState(false);
   const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(false);
 
@@ -36,6 +62,7 @@ export default function CNH() {
     const data = await fetchCnhData();
     if (data) {
       setExistingImages({ front: data.fotoFront, back: data.fotoBack });
+      setCNHValida(data.cnhvalida);
     }
     setLoading(false);
   };
@@ -64,6 +91,9 @@ export default function CNH() {
         <Text style={styles.text}>Visualize ou Cadastre sua CNH</Text>
         <Text style={styles.textocampo}>Para maior segurança, e conforme ordena  Art. 141 do CTB,
           cadastre as imagens da sua CNH.</Text>
+        <View style={{ marginTop: 8, marginBottom: 16, alignItems: 'center' }}>
+          <CnhStatusBadge cnhvalida={cnhvalida} />
+        </View>
         {/* Imagem da frente da CNH */}
         <View style={{ alignItems: 'center' }}>
           <Text style={styles.textocampo}>Frente da CNH:</Text>

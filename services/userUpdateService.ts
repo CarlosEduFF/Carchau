@@ -1,6 +1,8 @@
 import firebase from "~/config/firebase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { validateUserData } from '~/utils/validators';  // ajuste o caminho conforme seu projeto
+import Validators from "../utils/Validators/index";
+
+
 
 export const updateUserProfile = async (data: {
   nome: string;
@@ -14,7 +16,7 @@ export const updateUserProfile = async (data: {
 }) => {
   // Se quiser validar aqui, precisa receber o selectedIndex ou validar pelo sexo
   if (data.selectedIndex !== undefined) {
-    const isValid = validateUserData({
+    const isValid = Validators.validateUserData({
       nome: data.nome,
       nacionalidade: data.nacionalidade,
       telefone: data.telefone,

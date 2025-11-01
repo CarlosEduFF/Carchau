@@ -9,7 +9,7 @@ export const Maps = (id: string, locadorId: string, locatarioId: string, carroId
 
     AsyncStorage.getItem('userId').then(userId => {
         if (userId === LocadorId) {
-            router.push({
+            router.replace({
                 pathname: routes.mapsLessor,
                 params: {
                     soliciId: SolicitacaoId,
@@ -19,7 +19,7 @@ export const Maps = (id: string, locadorId: string, locatarioId: string, carroId
                 },
             });
         } else if (userId === LocatarioId) {
-            router.push({
+            router.replace({
                 pathname: routes.mapsLessee,
                 params: {
                     soliciId: SolicitacaoId,

@@ -88,7 +88,7 @@ export default function VerfMapsLessorScreen() {
         onClose={() => setModalVisible(false)}
         message="A confirmação de localização do locatário foi realizada, a segurança de localização foi garantida."
         confirmText="Entendi"
-        onConfirm={() => router.push("/(tabs)/activity")}
+        onConfirm={() => router.replace("/(tabs)/activity")}
       />
 
     </View>

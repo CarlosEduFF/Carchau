@@ -13,8 +13,11 @@ export const sendMessageToChat = async ({
         ? `${userId}_${recipientId}`
         : `${recipientId}_${userId}`;
 
+    // Gerar o ID que você quer que seja o ID do documento
+    const messageDocId = `${userId}_${Date.now()}`;
+
     const newMessage = {
-        _id: `${userId}_${Date.now()}`,
+        // Não precisa mais do _id aqui se ele será o ID do documento
         text,
         createdAt: new Date(),
         user: {
@@ -27,7 +30,8 @@ export const sendMessageToChat = async ({
         .collection('ChatRooms')
         .doc(chatRoomId)
         .collection('messages')
-        .add({
+        .doc(messageDocId) // <--- USE .doc() COM O SEU ID AQUI
+        .set({             // <--- E .set() AQUI
             ...newMessage,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });

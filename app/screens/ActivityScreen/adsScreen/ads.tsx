@@ -48,7 +48,7 @@ export default function Veiculo() {
     front: null,
     back: null,
   });
-
+  const [cnhvalida, setCNHValida] = useState<boolean | null>(null);
   //Dados Locador
   const [nomeLocador, setNomeLocador] = useState<string>('');
   const [perfilImageLocador, setPerfilImageLocador] = useState<string | null>(null);
@@ -105,6 +105,7 @@ export default function Veiculo() {
     const data = await Services.fetchCnhData();
     if (data) {
       setExistingImages({ front: data.fotoFront, back: data.fotoBack });
+      setCNHValida(data.cnhvalida); 
     }
     setLoading(false);
   };
@@ -128,58 +129,6 @@ export default function Veiculo() {
     carregarDados();
   }, []);
 
-  const GerarChat = async () => {
-    try {
-      const chatId = await Services.createOrSearchChat(
-        LocadorId,
-        LocatarioId,
-        nomeLocador,
-        perfilImageLocador,
-        nomeLocatario,
-        perfilImageLocatario
-      );
-      Navigations().GenerateChat(chatId, LocadorId, LocatarioId);
-    } catch (error) {
-      console.error('Erro ao criar ou buscar chat:', error);
-      setSitu('Erro ao criar ou buscar chat.');
-      setModalVisible2(true);
-    }
-  };
-
-  const { valido, camposVazios } = Validators.validarCampos(
-    {
-      nomeLocatario,
-      nacionalidade,
-      telefone,
-      email,
-      profissao,
-      cpf,
-      endereco,
-      cep,
-      numero,
-      bairro,
-      cidade,
-      estado,
-      frontImage: existingImages?.front,
-      backImage: existingImages?.back,
-    },
-    [
-      'nomeLocatario',
-      'nacionalidade',
-      'telefone',
-      'email',
-      'profissao',
-      'cpf',
-      'endereco',
-      'cep',
-      'numero',
-      'bairro',
-      'cidade',
-      'estado',
-      'frontImage',
-      'backImage',
-    ]
-  );
 
   return (
     <>

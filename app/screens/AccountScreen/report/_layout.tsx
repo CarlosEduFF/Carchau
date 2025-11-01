@@ -11,13 +11,13 @@ export default function Layout() {
     
     <Stack>
       <Stack.Screen name="reportProblem" options={{ 
-        title: 'Relatar Problema',  
+        title: '',  
          headerTintColor: "#fff", 
          navigationBarColor: '#022036', 
          headerTransparent: true,
          headerLeft: () => (
           <Link href={routes.account} asChild>
-            <HeaderButton />
+
           </Link>
       ),    
       }} />

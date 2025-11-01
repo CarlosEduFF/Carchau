@@ -2,137 +2,121 @@
 import { StyleSheet } from 'react-native';
 
 const Styles = StyleSheet.create({
-   scrollContainer: {
-    flexGrow: 1,
-    padding: 24,
-    backgroundColor: '#022036',
-    justifyContent: 'center', // centraliza verticalmente quando conteúdo é menor que a tela
-    alignItems: 'center',
-  },
-
-  // container não ocupa 100% da altura por padrão (evita conflitos com ScrollView)
   container: {
-    width: '100%',
+    backgroundColor: '#022036',
+    flex: 1,
+    padding: 24,
     alignItems: 'center',
   },
+  errorText: {
+    color: 'red',
+    marginTop: 15, // Espaçamento acima da mensagem de erro
+    fontSize: 12, // Tamanho da fonte da mensagem de erro
+  },
+  foco: {
+    color: '#f2a51a'
+  },
 
-  // wrapper para imagens decorativas (absolute)
-  decorations: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 260, // ajuste conforme necessário
-    zIndex: 0,
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'justify',
   },
   circuloam: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    right: -40,
-    top: -40,
-    opacity: 0.9,
+    width: 300,
+    height: 300,
+    marginTop: 10,
+    left: 180,
+    bottom: 90,
   },
   segundocirculo: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    left: -50,
-    top: 160,
-    opacity: 0.9,
+    width: 300,
+    height: 300,
+    marginTop: 10,
+    top: 200,
+    right: 170,
   },
-
-  // caixa principal - sem height % nem bottom/top absolutos
   caixalogin: {
     backgroundColor: '#022036',
     borderRadius: 15,
     borderWidth: 5,
     borderColor: '#FFCD1B',
     width: '85%',
-    paddingVertical: 20,
-    paddingHorizontal: 18,
+    height: '40%',
+    bottom: 460,
     alignItems: 'center',
-    zIndex: 1, // garante que fique sobre as imagens decorativas
-    // opcional: sombra
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
   },
-
   form: {
-    width: '100%',
-    marginTop: 8,
+    flex: 1,
+    width: '80%',
+    top: 20,
   },
-
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  showHideButton: {
-    marginLeft: 10,
-    padding: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
   input: {
     backgroundColor: '#022036',
     width: '100%',
+    marginBottom: 20,
     color: '#fff',
     fontSize: 14,
     borderRadius: 7,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
+    padding: 5,
+    top: 30,
     borderWidth: 2,
     borderColor: '#fff',
-    height: 44,
-    marginTop: 6,
-    marginBottom: 10,
+    height: 40, // Defina uma altura fixa
   },
-
   title: {
     color: '#FFCD1B',
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 6,
+    top: 10,
+    bottom: 20,
   },
-
   textocampo: {
     color: '#FFCD1B',
     fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 10,
+    top: 20,
   },
-
-  errorText: {
-    color: 'red',
-    marginTop: 6,
-    fontSize: 12,
-  },
-
-  forgot: {
-    alignSelf: 'flex-end',
-    marginTop: 6,
-  },
-
-  forgotText: {
-    color: 'white',
-    textDecorationLine: 'underline',
-  },
-
   button: {
     backgroundColor: '#F2A51A',
     width: '60%',
-    height: 44,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
-    marginTop: 16,
+    bottom: 15,
   },
-  
+  passwordContainer: {
+    position: 'relative',
+    width: '100%',
+    top: 30,
+  },
+  inputPassword: {
+    backgroundColor: '#022036',
+    color: '#fff',
+    fontSize: 14,
+    borderRadius: 7,
+    paddingVertical: 5,
+    paddingLeft: 10,
+    paddingRight: 40, // espaço para o ícone
+    borderWidth: 2,
+    borderColor: '#fff',
+    height: 40,
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 10,
+    top: 8,
+    padding: 5,
+  },
+
 });
 
 export default Styles;

@@ -2,7 +2,6 @@ import { Cnh } from '~/types/index';
 import firebase from '~/config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 export const fetchCnhData = async (): Promise<Cnh | null> => {
   try {
     const uid = await AsyncStorage.getItem('userId');
@@ -25,6 +24,7 @@ export const fetchCnhData = async (): Promise<Cnh | null> => {
       return {
         fotoFront: data?.fotoFront || null,
         fotoBack: data?.fotoBack || null,
+        cnhvalida: data?.cnhvalida ?? null, // ✅ captura o novo campo
       };
     } else {
       console.warn('Documento de CNH não encontrado.');

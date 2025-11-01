@@ -1,102 +1,119 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { router } from 'expo-router';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, Image, TouchableOpacity, FlatList, TextInput } from 'react-native';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+
+import images from '~/constants/images';
+import { Message, SolicitacaoContato } from '~/types/';
+import { Components } from '~/components';
+import { Services } from '~/services';
 import styles from './StylesReportProblem';
-import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
-import { fetchUserData } from '~/services/UserService/GetUserService';
-import CustomModal from '~/components/CustomModal/CustomModal';
-import { routes } from '~/constants/routes';
-import { sendEmail } from '~/services/emailService';
-import { validateMessageForm } from '~/utils/validators';
 
+export default function ChatReport() {
+    const [locadorId, setLocadorId] = useState("OdxeqUU7SDNbBDzhN4ETeP2h1jI3");
+    const [locatarioId, setLocatarioId] = useState("");
+    const [perfilImage, setPerfilImage] = useState<string | null>(null);
+    const [nome, setNome] = useState<string | null>(null);
 
-export default function InformacoesPessoais() {
-    const [email, setEmail] = useState('');
-    const [mensagem, setMensagem] = useState('');
-    const [modalVisible2, setModalVisible2] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [situ, setSitu] = useState('');
+    const [UserImage, setUserImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const [loading2, setLoading2] = useState(false);
+
+    const ContatoIdParam = useLocalSearchParams()?.id;
+    const ContatoId = Array.isArray(ContatoIdParam) ? ContatoIdParam[0] : ContatoIdParam;
+
+    const [userId, setUserId] = useState<string | undefined>(undefined);
+    const [recipientId, setRecipientId] = useState<string | undefined>(undefined);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const flatListRef = useRef<FlatList>(null);
+    const [messageText, setMessageText] = useState('');
+    const previousContactId = useRef<string | null>(null);
+
+    useFocusEffect(
+        useCallback(() => {
+            let isUnmount = false;
+            Services.loadChatUserData({
+                locadorId,
+                locatarioId,
+                ContatoId,
+                recipientId,
+                userId,
+                setUserId,
+                setRecipientId,
+                setNome,
+                setPerfilImage,
+                setUserImage,
+                setLoading,
+                previousContactId,
+            });
+
+
+            return () => {
+                isUnmount = true;
+            };
+        }, [locadorId, locatarioId, ContatoId, recipientId])
+    );
 
     useEffect(() => {
-        loadUser();
-    }, []);
-
-    const loadUser = async () => {
-        const userData = await fetchUserData();
-        if (userData) {
-            setEmail(userData.email);
-        }
-        setLoading(false);
-    };
-
-    const onSubmit = async () => {
-        setLoading2(true);
-
-        try {
-            validateMessageForm(email, mensagem);
-            await sendEmail(email, mensagem);
-            setModalVisible(true);
-        } catch (error: any) {
-            console.error(error);
-            setSitu('Erro ao enviar mensagem.');
-            setModalVisible2(true);
-        } finally {
-            setLoading2(false);
-        }
-    };
-
-
-    { (loading || loading2) && <LoadingCarAnimation loading={true} /> }
+        const unsubscribe = Services.GetMessage({
+            userId,
+            recipientId,
+            onMessagesUpdate: setMessages,
+            flatListRef,
+        });
+        return () => unsubscribe && unsubscribe();
+    }, [userId, recipientId]);
 
     return (
-        <View style={{ flex: 1 }}>
-            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
+        <View style={styles.container}>
+            {(loading) && <Components.LoadingCarAnimation loading={loading}  />}
+            <View style={styles.Topo}></View>
+            <View style={styles.header}>
+                <Text style={styles.headerText}>{nome ? nome : 'Carregando...'}</Text>
+                <Image
+                    style={styles.userIcon}
+                    source={typeof perfilImage === 'string' ? { uri: perfilImage } : images.defaultProfileImage}
+                />
+            </View>
 
-            <View style={styles.container}>
-                <ScrollView style={styles.scroll}>
-                    <View style={{ marginTop: 20 }}></View>
-                    <Text style={styles.textocampo}>Algum problema com o Uso da Aplicação ou com o Aplicativo?</Text>
 
-                    <Text style={styles.textocampo}>Relate o seu problema:</Text>
-                    <TextInput
-                        style={[styles.input, { height: 120, textAlignVertical: 'top' }]}
-                        multiline
-                        value={mensagem}
-                        onChangeText={text => setMensagem(text)}
-                        placeholder="Digite seu problema aqui ..."
-                        placeholderTextColor="#888888"
+            <FlatList
+                ref={flatListRef}
+                data={messages}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => (
+                    <Components.MessageItem
+                        item={item}
+                        userId={userId}
+                        UserImage={UserImage}
+                        perfilImage={perfilImage}
                     />
+                )}
+                inverted={false}
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            />
 
-                    <View style={{ alignItems: 'center' }}>
-                        <TouchableOpacity style={styles.buttonSave} onPress={() => { onSubmit(), setLoading2(true) }}>
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Enviar</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <CustomModal
-                        visible={modalVisible}
-                        onClose={() => setModalVisible(false)}
-                        message="Relato enviado com sucesso!"
-                        confirmText="Entendi"
-                        onConfirm={() => {
-                            setModalVisible(false);
-                            router.replace(routes.account);
-                        }}
-                    />
-
-                    <CustomModal
-                        visible={modalVisible2}
-                        onClose={() => setModalVisible2(false)}
-                        message={situ}
-                        confirmText="Entendi"
-                        onConfirm={() => {
-                            router.replace(routes.account);
-                        }}
-                    />
-                </ScrollView>
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.textInput}
+                    placeholder="Digite sua mensagem..."
+                    value={messageText}
+                    onChangeText={setMessageText}
+                    placeholderTextColor={'white'}
+                />
+                <TouchableOpacity onPress={() => {
+                    Services.sendMessageToChat({
+                        userId,
+                        recipientId,
+                        text: messageText,
+                        nome, // opcional
+                    });
+                    setMessageText('');
+                }}>
+                    <Ionicons name="send" size={34} color="#F2A51A" />
+                </TouchableOpacity>
             </View>
         </View>
     );
 }
+

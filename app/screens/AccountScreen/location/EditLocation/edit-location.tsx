@@ -716,7 +716,7 @@ export default function CarRegistrationScreen() {
                     onClose={() => setModalVisible(false)}
                     message="Locação editada com sucesso!"
                     onConfirm={() => {
-                        router.push(routes.viewLocation); // só se estiver usando `expo-router`
+                        router.replace(routes.viewLocation); // só se estiver usando `expo-router`
                     }}
                 />
 

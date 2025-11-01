@@ -1,6 +1,15 @@
 import firebase from "~/config/firebase";
 import { ListenToMessagesParams, Message } from "~/types";
+interface BaseChatParams {
+  userId: string | undefined;
+  recipientId: string | undefined;
+}
 
+// Para envio de mensagens
+export interface SendMessageParams extends BaseChatParams {
+  text: string;
+  nome?: string | null;
+}
 export const GetMessage = ({
     userId,
     recipientId,

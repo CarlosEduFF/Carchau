@@ -6,9 +6,21 @@ interface UploadCNHResponse {
     message: string;
 }
 
+/**
+ * Faz upload das imagens (front/back) da CNH para o Storage e grava/atualiza o documento
+ * Locatarios/{uid}/documentos/cnh com os campos:
+ *  - fotoFront?: string
+ *  - fotoBack?: string
+ *  - cnhvalida: boolean
+ *
+ * Regras de cnhvalida:
+ *  - se for passado explicitamente cnhValida, usamos esse valor
+ *  - caso contrário, inferimos true somente se existirem BOTH (fotoFront && fotoBack)
+ */
 export const uploadAndSaveCNH = async (
     frontCNH: string | null,
-    backCNH: string | null
+    backCNH: string | null,
+    cnhValida?: boolean // opcional: força o valor se fornecido
 ): Promise<UploadCNHResponse> => {
     try {
         const uid = await AsyncStorage.getItem('userId');
@@ -19,7 +31,7 @@ export const uploadAndSaveCNH = async (
             };
         }
 
-        const updateData: { fotoFront?: string; fotoBack?: string } = {};
+        const updateData: { fotoFront?: string; fotoBack?: string; cnhvalida?: boolean } = {};
 
         const uploadImage = async (imageUri: string, imageType: 'front' | 'back') => {
             const response = await fetch(imageUri);
@@ -32,6 +44,7 @@ export const uploadAndSaveCNH = async (
             return await snapshot.ref.getDownloadURL();
         };
 
+        // Faz upload se vierem imagens nesta chamada
         if (frontCNH) {
             const frontUrl = await uploadImage(frontCNH, 'front');
             updateData.fotoFront = frontUrl;
@@ -50,6 +63,30 @@ export const uploadAndSaveCNH = async (
             .doc('cnh');
 
         const docSnapshot = await documentRef.get();
+
+        // Se o usuário já tem documento, precisamos combinar as imagens antigas (se existirem)
+        let existingFront: string | undefined;
+        let existingBack: string | undefined;
+
+        if (docSnapshot.exists) {
+            const data = docSnapshot.data() as any;
+            existingFront = data?.fotoFront;
+            existingBack = data?.fotoBack;
+        }
+
+        // Decide o valor de cnhvalida:
+        let finalCnhValida: boolean;
+        if (typeof cnhValida === 'boolean') {
+            // se foi passado explicitamente, respeitamos
+            finalCnhValida = cnhValida;
+        } else {
+            // caso contrário, inferimos true somente se BOTH existirem (quer vindos antes, quer enviados agora)
+            const frontExists = Boolean(updateData.fotoFront || existingFront);
+            const backExists = Boolean(updateData.fotoBack || existingBack);
+            finalCnhValida = frontExists && backExists;
+        }
+
+        updateData.cnhvalida = finalCnhValida;
 
         if (docSnapshot.exists) {
             await documentRef.update(updateData);

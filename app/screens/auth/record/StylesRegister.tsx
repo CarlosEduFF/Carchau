@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: '#022036',
-    width: '80%',
+    width: '100%',
     marginBottom: 20,
     color: '#fff',
     fontSize: 14,
@@ -118,6 +118,29 @@ const styles = StyleSheet.create({
   },
   buttonPrivaTextDisabled: {
     color: "#888888",
+  },
+  inputPassword: {
+    backgroundColor: '#022036',
+    color: '#fff',
+    fontSize: 14,
+    borderRadius: 7,
+    paddingVertical: 5,
+    paddingLeft: 10,
+    paddingRight: 40, // espaço para o ícone
+    borderWidth: 2,
+    borderColor: '#fff',
+    height: 40,
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 10,
+    top: 8,
+    padding: 5,
+  },
+  passwordContainer: {
+    position: 'relative',
+    width: '100%',
+    top: 30,
   },
 });
 

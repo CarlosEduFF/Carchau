@@ -18,14 +18,14 @@ import { routes } from '../constants/routes';
 
 
 export const CardsVisu = (cardId: string) => {
-    router.push({
+    router.replace({
         pathname: routes.deleteCard,
         params: { cardId }
     });
 }
 
 export const ViewCars = (carro: { id: any; }) => {
-    router.push({
+    router.replace({
         pathname: routes.editLocation,
         params: { carroId: carro.id }
     });
@@ -33,7 +33,7 @@ export const ViewCars = (carro: { id: any; }) => {
 
 export const PerfilLocador = (LocadorId: string, LocatarioId: string) => {
     if (LocatarioId != LocadorId) {
-        router.push({
+        router.replace({
             pathname: routes.viewOtherProfile,
             params: { locatarioId: LocadorId },
         });
@@ -51,7 +51,7 @@ export const Requisitar = async (
     dataTermino: string,
     totalDias: string
 ) => {
-    router.push({
+    router.replace({
         pathname: routes.confirmScreen,
         params: {
             carroId,
@@ -75,7 +75,7 @@ export const BackSchedule = async (
     dataTermino: string,
     totalDias: string
 ) => {
-    router.push({
+    router.replace({
         pathname: routes.viewSchedule,
         params: {
             carroId,
@@ -92,7 +92,7 @@ export const BackSchedule = async (
 
 
 export const Perfil = async (locatarioId: string) => {
-    router.push({
+    router.replace({
         pathname: '/screens/ActivityScreen/viewProfile/profile',
         params: {
             locatarioId: locatarioId,

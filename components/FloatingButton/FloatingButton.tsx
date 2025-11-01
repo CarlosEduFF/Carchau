@@ -4,6 +4,7 @@ import { Navigations } from "~/utils/navigations";
 import { useEffect, useRef, useState } from "react";
 import { Services } from "~/services";
 import Validators from "~/utils/Validators/index";
+import { Components } from "..";
 
 interface FloatingButtonProps {
     carroId: string;
@@ -36,7 +37,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
         front: null,
         back: null,
     });
-
+    const [cnhvalida, setCNHValida] = useState<boolean | null>(null);
     //Dados Locador
     const [nomeLocador, setNomeLocador] = useState<string>('');
     const [perfilImageLocador, setPerfilImageLocador] = useState<string | null>(null);
@@ -96,6 +97,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
         const data = await Services.fetchCnhData();
         if (data) {
             setExistingImages({ front: data.fotoFront, back: data.fotoBack });
+            setCNHValida(data.cnhvalida);
         }
         setLoading(false);
     };
@@ -153,6 +155,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
             estado,
             frontImage: existingImages?.front,
             backImage: existingImages?.back,
+            cnhvalida,
         },
         [
             'nomeLocatario',
@@ -169,6 +172,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
             'estado',
             'frontImage',
             'backImage',
+            'CNH',
         ]
     );
 
@@ -201,6 +205,16 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
                 }}>
                 <Text style={styles.textStyle}>Chat</Text>
             </Pressable>
+
+            <Components.CustomModal
+                    visible={modalVisible2}
+                    onClose={() => setModalVisible2(false)}
+                    message={situ}
+                    confirmText="Entendi"
+                    onConfirm={() => {
+                      setModalVisible2(!modalVisible2);
+                    }}
+                  />
         </View>
     );
 }

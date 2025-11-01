@@ -13,3 +13,5 @@ export const validateMessageForm = (email: string, mensagem: string) => {
     throw new Error('Digite um email válido.');
   }
 };
+
+export default validateMessageForm;

@@ -12,7 +12,8 @@ import { fetchAvaliacoes } from '~/services/evalueServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { routes } from '~/constants/routes';
 import colors from '~/constants/colors';
-import { Avaliacao } from '~/types/Evalue/Evalue';
+import { Evalue } from '~/types';
+
 
 
 
@@ -28,7 +29,7 @@ export default function InformacoesPessoais() {
     const [loading, setLoading] = useState(true);
     const [loading2, setLoading2] = useState(false);
     const [expandedId, setExpandedId] = useState<string | null>(null);
-    const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]); 
+    const [avaliacoes, setAvaliacoes] = useState<Evalue[]>([]); 
     const [userId, setUserId] = useState<string | null>(null); 
 
 
@@ -78,7 +79,7 @@ export default function InformacoesPessoais() {
             {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
             <View>
                 <View style={styles.EditButton}>
-                    <TouchableOpacity style={styles.EditButton} onPress={() => router.push(routes.editProfile)}>
+                    <TouchableOpacity style={styles.EditButton} onPress={() => router.replace(routes.editProfile)}>
                         <Image
                             style={styles.EditImage}
                             source={images.editIcon}

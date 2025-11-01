@@ -8,7 +8,7 @@ export const PYRent = async ({
     LocatarioId,
     TotalValor,
 }: RequestNavigationParams) => {
-    router.push({
+    router.replace({
         pathname: routes.payRent,
         params: {
             soliciId: SolicitacaoId,

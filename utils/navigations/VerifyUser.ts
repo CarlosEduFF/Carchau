@@ -12,7 +12,7 @@ export const VerifyUser = async ({
         const userId = await AsyncStorage.getItem('userId');
 
         if (userId === LocadorId) {
-            router.push({
+            router.replace({
                 pathname: routes.verfLessor,
                 params: {
                     soliciId: SolicitacaoId,
@@ -21,7 +21,7 @@ export const VerifyUser = async ({
                 },
             });
         } else if (userId === LocatarioId) {
-            router.push({
+            router.replace({
                 pathname: routes.verfLessee,
                 params: {
                     soliciId: SolicitacaoId,

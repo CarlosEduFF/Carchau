@@ -4,7 +4,7 @@ import { CheckBox } from '@rneui/themed';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './StylesAceptTerms';
-import { Terms } from '~/components/Terms/Terms';
+import Terms  from '~/components/Terms/Terms';
 import { fetchLatestTermo } from '~/services/termsServices';
 import { routes } from '~/constants/routes';
 import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';

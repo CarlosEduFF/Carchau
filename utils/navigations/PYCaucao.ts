@@ -7,7 +7,7 @@ export const PYCaucao = async ({
     LocadorId,
     LocatarioId,
 }: RequestNavigationParams) => {
-    router.push({
+    router.replace({
         pathname: routes.payCaucao,
         params: {
             soliciId: SolicitacaoId,

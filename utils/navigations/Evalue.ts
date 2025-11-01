@@ -10,7 +10,7 @@ export const Evalue = async (id: string, locadorId: string, locatarioId: string,
 
     Services.StorageService.getUserId().then(userId => {
         if (userId === LocadorId) {
-            router.push({
+            router.replace({
                 pathname: routes.evaluateLessor,
                 params: {
                     soliciId: SolicitacaoId,
@@ -20,7 +20,7 @@ export const Evalue = async (id: string, locadorId: string, locatarioId: string,
                 },
             });
         } else if (userId === LocatarioId) {
-            router.push({
+            router.replace({
                 pathname: routes.evaluateLessee,
                 params: {
                     soliciId: SolicitacaoId,

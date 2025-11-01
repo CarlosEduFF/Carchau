@@ -7,7 +7,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     alignItems: 'center',
-    marginTop: 30
+    marginTop: 30,
+    width: '100%',
+    height: '100%'
   },
   buttonPriva: {
     width: '40%',

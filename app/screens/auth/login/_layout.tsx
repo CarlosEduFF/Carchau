@@ -16,7 +16,6 @@ export default function Layout() {
          headerTransparent: true,
          headerLeft: () => (
           <Link href="/" asChild>
-            <HeaderButton />
           </Link>
       ),    
       }} />

@@ -13,7 +13,7 @@ import CustomModal from '~/components/CustomModal/CustomModal';
 import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
 import images from '~/constants/images';
 import colors from '~/constants/colors';
-import {Services} from '~/services/index';
+import { Services } from '~/services/index';
 import { validarCampos } from '~/utils/Validators/RequiredFieldsValidator';
 
 
@@ -41,11 +41,13 @@ export default function Account() {
   const [loading, setLoading] = useState(true);
   const [loading2, setLoading2] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [cnhvalida, setCNHValida] = useState<boolean | null>(null);
 
   const loadCnhData = async () => {
     const data = await Services.fetchCnhData();
     if (data) {
       setExistingImages({ front: data.fotoFront, back: data.fotoBack });
+      setCNHValida(data.cnhvalida); 
     }
     setLoading(false);
   };
@@ -66,7 +68,7 @@ export default function Account() {
 
   const loadEndereco = async () => {
     setLoading(true);
-    const endereco = await Services.fetchEndereco();
+    const endereco = await Services.fetchAddress();
 
     if (endereco) {
       setCep(endereco.cep);
@@ -99,7 +101,7 @@ export default function Account() {
     ['endereco', 'cep', 'numero', 'bairro', 'cidade', 'estado']
   );
 
-  const cnhIncompleta = !existingImages?.front || !existingImages?.back;
+  const cnhIncompleta = !existingImages?.front || !existingImages?.back || !cnhvalida;
 
 
 

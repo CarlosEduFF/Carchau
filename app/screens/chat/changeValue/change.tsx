@@ -214,7 +214,7 @@ export default function AluguelVeiculo() {
                 onClose={() => setModalVisible(false)}
                 message="Solicitação editada com sucesso!"
                 confirmText="Entendi"
-                onConfirm={() => { setModalVisible(false), router.push('/(tabs)/contact'); }}
+                onConfirm={() => { setModalVisible(false), router.replace('/(tabs)/contact'); }}
             />
 
             <View style={styles.viewUpdateButton}>

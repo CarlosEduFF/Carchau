@@ -41,6 +41,25 @@ const styles = StyleSheet.create({
       paddingBottom: 10,
       paddingLeft: 20,
       marginTop: 65
-    },  
+    },
+    
+    containerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+  },
+  dotBadge: {
+    width: 12,
+    height: 12,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  textBadge: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   });
   export default styles;
