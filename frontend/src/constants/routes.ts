@@ -1,3 +1,6 @@
+import CnhList from "../pages/cnhList/cnhList";
+import cnhValidate from "../pages/cnhValidate/cnhValidate";
+
 // src/constants/routes.ts
 const RoutesP = {
   Home: "/",
@@ -7,7 +10,10 @@ const RoutesP = {
   NOSSO_APP: "/#Down",
   CONTATO: "/#Contato",
   
-  Control: "/control"
+  Control: "/control",
+  ReportList: "/reportlist",
+  CnhList: "/cnhlist",
+  cnhValidate: "/cnhvalidate"
 };
 
 export default RoutesP;
