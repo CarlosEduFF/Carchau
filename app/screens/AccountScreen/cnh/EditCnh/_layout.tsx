@@ -17,7 +17,7 @@ export default function Layout() {
          headerTransparent: true,
          headerLeft: () => (
           <Link href={routes.viewCnh} asChild>
-            <HeaderButton />
+
           </Link>
       ),    
       }} />

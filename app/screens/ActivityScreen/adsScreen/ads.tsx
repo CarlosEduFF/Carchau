@@ -48,7 +48,7 @@ export default function Veiculo() {
     front: null,
     back: null,
   });
-  const [cnhvalida, setCNHValida] = useState<boolean | null>(null);
+  const [cnhvalida, setCNHValida] = useState<'valido' | 'invalido' | 'pendente' | null>(null);
   //Dados Locador
   const [nomeLocador, setNomeLocador] = useState<string>('');
   const [perfilImageLocador, setPerfilImageLocador] = useState<string | null>(null);
@@ -105,7 +105,13 @@ export default function Veiculo() {
     const data = await Services.fetchCnhData();
     if (data) {
       setExistingImages({ front: data.fotoFront, back: data.fotoBack });
-      setCNHValida(data.cnhvalida); 
+      if ( data.cnhvalida === 'valido') {
+        setCNHValida('valido');
+      } else if (data.cnhvalida === 'invalido') {
+        setCNHValida('invalido');
+      } else {
+        setCNHValida(null); // pendente, inválido, etc.
+      }
     }
     setLoading(false);
   };

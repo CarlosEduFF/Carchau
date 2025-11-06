@@ -24,7 +24,7 @@ export default function CNH() {
     const [situ, setSitu] = useState('');
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
-    const [cnhvalida, setCNHValida] = useState(false);
+    const [cnhvalida, setCNHValida] = useState<'valido' | 'invalido' | 'pendente' | null>(null);
 
     useEffect(() => {
         loadCnhData();
@@ -36,7 +36,14 @@ export default function CNH() {
 
         setLoading2(true);
 
-        const result = await uploadAndSaveCNH(frontCNH, backCNH, cnhvalida);
+        const cnhValidaToSend: string | undefined = cnhvalida === 'valido'
+            ? 'valido'
+            : cnhvalida === 'invalido'
+                ? 'invalido'
+                : undefined;
+
+        const result = await uploadAndSaveCNH(frontCNH, backCNH, cnhValidaToSend);
+
 
         if (result.success) {
             setModalVisible(true);

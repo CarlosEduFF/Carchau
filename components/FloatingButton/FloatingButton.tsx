@@ -37,7 +37,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
         front: null,
         back: null,
     });
-    const [cnhvalida, setCNHValida] = useState<boolean | null>(null);
+    const [cnhvalida, setCNHValida] = useState<'valido' | 'invalido' | 'pendente' | null>(null);
     //Dados Locador
     const [nomeLocador, setNomeLocador] = useState<string>('');
     const [perfilImageLocador, setPerfilImageLocador] = useState<string | null>(null);

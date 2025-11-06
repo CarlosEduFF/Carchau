@@ -41,13 +41,19 @@ export default function Account() {
   const [loading, setLoading] = useState(true);
   const [loading2, setLoading2] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [cnhvalida, setCNHValida] = useState<boolean | null>(null);
+  const [cnhvalida, setCNHValida] = useState<'valido' | 'invalido' | 'pendente' | null>(null);
 
   const loadCnhData = async () => {
     const data = await Services.fetchCnhData();
     if (data) {
       setExistingImages({ front: data.fotoFront, back: data.fotoBack });
-      setCNHValida(data.cnhvalida); 
+      if ( data.cnhvalida === 'valido') {
+        setCNHValida('valido');
+      } else if (data.cnhvalida === 'invalido') {
+        setCNHValida('invalido');
+      } else {
+        setCNHValida(null); // pendente, inválido, etc.
+      }
     }
     setLoading(false);
   };
@@ -101,7 +107,11 @@ export default function Account() {
     ['endereco', 'cep', 'numero', 'bairro', 'cidade', 'estado']
   );
 
-  const cnhIncompleta = !existingImages?.front || !existingImages?.back || !cnhvalida;
+  const cnhIncompleta =
+    !existingImages?.front ||
+    !existingImages?.back ||
+    cnhvalida !== 'valido';
+
 
 
 
