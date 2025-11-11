@@ -25,6 +25,9 @@
     "@react-navigation/native": "^7.0.0",
     "@rneui/base": "^4.0.0-rc.7",
     "@rneui/themed": "^4.0.0-rc.8",
+    "@stripe/stripe-react-native": "0.38.6",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "expo": "~52.0.47",
     "expo-constants": "~17.0.3",
     "expo-dev-client": "~5.0.20",
@@ -37,6 +40,7 @@
     "expo-status-bar": "~2.0.0",
     "expo-system-ui": "~4.0.9",
     "expo-web-browser": "~14.0.2",
+    "express": "^5.1.0",
     "firebase": "^11.7.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -54,17 +58,21 @@
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
     "react-native-svg": "15.8.0",
-    "react-native-web": "~0.19.10"
+    "react-native-web": "~0.19.10",
+    "stripe": "^19.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@react-native-community/cli": "latest",
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.0",
     "@types/react": "~18.3.12",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
     "eslint": "^8.57.0",
     "eslint-config-universe": "^12.0.1",
     "prettier": "^3.2.5",
+    "ts-node-dev": "^2.0.0",
     "typescript": "~5.3.3"
   },
   "eslintConfig": {
@@ -85,5 +93,18 @@
         "listUnknownPackages": false
       }
     }
-  }
+  },
+  "description": "This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CarlosEduFF/Carchau.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/CarlosEduFF/Carchau/issues"
+  },
+  "homepage": "https://github.com/CarlosEduFF/Carchau#readme"
 }

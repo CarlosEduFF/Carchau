@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import { View, Image, Text, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -5,8 +6,6 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useEffect, useState } from 'react';
-import React from 'react';
 import styles from '../Styles/StylesAccount';
 import { routes } from '~/constants/routes';
 import CustomModal from '~/components/CustomModal/CustomModal';
@@ -15,7 +14,6 @@ import images from '~/constants/images';
 import colors from '~/constants/colors';
 import { Services } from '~/services/index';
 import { validarCampos } from '~/utils/Validators/RequiredFieldsValidator';
-
 
 export default function Account() {
   const [nome, setNome] = useState('');
@@ -38,90 +36,142 @@ export default function Account() {
     front: null,
     back: null,
   });
-  const [loading, setLoading] = useState(true);
-  const [loading2, setLoading2] = useState(false);
+  const [loading, setLoading] = useState(true);   // controla primeiro carregamento
+  const [loading2, setLoading2] = useState(false); // controle adicional (se usar)
   const [modalVisible, setModalVisible] = useState(false);
   const [cnhvalida, setCNHValida] = useState<'valido' | 'invalido' | 'pendente' | null>(null);
 
+  // --- Funções de carregamento (não altere os nomes se Services dependem disso) ---
   const loadCnhData = async () => {
-    const data = await Services.fetchCnhData();
-    if (data) {
-      setExistingImages({ front: data.fotoFront, back: data.fotoBack });
-      if ( data.cnhvalida === 'valido') {
-        setCNHValida('valido');
-      } else if (data.cnhvalida === 'invalido') {
-        setCNHValida('invalido');
-      } else {
-        setCNHValida(null); // pendente, inválido, etc.
+    try {
+      const data = await Services.fetchCnhData();
+      if (data) {
+        setExistingImages({ front: data.fotoFront ?? null, back: data.fotoBack ?? null });
+        if (data.cnhvalida === 'valido') setCNHValida('valido');
+        else if (data.cnhvalida === 'invalido') setCNHValida('invalido');
+        else setCNHValida(data.cnhvalida ?? null); // pendente ou null
       }
+    } catch (err) {
+      // opcional: console.warn('Erro loadCnhData', err);
     }
-    setLoading(false);
   };
 
   const loadUser = async () => {
-    const userData = await Services.fetchUserData();
-    if (userData) {
-      setNome(userData.nome);
-      setNacionalidade(userData.nacionalidade);
-      setTelefone(userData.telefone);
-      setEmail(userData.email);
-      setCPF(userData.cpf);
-      setProfissao(userData.profissao);
-      setIndex(userData.sexo === 'Masculino' ? 0 : 1);
+    try {
+      const userData = await Services.fetchUserData();
+      if (userData) {
+        setNome(userData.nome ?? '');
+        setNacionalidade(userData.nacionalidade ?? '');
+        setTelefone(userData.telefone ?? '');
+        setEmail(userData.email ?? '');
+        setCPF(userData.cpf ?? '');
+        setProfissao(userData.profissao ?? '');
+        setIndex(userData.sexo === 'Masculino' ? 0 : 1);
+      }
+    } catch (err) {
+      // opcional: console.warn('Erro loadUser', err);
     }
-    setLoading(false);
   };
 
   const loadEndereco = async () => {
-    setLoading(true);
-    const endereco = await Services.fetchAddress();
-
-    if (endereco) {
-      setCep(endereco.cep);
-      setEndereco(endereco.endereco);
-      setNumero(endereco.numero);
-      setComplemento(endereco.complemento);
-      setBairro(endereco.bairro);
-      setCidade(endereco.cidade);
-      setEstado(endereco.estado);
+    try {
+      const enderecoData = await Services.fetchAddress();
+      if (enderecoData) {
+        setCep(enderecoData.cep ?? '');
+        setEndereco(enderecoData.endereco ?? '');
+        setNumero(enderecoData.numero ?? '');
+        setComplemento(enderecoData.complemento ?? '');
+        setBairro(enderecoData.bairro ?? '');
+        setCidade(enderecoData.cidade ?? '');
+        setEstado(enderecoData.estado ?? '');
+      }
+    } catch (err) {
+      // opcional: console.warn('Erro loadEndereco', err);
     }
-
-    setLoading(false);
   };
 
+  // --- useEffect que aguarda todos os loads ---
   useEffect(() => {
-    setLoading2(true);
-    loadEndereco();
-    loadUser();
-    loadCnhData();
-    setLoading2(false);
+    let mounted = true;
+    const loadAll = async () => {
+      try {
+        setLoading(true);
+        setLoading2(true);
+        await Promise.all([loadEndereco(), loadUser(), loadCnhData()]);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+          setLoading2(false);
+        }
+      }
+    };
+
+    loadAll();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const { valido: dadosPessoaisValidos } = validarCampos(
-    { nome, nacionalidade, telefone, email, profissao, cpf },
-    ['nome', 'nacionalidade', 'telefone', 'email', 'profissao', 'cpf']
-  );
+  // --- Chamada do validador: passamos explicitamente os nomes que o validator espera ---
+  const camposPessoaisDados = {
+    nome,
+    nacionalidade,
+    telefone,
+    email,
+    profissao,
+    cpf,
+  };
 
-  const { valido: enderecoValido } = validarCampos(
-    { endereco, cep, numero, bairro, cidade, estado },
-    ['endereco', 'cep', 'numero', 'bairro', 'cidade', 'estado']
-  );
+  const enderecoDados = {
+    endereco,
+    cep,
+    numero,
+    bairro,
+    cidade,
+    estado,
+  };
 
-  const cnhIncompleta =
-    !existingImages?.front ||
-    !existingImages?.back ||
-    cnhvalida !== 'valido';
+  // Passa frontImage/backImage com fallback para estados que vc tem (existingImages | frontCNH/backCNH)
+  const cnhDadosParaValidar = {
+    frontImage: existingImages.front ?? frontCNH,
+    backImage: existingImages.back ?? backCNH,
+    cnhvalida,
+  };
 
+  const { valido: dadosPessoaisValidos } = validarCampos(camposPessoaisDados, [
+    'nome',
+    'nacionalidade',
+    'telefone',
+    'email',
+    'profissao',
+    'cpf',
+  ]);
 
+  const { valido: enderecoValido } = validarCampos(enderecoDados, [
+    'endereco',
+    'cep',
+    'numero',
+    'bairro',
+    'cidade',
+    'estado',
+  ]);
 
+  // Validamos CNH usando o objeto específico (sem campos obrigatórios textuais)
+  const { valido: cnhValidaCampos } = validarCampos(cnhDadosParaValidar, []);
+
+  // cnhIncompleta usado para exibir alerta de CNH; só mostramos depois de terminar o loading
+  const cnhIncompleta = !cnhValidaCampos;
 
   return (
     <View style={styles.container}>
       {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
+
       <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewProfile)}>
         <FontAwesome6 style={{ padding: 4 }} name="user-pen" size={20} color={colors.amareloClaro} />
         <Text style={styles.text}>Dados Pessoais</Text>
-        {!dadosPessoaisValidos && (
+        {/* Só mostrar alerta depois de carregar */}
+        {!loading && !dadosPessoaisValidos && (
           <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.imageRight}>
             <Image style={styles.imageRight} source={images.alertImage} />
           </TouchableOpacity>
@@ -131,7 +181,7 @@ export default function Account() {
       <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewAddress)}>
         <Entypo style={{ padding: 4 }} name="location" size={24} color={colors.amareloClaro} />
         <Text style={styles.text}>Endereço</Text>
-        {!enderecoValido && (
+        {!loading && !enderecoValido && (
           <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.imageRight}>
             <Image style={styles.imageRight} source={images.alertImage} />
           </TouchableOpacity>
@@ -141,14 +191,12 @@ export default function Account() {
       <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewCnh)}>
         <FontAwesome style={{ padding: 4 }} name="id-card" size={24} color={colors.amareloClaro} />
         <Text style={styles.text}>CNH</Text>
-        {cnhIncompleta && (
+        {!loading && cnhIncompleta && (
           <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.imageRight}>
             <Image style={styles.imageRight} source={images.alertImage} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
-
-
 
       <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewCard)}>
         <MaterialIcons style={{ padding: 4 }} name="add-card" size={28} color={colors.amareloClaro} />
@@ -178,7 +226,7 @@ export default function Account() {
       <CustomModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        message='Antes de começar a usufruir do Aplicativo e de nossos serviços, regularize sua conta!'
+        message="Antes de começar a usufruir do Aplicativo e de nossos serviços, regularize sua conta!"
         confirmText="Entendi"
         onConfirm={() => {
           setModalVisible(false);
@@ -187,4 +235,3 @@ export default function Account() {
     </View>
   );
 }
-

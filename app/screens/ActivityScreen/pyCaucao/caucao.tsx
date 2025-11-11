@@ -1,172 +1,185 @@
-
-import { FontAwesome6, MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, Pressable, Animated } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../../../../config/firebase';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import styles from './StylesCaucao';
 import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
-import { routes } from '~/constants/routes';
 import CustomModal from '~/components/CustomModal/CustomModal';
 import { fetchSolicitacaoById } from '~/services/requestService';
-import { fetchCards } from '~/services/cardService';
+import { useStripe } from '@stripe/stripe-react-native';
 import { pagarCaucao } from '~/services/paymentService';
+// import { pagarCaucao } from '~/services/paymentService'; // descomente quando tiver
 
 export default function PagamentoScreen() {
+    const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
+    const [loading, setLoading] = useState(true);
+    const [loading2, setLoading2] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [situ, setSitu] = useState('');
-
-
-    const [caucao, setCaucao] = useState(0);
+    const [caucao, setCaucao] = useState<number>(0);
 
     const soliciIdParam = useLocalSearchParams()?.soliciId;
     const soliciId = Array.isArray(soliciIdParam) ? soliciIdParam[0] : soliciIdParam;
-
-    const locadorIdParam = useLocalSearchParams()?.locadorId;
-    const locadorId = Array.isArray(locadorIdParam) ? locadorIdParam[0] : locadorIdParam;
-
     const locatarioIdParam = useLocalSearchParams()?.locatarioId;
     const locatarioId = Array.isArray(locatarioIdParam) ? locatarioIdParam[0] : locatarioIdParam;
 
-    const totalValorParam = useLocalSearchParams()?.TotalValor;
-    const totalValor = Array.isArray(totalValorParam) ? totalValorParam[0] : totalValorParam;
-
+    // Ajuste para dev: IP local (já conversamos). Em produção use uma URL segura.
+    const LOCAL_HOST_IP = '192.168.15.23';
+    const BACKEND_BASE = (__DEV__ ? `http://${LOCAL_HOST_IP}:4242` : 'https://seu-backend-production.com');
     const [EstadoPGCaucao, setEstadoPGCaucao] = useState("Caução pago");
-
-    const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
-    const [cards, setCards] = useState<{ id: string; cartaoNumero: string; cartaoData: string }[]>([]);
-
-    const [loading, setLoading] = useState(true); // Inicializando como true para mostrar carregamento
-    const [loading2, setLoading2] = useState(false);
-
-    const maskCardNumber = (number: string) => {
-        if (number.length > 4) {
-            return ` ${number.slice(-4)}`; // Máscara para exibir apenas os últimos 4 dígitos
-        }
-        return number;
-    };
-
-    const fetchSolicitacaoData = async () => {
-        try {
-            if (soliciId && locatarioId) {
-                const solicitacao = await fetchSolicitacaoById(locatarioId, soliciId);
-                if (solicitacao) {
-                    setCaucao(solicitacao.caucao);
-                }
-            }
-        } catch (error) {
-            console.error("Erro ao buscar dados da solicitação: ", error);
-            setSitu("Erro ao buscar dados da solicitação");
-            setModalVisible2(true);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const loadCards = async () => {
-        setLoading(true);
-        const result = await fetchCards();
-        if (result) {
-            setCards(result);
-        }
-        setLoading(false);
-    };
-
+    // Carrega dados ao montar
     useEffect(() => {
-        loadCards();
-        fetchSolicitacaoData();
-    }, []);
+        let mounted = true;
+        const load = async () => {
+            setLoading(true);
+            try {
+                if (soliciId && locatarioId) {
+                    const solicitacao = await fetchSolicitacaoById(locatarioId, soliciId);
+                    if (!mounted) return;
+                    if (solicitacao && typeof solicitacao.caucao !== 'undefined') {
+                        setCaucao(Number(solicitacao.caucao) || 0);
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao buscar dados da solicitação:', error);
+                setSitu('Erro ao buscar dados da solicitação');
+                setModalVisible2(true);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+        load();
+        return () => {
+            mounted = false;
+        };
+    }, [soliciId, locatarioId]);
 
-    const handlePagar = async () => {
+    // assume BACKEND_BASE, locatarioId, soliciId, initPaymentSheet já disponíveis no escopo
+    const initializePaymentSheet = async (amountBRL: number) => {
         try {
-            const uid = await AsyncStorage.getItem('userId');
-            if (!uid) {
-                alert('Erro ao obter ID do usuário.');
+            const resp = await fetch(`${BACKEND_BASE}/create-payment-intent`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amountBRL,
+                    metadata: { locatarioId, soliciId, tipo: 'caucao' },
+                }),
+            });
+
+            if (!resp.ok) {
+                const txt = await resp.text();
+                throw new Error(txt || 'Erro criando PaymentIntent');
+            }
+
+            const { clientSecret } = await resp.json();
+            if (!clientSecret) throw new Error('clientSecret ausente');
+
+            // inicializa PaymentSheet incluindo Google Pay (e Apple Pay se quiser)
+            const { error: initError } = await initPaymentSheet({
+                paymentIntentClientSecret: clientSecret,
+                merchantDisplayName: 'Carchau',
+
+                // --- GOOGLE PAY (Android) ---
+                googlePay: {
+                    merchantCountryCode: 'BR',   // seu país (BR para Brasil)
+                    testEnv: __DEV__,           // true em desenvolvimento para ambiente de teste do Google Pay
+                },
+
+            });
+
+            if (initError) {
+                console.error('initPaymentSheet error:', initError);
+                throw initError;
+            }
+
+            return true;
+        } catch (error: any) {
+            console.error('initializePaymentSheet error:', error);
+            throw error;
+        }
+    };
+
+
+    const handlePagarComCartao = async () => {
+        try {
+            setLoading2(true);
+
+            if (!caucao || Number(caucao) <= 0) {
+                Alert.alert('Valor inválido', 'Valor da caução inválido.');
                 return;
             }
-            if (!selectedCardId) {
-                setSitu('Escolha um cartão para realizar o pagamento!');
+
+            // Inicializa o PaymentSheet
+            await initializePaymentSheet(Number(caucao));
+
+            // Apresenta o PaymentSheet ao usuário
+            const { error } = await presentPaymentSheet();
+
+            if (error) {
+                setSitu('Ocorreu um erro no pagamento, tente novamente mais tarde.');
                 setModalVisible2(true);
                 return;
             }
-            await pagarCaucao(locatarioId, soliciId, EstadoPGCaucao, selectedCardId);
+
+            await pagarCaucao(locatarioId, soliciId, EstadoPGCaucao);
             setModalVisible(true);
+
         } catch (error) {
+            console.error("Erro ao atualizar o pagamento:", error);
             setSitu('Erro ao atualizar o pagamento.');
-            console.error("Erro ao atualizar o estado de visto: ", error);
             setModalVisible2(true);
         } finally {
+            setLoading2(false);
             setLoading(false);
         }
     };
 
+
     return (
         <View style={styles.container}>
-            {loading && <LoadingCarAnimation loading={loading} loading2={loading2} />}
-            <View style={styles.Topo}></View>
+            {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
+
+            <View style={styles.Topo} />
             <View style={{ padding: 38 }}>
                 <View style={styles.section}>
                     <Text style={styles.label2}>Valor da caução :</Text>
-                    <Text style={styles.value2}>R$ {caucao}</Text>
+                    <Text style={styles.value2}>{`R$ ${Number(caucao).toFixed(2)}`}</Text>
                 </View>
             </View>
-            <View style={{ borderWidth: 0.5, borderColor: '#888' }}></View>
 
             <View style={{ padding: 20 }}>
-                <Text style={styles.subheader}>Pagar com :</Text>
+                <Text style={styles.subheader}>Pagar com cartão</Text>
             </View>
 
-            {cards.length === 0 ? (
-                <Text style={styles.cardText}>Nenhum cartão cadastrado.</Text>
-            ) : (
-                cards.map(card => (
-                    <View key={card.id} style={{ flexDirection: 'row', marginBottom: 10 }}>
-                        <TouchableOpacity
-                            style={styles.opcao}
-                            onPress={() => setSelectedCardId(card.id)} // Atualiza o cartão selecionado ao pressionar
-                        >
-                            <Text style={[styles.value2, { padding: 14 }]}>
-                                {maskCardNumber(card.cartaoNumero)} - {card.cartaoData}
-                            </Text>
-                            {/* Adicionando um radiobutton */}
-                            {selectedCardId === card.id ? (
-                                <MaterialCommunityIcons name="radiobox-marked" size={24} color="#f2a51a" />
-                            ) : (
-                                <MaterialCommunityIcons name="radiobox-blank" size={24} color="#888" />
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                ))
-            )}
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.acceptButton} onPress={() => { handlePagar(), setLoading2(true) }}>
-                    <Text style={styles.buttonText}>Pagar Caução</Text>
+                <TouchableOpacity
+                    style={[styles.acceptButton, loading2 || loading ? { opacity: 0.6 } : undefined]}
+                    onPress={handlePagarComCartao}
+                    disabled={loading || loading2}
+                >
+                    <Text style={styles.buttonText}>Pagar Caução com Cartão</Text>
                 </TouchableOpacity>
             </View>
+
             <CustomModal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
-                message={`O pagamento do caução foi realizado com sucesso! Realize o pagamento do aluguel para finalizar a locação!`}
-                confirmText="Entendi"
+                message="Pagamento realizado com sucesso!"
+                confirmText="Ok"
                 onConfirm={() => {
-                    setModalVisible(!modalVisible);
-                    router.replace(routes.activity);
+                    setModalVisible(false);
+                    router.replace('/activity');
                 }}
             />
+
             <CustomModal
                 visible={modalVisible2}
                 onClose={() => setModalVisible2(false)}
                 message={situ}
-                confirmText="Entendi"
-                onConfirm={() => {
-                    setModalVisible2(!modalVisible2);
-                }}
+                confirmText="Ok"
+                onConfirm={() => setModalVisible2(false)}
             />
         </View>
     );
 }
-
-

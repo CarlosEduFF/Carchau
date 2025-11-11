@@ -31,9 +31,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#022036"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -42,7 +40,13 @@
         "foregroundImage": "./assets/Car-Logo.png",
         "backgroundColor": "#022036"
       },
-      "package": "com.carloseduss.Carchau"
+      "package": "com.carloseduss.Carchau",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCJETZr2G89qDERKKUWanYAFDS2HMRWR5A"
+        }
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "extra": {
       "router": {

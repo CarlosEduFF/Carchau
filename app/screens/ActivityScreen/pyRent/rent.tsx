@@ -11,12 +11,14 @@ import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnim
 import { pagarRent } from '~/services/paymentService';
 import { routes } from '~/constants/routes';
 import CustomModal from '~/components/CustomModal/CustomModal';
+import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
+import { fetchSolicitacaoById } from '~/services/requestService';
 
 export default function PagamentoScreen() {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const [situ, setSitu] = useState('');
 
@@ -32,103 +34,123 @@ export default function PagamentoScreen() {
     const TotalValor = Array.isArray(TotalValorParam) ? TotalValorParam[0] : TotalValorParam;
 
     const [totalValor, setotalValor] = useState(parseFloat(TotalValor));
-
     const [estadoPGAluguel, setEstadoPGAluguel] = useState("Aluguel pago");
 
     const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
     const [cards, setCards] = useState<{ id: string; cartaoNumero: string; cartaoData: string }[]>([]);
 
-    const maskCardNumber = (number: string) => {
-        if (number.length > 4) {
-            return ` ${number.slice(-4)}`; // Máscara para exibir apenas os últimos 4 dígitos
-        }
-        return number;
-    };
+    // Ajuste para dev: IP local (já conversamos). Em produção use uma URL segura.
+    const LOCAL_HOST_IP = '192.168.15.23';
+    const BACKEND_BASE = (__DEV__ ? `http://${LOCAL_HOST_IP}:4242` : 'https://seu-backend-production.com');
 
-    const loadCards = async () => {
-        setLoading(true);
-        const result = await fetchCards();
-        if (result) {
-            setCards(result);
-        }
-        setLoading(false);
-    };
 
-    useEffect(() => {
-        loadCards();
-    }, []);
-
-    const handlePagar = async () => {
+    // 1) chama backend para criar PaymentIntent e inicializar PaymentSheet
+    const initializePaymentSheet = async (amountBRL: number) => {
         try {
-            const uid = await AsyncStorage.getItem('userId');
-            if (!uid) {
-                alert('Erro ao obter ID do usuário.');
-                return;
+            const resp = await fetch(`${BACKEND_BASE}/create-payment-intent`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amountBRL,
+                    metadata: { locatarioId, soliciId, tipo: 'caucao' },
+                }),
+            });
+
+            if (!resp.ok) {
+                const txt = await resp.text();
+                throw new Error(txt || 'Erro criando PaymentIntent');
             }
-            if (!selectedCardId) {
-                setSitu('Escolha um cartão para realizar o pagamento!');
+
+            const { clientSecret } = await resp.json();
+            if (!clientSecret) throw new Error('clientSecret ausente');
+
+            // inicializa PaymentSheet incluindo Google Pay (e Apple Pay se quiser)
+            const { error: initError } = await initPaymentSheet({
+                paymentIntentClientSecret: clientSecret,
+                merchantDisplayName: 'Carchau',
+
+                // --- GOOGLE PAY (Android) ---
+                googlePay: {
+                    merchantCountryCode: 'BR',   // seu país (BR para Brasil)
+                    testEnv: __DEV__,           // true em desenvolvimento para ambiente de teste do Google Pay
+                },
+
+            });
+
+            if (initError) {
+                console.error('initPaymentSheet error:', initError);
+                throw initError;
+            }
+
+            return true;
+        } catch (error: any) {
+            console.error('initializePaymentSheet error:', error);
+            throw error;
+        }
+    };
+
+    const handlePagarComCartao = async () => {
+        try {
+            setLoading2(true);
+
+            if (!totalValor || Number(TotalValor) <= 0) {
+                setSitu('Valor inválido');
                 setModalVisible2(true);
                 return;
             }
-            await pagarRent(locatarioId, soliciId, estadoPGAluguel, selectedCardId);
+
+            // Inicializa o PaymentSheet
+            await initializePaymentSheet(Number(TotalValor));
+
+            // Apresenta o PaymentSheet ao usuário
+            const { error } = await presentPaymentSheet();
+
+            if (error) {
+                setSitu('Ocorreu um erro no pagamento, tente novamente mais tarde.');
+                setModalVisible2(true);
+                return;
+            }
+
+            await pagarRent(locatarioId, soliciId, estadoPGAluguel);
             setModalVisible(true);
+
         } catch (error) {
-            setLoading(false);
-            setLoading2(false);
-            setSitu('Erro ao atualizar o estado de visto.');
+            console.error("Erro ao atualizar o pagamento:", error);
+            setSitu('Erro ao atualizar o pagamento.');
+            setModalVisible2(true);
         } finally {
-            setLoading(false);
             setLoading2(false);
+            setLoading(false);
         }
     };
+
 
 
     return (
         <View style={styles.container}>
             {loading && <LoadingCarAnimation loading={loading} loading2={loading2} />}
-            <View style={styles.Topo}></View>
+            <View style={styles.Topo} />
             <View style={{ padding: 38 }}>
-
                 <View style={styles.section}>
-                    <Text style={styles.label2}>Valor total do Aluguel :</Text>
-                    <Text style={styles.value2}>R$ {totalValor.toFixed(2)}</Text>
+                    <Text style={styles.label2}>Valor da Aluguel:</Text>
+                    <Text style={styles.value2}>{`R$ ${Number(totalValor).toFixed(2)}`}</Text>
                 </View>
-
             </View>
-            <View style={{ borderWidth: 0.5, borderColor: '#888' }}></View>
 
             <View style={{ padding: 20 }}>
-                <Text style={styles.subheader}>Pagar com :</Text>
+                <Text style={styles.subheader}>Pagar com cartão</Text>
             </View>
-            {cards.length === 0 ? (
-                <Text style={styles.cardText}>Nenhum cartão cadastrado.</Text>
-            ) : (
-                cards.map(card => (
-                    <View key={card.id} style={{ flexDirection: 'row', marginBottom: 10 }}>
-                        <TouchableOpacity
-                            style={styles.opcao}
-                            onPress={() => setSelectedCardId(card.id)} // Atualiza o cartão selecionado ao pressionar
-                        >
-                            <Text style={[styles.value2, { padding: 14 }]}>
-                                {maskCardNumber(card.cartaoNumero)} - {card.cartaoData}
-                            </Text>
-                            {/* Adicionando um radiobutton */}
-                            {selectedCardId === card.id ? (
-                                <MaterialCommunityIcons name="radiobox-marked" size={24} color="#f2a51a" />
-                            ) : (
-                                <MaterialCommunityIcons name="radiobox-blank" size={24} color="#888" />
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                ))
-            )}
-
 
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.acceptButton} onPress={() => { handlePagar(), setLoading2(true) }}>
-                    <Text style={styles.buttonText}>Pagar Aluguel</Text>
+                <TouchableOpacity
+                    style={[styles.acceptButton, loading2 || loading ? { opacity: 0.6 } : undefined]}
+                    onPress={handlePagarComCartao}
+                    disabled={loading || loading2}
+                >
+                    <Text style={styles.buttonText}>Pagar Caução com Cartão</Text>
                 </TouchableOpacity>
             </View>
+
             <CustomModal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
