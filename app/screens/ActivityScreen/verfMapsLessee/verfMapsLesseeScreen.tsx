@@ -50,7 +50,7 @@ export default function VerfMapsLesseeScreen() {
     return (
         <View style={styles.container}>
             <MapView
-                style={styles.map}
+                style={{ width: '100%', height: 300 }} // teste simples
                 initialRegion={{
                     latitude: ownCoords.latitude,
                     longitude: ownCoords.longitude,

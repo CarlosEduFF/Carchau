@@ -25,8 +25,7 @@ export default function PagamentoScreen() {
     const locatarioId = Array.isArray(locatarioIdParam) ? locatarioIdParam[0] : locatarioIdParam;
 
     // Ajuste para dev: IP local (já conversamos). Em produção use uma URL segura.
-    const LOCAL_HOST_IP = '192.168.15.23';
-    const BACKEND_BASE = (__DEV__ ? `http://${LOCAL_HOST_IP}:4242` : 'https://seu-backend-production.com');
+    const BACKEND_BASE = 'https://carchau.onrender.com';
     const [EstadoPGCaucao, setEstadoPGCaucao] = useState("Caução pago");
     // Carrega dados ao montar
     useEffect(() => {

@@ -40,8 +40,7 @@ export default function PagamentoScreen() {
     const [cards, setCards] = useState<{ id: string; cartaoNumero: string; cartaoData: string }[]>([]);
 
     // Ajuste para dev: IP local (já conversamos). Em produção use uma URL segura.
-    const LOCAL_HOST_IP = '192.168.15.23';
-    const BACKEND_BASE = (__DEV__ ? `http://${LOCAL_HOST_IP}:4242` : 'https://seu-backend-production.com');
+    const BACKEND_BASE = 'https://carchau.onrender.com';
 
 
     // 1) chama backend para criar PaymentIntent e inicializar PaymentSheet
