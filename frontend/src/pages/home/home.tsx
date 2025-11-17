@@ -48,16 +48,12 @@ export default function Home() {
     return (
         <div>
             <Header/>
-
             <div id="Home">
                 <div className="objs">
                     <div className="header">
-                        <p className="Title">Carchau</p>
-                        <p className="paragrafo"> Sistema de conectividade na locação de automóveis.</p>
-                        <p className="paragrafo">
-                            Ofertar a criação de uma nova receita aos locatários,
-                            além de abrir as portas para os aluguéis digitais de forma renovada!
-                        </p>
+                        <div className="Title" style={{  color: "#fff" }}>Carchau</div>
+                        <div className="paragrafo" style={{ color: "#fff" }}>Um sistema de conectividade na locação de automóveis. Ofertando a criação de uma nova receita aos locatários,
+                            além de abrir as portas para os aluguéis digitais de forma renovada!</div>
                     </div>
                     <div className="carhome">
                         <img className="car" src={Images.car} alt="Car Image" />
@@ -70,52 +66,40 @@ export default function Home() {
             </div>
 
             <div id="QuemSomos">
-                <div className='quemsomos'>
-                    <p className="Title" style={{ textAlign: 'center', }}>Conheça nossa equipe</p>
+                <div className="quemsomos">
+                    <p className="Title">Conheça nossa equipe</p>
+
                     <div className="Group-Box">
                         <div className="box">
-                            <div className="imgperfil">
-                                <img className="fotoperfil" src={Images.perfilana} alt="foto intefrante" />
-                            </div>
-                            <div className="textsobrenos">
-                                <p className="textsobrenos">Ana Beatriz Novais Pereira, de 18 anos,
-                                    está no 3º ano do Ensino Médio na ETEC Zona Leste,
-                                    onde cursa Desenvolvimento de Sistemas.
-                                </p>
-                            </div>
+                            <img className="fotoperfil" src={Images.perfilana} alt="Foto de integrante" />
+                            <p className="textsobrenos">
+                                Ana Beatriz Novais Pereira, de 18 anos, está no 3º ano do Ensino Médio na ETEC Zona Leste,
+                                onde cursa Desenvolvimento de Sistemas.
+                            </p>
                         </div>
+
                         <div className="box">
-                            <div className="imgperfil">
-                                <img className="fotoperfil" src={Images.perfilandrei} alt="foto intefrante" />
-                            </div>
-                            <div className="textsobrenos">
-                                <p className="textsobrenos">Andrei Nunes Pereira, de 18 anos,
-                                    está no 3º ano do Ensino Médio na ETEC Zona Leste, onde
-                                    cursa Desenvolvimento de Sistemas.
-                                </p>
-                            </div>
+                            <img className="fotoperfil" src={Images.perfilandrei} alt="Foto de integrante" />
+                            <p className="textsobrenos">
+                                Andrei Nunes Pereira, de 18 anos, está no 3º ano do Ensino Médio na ETEC Zona Leste, onde
+                                cursa Desenvolvimento de Sistemas.
+                            </p>
                         </div>
+
                         <div className="box">
-                            <div className="imgperfil">
-                                <img className="fotoperfil" src={Images.perfilcamilly} alt="foto intefrante" />
-                            </div>
-                            <div className="textsobrenos">
-                                <p className="textsobrenos">Camilly Demarco dos Santos, de 18 anos,
-                                    está no 3º ano do Ensino Médio na ETEC Zona Leste, onde
-                                    cursa Desenvolvimento de Sistemas.
-                                </p>
-                            </div>
+                            <img className="fotoperfil" src={Images.perfilcamilly} alt="Foto de integrante" />
+                            <p className="textsobrenos">
+                                Camilly Demarco dos Santos, de 18 anos, está no 3º ano do Ensino Médio na ETEC Zona Leste,
+                                onde cursa Desenvolvimento de Sistemas.
+                            </p>
                         </div>
+
                         <div className="box">
-                            <div className="imgperfil">
-                                <img className="fotoperfil" src={Images.perfilcarlos} alt="foto intefrante" />
-                            </div>
-                            <div className="textsobrenos">
-                                <p className="textsobrenos">Carlos Eduardo Fernandes Farias, de 18 anos,
-                                    está no 3º ano do Ensino Médio na ETEC Zona Leste, onde cursa
-                                    Desenvolvimento de Sistemas.
-                                </p>
-                            </div>
+                            <img className="fotoperfil" src={Images.perfilcarlos} alt="Foto de integrante" />
+                            <p className="textsobrenos">
+                                Carlos Eduardo Fernandes Farias, de 18 anos, está no 3º ano do Ensino Médio na ETEC Zona Leste,
+                                onde cursa Desenvolvimento de Sistemas.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -162,18 +146,40 @@ export default function Home() {
             <div id="Contato">
                 <div className="FaleCon" >
                     <div className="right-side">
-                        <form ref={form} onSubmit={sendEmail}>
-                            <label htmlFor="nome">Nome:</label>
-                            <input type="text" id="nome" name="from_name" required />
+                        <form style={{ alignItems: "center" }} ref={form} onSubmit={sendEmail}>
 
-                            <label htmlFor="email">Email:</label>
-                            <input type="email" id="email" name="message" required />
+                            <div className="input-group">
+                                <input
+                                type="nome"
+                                id="nome"
+                                name="from_name"
+                                required
+                                />
+                                <label>Nome</label>
+                            </div>
 
-                            <label htmlFor="mensagem">Mensagem:</label>
-                            <textarea id="mensagem" name="message" rows={5} required></textarea>
-
+                            <div className="input-group">
+                                <input
+                                type="email"
+                                id="email"
+                                name="message"
+                                required
+                            />
+                            <label>E-mail</label>
+                            </div>
+                            
+                            <div className="input-group">
+                                <textarea
+                                id="mensagem"
+                                name="message"
+                                rows={5}
+                                required
+                            />
+                            <label>Mensagem</label>
+                            </div>
+                            
                             <div>
-                                <button className="loading" type="submit">Enviar</button>
+                                <button className="button-entrar" type="submit">Enviar</button>
                                 {showAlert && (
                                     <Alert message="E-mail enviado com sucesso!!" onClose={() => setShowAlert(false)} />
                                 )}

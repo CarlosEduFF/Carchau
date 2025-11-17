@@ -138,144 +138,145 @@ const CnhList: React.FC = () => {
     [navigate]
   );
 
+   const toggleRealtime = () => setUseRealtime(prev => !prev);
+
   return (
-    <div className="page-root">
-      <main className="page-main">
-        <div className="container">
-          <div className="title-row">
-            <div className="flex-col">
-              <h1 className="page-title">Painel de Validação</h1>
-              <p className="page-sub">Revise e valide os documentos dos usuários pendentes.</p>
-            </div>
-            <div style={{ marginLeft: 'auto' }}>
-              <label style={{ marginRight: 8 }}>
-                <input
-                  type="checkbox"
-                  checked={useRealtime}
-                  onChange={() => setUseRealtime((v) => !v)}
-                />{' '}
-                Realtime
-              </label>
-            </div>
-          </div>
+    <>
+      
+        <main className="page-main">
+          <div className="container">
 
-          <div className="search-row">
-            <div className="search-wrapper">
-              <label className="search-label" style={{ display: 'block' }}>
-                <div className="search-box">
-                  <input
-                    className="form-input"
-                    placeholder="Buscar usuário por nome..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    aria-label="Buscar usuário"
-                  />
-                </div>
-              </label>
-            </div>
-
-            <div className="filter-chips" role="tablist" aria-label="Filtros">
-              <button
-                className={`chip ${filter === 'all' ? 'chip--all' : 'chip--muted'}`}
-                type="button"
-                onClick={() => setFilter('all')}
-              >
-                Todos
-              </button>
-              <button
-                className={`chip ${filter === 'pending' ? 'chip--all' : 'chip--muted'}`}
-                type="button"
-                onClick={() => setFilter('pending')}
-              >
-                Não validado
-              </button>
-              <button
-                className={`chip ${filter === 'validated' ? 'chip--all' : 'chip--muted'}`}
-                type="button"
-                onClick={() => setFilter('validated')}
-              >
-                Validado
-              </button>
-              <button
-                className={`chip ${filter === 'rejected' ? 'chip--all' : 'chip--muted'}`}
-                type="button"
-                onClick={() => setFilter('rejected')}
-              >
-                Inválido
-              </button>
-            </div>
-          </div>
-
-          {loading && <p>Carregando...</p>}
-          {error && <p className="error">{error}</p>}
-
-          <div className="cards-grid">
-            {filtered.map((user) => {
-              const status = statusToBadge((user as any).cnhvalida);
-              const image = user.fotoPerfil || user.fotoFront;
-
-              const raw = (user as any).cnhvalida;
-              const normalized = normalizeCnhValida(raw);
-              console.debug(
-                '[CnhList][Render]',
-                user.id,
-                '| raw:',
-                raw,
-                '| typeof:',
-                typeof raw,
-                '| normalized:',
-                normalized
-              );
-
-              return (
-                <article key={user.id} className="card" role="article" aria-label={user.nome}>
-                  <div className="card-head">
-                    <div
-                      className={`avatar-lg bg-cover ${!image ? 'avatar--empty' : ''}`}
-                      data-alt={`Avatar de ${user.nome}`}
-                      style={
-                        image && typeof image === 'string'
-                          ? { backgroundImage: `url('${image.replace(/'/g, "\\'")}')` }
-                          : undefined
-                      }
+            <div className="search-row">
+              <div className="search-wrapper">
+                <label className="search-label" style={{ display: 'block' }}>
+                  <div className="search-box">
+                    <input
+                      className="form-input"
+                      placeholder="Buscar usuário por nome..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      aria-label="Buscar usuário"
                     />
+                  </div>
+                </label>
+              </div>
 
-                    <div>
-                      <p className="card-title truncate">{user.nome || '—'}</p>
-                      <div className={`card-badge ${status.className}`}>{status.text}</div>
+              <div className="filter-chips" role="tablist" aria-label="Filtros">
+                <button
+                  className={`chip ${filter === 'all' ? 'chip--all' : 'chip--muted'}`}
+                  type="button"
+                  onClick={() => setFilter('all')}
+                  aria-selected={filter === 'all'}
+                >
+                  Todos
+                </button>
+                <button
+                  className={`chip ${filter === 'pending' ? 'chip--all' : 'chip--muted'}`}
+                  type="button"
+                  onClick={() => setFilter('pending')}
+                  aria-selected={filter === 'pending'}
+                >
+                  Não validado
+                </button>
+                <button
+                  className={`chip ${filter === 'validated' ? 'chip--all' : 'chip--muted'}`}
+                  type="button"
+                  onClick={() => setFilter('validated')}
+                  aria-selected={filter === 'validated'}
+                >
+                  Validado
+                </button>
+                <button
+                  className={`chip ${filter === 'rejected' ? 'chip--all' : 'chip--muted'}`}
+                  type="button"
+                  onClick={() => setFilter('rejected')}
+                  aria-selected={filter === 'rejected'}
+                >
+                  Inválido
+                </button>
+                
+                <button
+                  className={`chip ${useRealtime ? 'chip--all' : 'chip--muted'}`}
+                  type="button"
+                  onClick={toggleRealtime}
+                  style={{backgroundColor: useRealtime ? '#23b306' : '#e5e7eb', color: useRealtime ? '#fff' : '#4b5563'}}
+                >
+                  {useRealtime ? 'Mock Realtime ON' : 'Mock Realtime OFF'}
+                </button>
+              </div>
+            </div>
+
+            {loading && <p>Carregando...</p>}
+            {error && <p className="error">{error}</p>}
+
+            <div className="cards-grid">
+              {filtered.map((user) => {
+                const status = statusToBadge((user as any).cnhvalida);
+                const image = user.fotoPerfil || user.fotoFront;
+
+                const raw = (user as any).cnhvalida;
+                const normalized = normalizeCnhValida(raw);
+                console.debug(
+                  '[CnhList][Render]',
+                  user.id,
+                  '| raw:',
+                  raw,
+                  '| typeof:',
+                  typeof raw,
+                  '| normalized:',
+                  normalized
+                );
+
+                return (
+                  <article key={user.id} className="card" role="article" aria-label={user.nome}>
+                    <div className="card-head">
+                      <div
+                        className={`avatar-lg bg-cover ${!image ? 'avatar--empty' : ''}`}
+                        data-alt={user.nome ? user.nome.slice(0, 2).toUpperCase() : '—'}
+                        style={
+                          image && typeof image === 'string'
+                            ? { backgroundImage: `url('${image.replace(/'/g, "\\'")}')` }
+                            : undefined
+                        }
+                      />
+
+                      <div>
+                        <div className="card-title" title={user.nome || '—'}>{user.nome || '—'}</div>
+                        <div className={`card-badge ${status.className}`}>{status.text}</div>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="card-action mt-2">
-                    {normalized === null ? (
-                      <button
-                        className="btn-full btn-primary"
-                        type="button"
-                        onClick={() => handleValidate(user.id)}
-                        aria-label={`Validar CNH de ${user.nome}`}
-                      >
-                        Validar
-                      </button>
-                    ) : (
-                      <button
-                        className="btn-full btn-primary"
-                        type="button"
-                        onClick={() => handleValidate(user.id)}
-                        aria-label={`Ver detalhes da CNH de ${user.nome}`}
-                      >
-                        Ver Detalhes
-                      </button>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+                    <div className="card-action mt-2">
+                      {normalized === null ? (
+                        <button
+                          className="btn-full btn-validar"
+                          type="button"
+                          onClick={() => handleValidate(user.id)}
+                          aria-label={`Validar CNH de ${user.nome}`}
+                        >
+                          Validar
+                        </button>
+                      ) : (
+                        <button
+                          className="btn-full btn-detalhes"
+                          type="button"
+                          onClick={() => handleValidate(user.id)}
+                          aria-label={`Ver detalhes da CNH de ${user.nome}`}
+                        >
+                          Ver Detalhes
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
 
-            {filtered.length === 0 && !loading && <div style={{ padding: 20 }}>Nenhum resultado.</div>}
+              {filtered.length === 0 && !loading && <div style={{ padding: 20 }}>Nenhum resultado.</div>}
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      
+    </>
   );
 };
 

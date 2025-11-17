@@ -1,4 +1,5 @@
-.principal {
+
+.auth-container {
   width: 100%;
   height: 100vh; /* altura da viewport */
   display: flex;
@@ -10,8 +11,266 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box; /* para evitar que padding/borda aumentem o tamanho */
+  background-color: #030728;
 }
 
 .Title{
     color: white;
 }
+
+h2{
+  color: white;
+}
+/*---------------------------------------Header---------------------------------------------------*/
+
+.auth-header {
+  align-items: center;
+
+  background-color: #030728;
+}
+
+.auth-logo {
+  background-color: #030728;
+  width: 80px;
+}
+
+/*---------------------------------------MAIN AREA---------------------------------------------------*/
+
+.auth-main {
+  display: flex;
+  width: auto;
+  height: auto;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #030728;
+}
+
+.toggle-switch{
+  display: grid;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.auth-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 3%;
+
+}
+
+.auth-toggle p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #ddd;
+}
+
+.auth-toggle p.active {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Switch */
+.switch {
+  position: relative;
+  width: 50px;
+  height: 22px;
+  margin: 0 auto;
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0;
+  right: 0; bottom: 0;
+  background-color: #FFA621;
+  border-radius: 34px;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px; width: 16px;
+  left: 4px; bottom: 3px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: 0.4s;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* Flip Card Container */
+.flip-card {
+  width: 300px;
+  height: 400px;
+  margin-top: 3%;
+  perspective: 1000px;
+  position: relative;
+}
+
+.flip-card-front,
+.flip-card-back {
+  width: 100%;
+  height: 100%;
+  background: #030728c0;
+  border-radius: 16px;
+  border-top: 2px solid #150861;
+  border-left: 2px solid #150861;
+  box-shadow: 5px 5px 12px #083661;
+  position: absolute;
+  backface-visibility: hidden;
+  transition: transform 0.8s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.flip-card-front {
+  transform: rotateY(0deg);
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+.flip-card.flipped .flip-card-front {
+  transform: rotateY(180deg);
+}
+
+.flip-card.flipped .flip-card-back {
+  transform: rotateY(360deg);
+}
+
+/* Inputs */
+input,
+textarea {
+  width: 80%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #150861;
+  outline: none;
+  background-color: #020838;
+  color: white;
+  font-size: 1rem;
+}
+
+/* Container do input */
+.input-group {
+  position: relative;
+  width: 80%;
+  margin: 1px 0;
+}
+
+/* Input */
+.input-group input,
+.input-group textarea {
+  width: 100%;
+  padding: 14px 12px;
+  border-radius: 8px;
+  border: 2px solid #150861;
+  background-color: #030728;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.3s;
+}
+
+/* Label flutuante */
+.input-group label,
+.input-group input:valid + label,
+.input-group textarea:valid + label {
+  position: absolute;
+  left: 12px;
+  top: 14px;
+  color: #a8bfff;
+  border-radius: 20%;
+  pointer-events: none;
+  transition: 0.3s ease;
+  background-color: #030728; /* fundo igual ao input */
+  padding: 0 6px;
+}
+
+/* Quando o input está focado */
+.input-group input:focus + label,
+.input-group input:valid + label {
+  top: -8px;
+  left: 10px;
+  font-size: 0.75rem;
+  color: #ffffff;
+    border-color: #836eff;
+}
+
+.input-group textarea:focus + label,
+.input-group textarea:valid + label {
+  top: -8px;
+  left: 10px;
+  font-size: 0.75rem;
+  color: #ffffff;
+    border-color: #836eff;
+
+}
+
+
+
+
+.button-login {
+  width: 60%;
+  padding: 10px;
+  background-color: #f19317;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #e46e00;
+}
+
+.recover {
+  font-size: 0.9rem;
+  color: #a8bfff;
+  text-decoration: underline;
+  width: 60%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/*---------------------------------------Imagem lateral--------------------------------------------------
+
+.image-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 4rem;
+  gap: 5rem;
+}
+
+.imagem-car{
+  background-color: #FFA621;
+  color: #0b0051;
+  border-radius: 50%;
+  width: 380px;
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+-*/

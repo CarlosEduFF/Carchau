@@ -173,8 +173,13 @@ header {
 .header {
   justify-content: start;
   align-items: center;
-  margin: 0px 20px 100px 20px;
   width: 60%;
+  color: #fff;
+}
+
+.header.Title {
+  color: #fff;
+  margin: 5px 0 20px;
 }
 
 .carhome {
@@ -187,7 +192,7 @@ header {
   font-weight: bold;
   font-family: 'Times-Italic';
   font-style: italic;
-  color: #FFA621;
+  color: #fff;
 }
 
 .paragrafo {
@@ -196,6 +201,8 @@ header {
   color: #fff;
   font-weight: lighter;
   text-align: justify;
+  margin: 10px;
+  padding: 20px;
 }
 
 @media (max-width: 1008px) {
@@ -317,45 +324,27 @@ header {
 }
 
 
+/* ---------------------- SOBRE NÓS ---------------------- */
 
-/*--------------------------------SOBRE NOS----------------------------------------------------------*/
 .Title {
   text-align: center;
+  color: #fff;
 }
 
 .formas {
-  height: 210px;
-}
-.login-link {
+  height: 200px;
+  background-color: #030728;
   display: flex;
   align-items: center;
-  gap: 6px; /* espaço entre ícone e texto */
-  color: inherit; /* herda cor do link */
-  text-decoration: none;
-  font-weight: bold;
 }
-
-.login-icon {
-  font-size: 20px;
-}
-
 
 .forma {
-  width: 25cap;
-}
-
-.formab{
-   margin-bottom: 0px;
+  width: 300px;
 }
 
 .quemsomos {
-  height: 450px;
   background-color: #030728;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  justify-items: center;
-
+  padding: 40px 20px;
 }
 
 .titlequipe {
@@ -366,183 +355,100 @@ header {
   color: #FFA621;
 }
 
+/* GRID RESPONSIVA */
 .Group-Box {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
   width: 100%;
-  justify-content: space-between;
-  align-items: center;
+  padding-top: 30px;
 }
 
 .box {
-  background-color: #f4f4f4;
-  border: 1px solid #ddd;
-  margin: 40px;
-  padding: 15px;
-  text-align: justify;
-  width: 18cap;
-  margin-bottom: 0px;
-  height: 18rem;
   background-color: #030728;
   border: 2px solid #FFA621;
+  padding: 15px;
+  text-align: justify;
+  border-radius: 10px;
+  min-height: 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .fotoperfil {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
+  width: 130px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #FFA621;
+  margin-bottom: 15px;
 }
 
 .textsobrenos {
   color: #fff;
-  margin-top: 10px;
-
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: center;
 }
 
+/* ---------------------- MEDIA QUERIES ---------------------- */
 
-@media (max-width: 1215px) {
+@media (max-width: 900px) {
   .formas {
-    height: 170px;
+    height: 160px;
   }
 
   .forma {
-    width: 22cap;
+    width: 240px;
   }
 
-  .quemsomos {
-    height: 890px;
-    background-color: #030728;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-
-  }
-
-  .Group-Box {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    width: 100%;
-    justify-content: center;
-    align-items: center;
+  .titlequipe {
+    font-size: 32px;
   }
 
   .box {
-    width: 18cap;
-    margin: 20%;
-    margin-bottom: 0px;
+    min-height: 260px;
+  }
+}
+
+@media (max-width: 600px) {
+  .formas {
+    height: 130px;
+  }
+
+  .forma {
+    width: 180px;
+  }
+
+  .textsobrenos {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 430px) {
+  .Group-Box {
+    grid-template-columns: 1fr;
+  }
+
+  .formas {
+    height: 110px;
+  }
+
+  .forma {
+    width: 150px;
+  }
+
+  .Title {
+    font-size: 26px;
   }
 
   .fotoperfil {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-  }
-
-  .textsobrenos {
-    color: #fff;
-    margin-top: 10px;
-
+    width: 110px;
+    height: 110px;
   }
 }
 
-@media (max-width: 599px) {
-  .formas {
-    height: 150px;
-  }
-
-  .forma {
-    width: 18cap;
-  }
-
-  .Group-Box {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .box {
-    width: 12cap;
-    margin-bottom: 0px;
-  }
-}
-
-
-@media (max-width: 490px) {
-  .quemsomos {
-    height: 700px;
-
-  }
-
-  .Group-Box {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .box {
-    width: 10cap;
-    margin-bottom: 0px;
-    height: 14rem;
-
-  }
-
-
-  .textsobrenos {
-    color: #fff;
-    margin-top: 10px;
-    font-size: 12px;
-
-  }
-
-}
-
-@media (max-width: 400px) {
-
-  .quemsomos {
-    height: 1400px;
-
-  }
-
-
-  .Title {
-    font-size: 28px;
-    margin-top: 50px;
-
-  }
-
-  .Group-Box {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .box {
-    width: 16cap;
-    margin: 20%;
-    margin-bottom: 0px;
-    height: 15rem;
-
-  }
-
-
-  .textsobrenos {
-    color: #fff;
-    margin-top: 10px;
-    font-size: 14px;
-
-  }
-}
 
 
 /*------------------------------------------DOWNLOAD------------------------------------------------*/
@@ -954,8 +860,7 @@ label {
   color: #FFA621;
 }
 
-input[type="text"],
-input[type="email"],
+input,
 textarea {
   width: 100%;
   padding: 10px;
@@ -966,7 +871,8 @@ textarea {
   resize: vertical;
 }
 
-button {
+.button-entrar {
+  width: 50%;
   background-color: #FFA621;
   color: white;
   padding: 12px 20px;
@@ -977,8 +883,8 @@ button {
   transition: background-color 0.3s;
 }
 
-button:hover {
-  background-color: #0056b3;
+.button-entrar:hover {
+  background-color: #da8405;
 }
 
 .alert-overlay {

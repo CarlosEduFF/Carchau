@@ -111,7 +111,7 @@ export async function getAllLocatariosCnhSummaries(): Promise<CnhSummary[]> {
  */
 export async function getCnhDetails(locatarioId: string): Promise<CnhDetails | null> {
   try {
-    const cnhRef = doc(db, 'Locatarios', locatarioId, 'documentos', 'cnh');
+    const cnhRef = doc(db, 'Locatarios', locatarioId, 'Documentos', 'CNH');
     const snap = await getDoc(cnhRef);
     if (!snap.exists()) return null;
     const data = snap.data() ?? {};

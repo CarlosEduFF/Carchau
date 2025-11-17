@@ -234,14 +234,14 @@ const ReportList: React.FC = () => {
         <div className="app">
             <div className="layout">
                 {/* Sidebar (chatRooms) */}
-                <aside className="sidebar">
+                <aside className="sidebar-report">
                     <div className="conversation-list">
                         {chatRooms.length === 0 ? (
                             <div className="empty">Nenhum chat encontrado</div>
                         ) : (
                             chatRooms.map((r) => {
                                 const isActive = selectedChatId === r.chatId;
-                                const avatarUrl = r.avatar || DEFAULT_AVATAR;
+                                const avatarUrl = r.avatar || "teste";
                                 const displayName = r.displayName || "Carregando...";
                                 return (
                                     <div
@@ -257,7 +257,7 @@ const ReportList: React.FC = () => {
                                             style={{ backgroundImage: `url("${avatarUrl}")` }}
                                             aria-hidden
                                         />
-                                        <h2>{displayName}</h2>
+                                        <h3>{displayName}</h3>
                                     </div>
                                 );
                             })
@@ -278,7 +278,7 @@ const ReportList: React.FC = () => {
                                     <span className="status-dot" style={{ width: 10, height: 10 }} />
                                 </div>
                                 <div>
-                                    <h2 style={{ margin: 0 }}>{nome ?? "Carregando..."}</h2>
+                                    <h3 className="nome" style={{ margin: 0 }}>{nome ?? "Carregando..."}</h3>
                                 </div>
                             </div>
                         </header>
@@ -323,10 +323,10 @@ const ReportList: React.FC = () => {
                                                         position: "relative",
                                                     }}
                                                 >
-                                                    <div>{m.text}</div>
+                                                    <div style={{position: "inherit",}}>{m.text}</div>
                                                     <div
                                                         style={{
-                                                            position: "absolute",
+                                                            position: "initial",
                                                             right: 8,
                                                             bottom: 4,
                                                             fontSize: 12,
@@ -365,7 +365,7 @@ const ReportList: React.FC = () => {
                             <div>
                                 <button
                                     onClick={handleSend}
-                                    style={{ background: "var(--primary)", borderRadius: 12, padding: 12, color: "#fff", border: 0 }}
+                                    style={{ background: "#0077ff", borderRadius: 12, padding: 12, color: "#fff", border: 0 }}
                                     aria-label="Enviar mensagem"
                                 >
                                     <span className="material-symbols-outlined" style={{ color: "#fff" }}>

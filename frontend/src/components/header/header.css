@@ -10,10 +10,13 @@ header {
 .navbar {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* mantém logo à esquerda e resto à direita */
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 16px 0;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 40px; /* mais espaçamento lateral */
+  background-color: #030728;
+  position: relative; /* necessário para centralizar o UL */
+
+
 }
 
 .navbar .hamburger-btn {
@@ -28,12 +31,9 @@ header {
 }
 
 .navbar .logo {
-  width: 30px;
   display: flex;
   align-items: center;
   text-decoration: none;
-  margin-right: auto;
-  /* Adicione isso para posicionar à esquerda do navbar */
 }
 
 .navbar .logob {
@@ -42,6 +42,28 @@ header {
   gap: 8px; /* espaçamento entre ícone e texto */
   margin-left: 30px; /* distância entre links e login */
   text-decoration: none;
+}
+
+.buttonLogin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #030728;
+  border: 2px solid #030728;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-right: 50px;
+  flex-direction: column;
+}
+
+.buttonLogin:hover {
+  background-color: #030728;
+  border: 2px solid #030728;
+}
+.buttonLogin img {
+  width: 28px;
+  height: 28px;
 }
 
 .Login-Text{
@@ -67,6 +89,9 @@ header {
 }
 
 .navbar .links {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* Centraliza perfeitamente */
   display: flex;
   gap: 35px;
   list-style: none;
