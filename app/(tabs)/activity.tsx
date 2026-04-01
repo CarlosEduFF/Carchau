@@ -11,6 +11,8 @@ export default function AtividadeScreen() {
   const [solicitacoesLocador, setSolicitacoesLocador] = useState<RequestComStatus[]>([]);
   const [solicitacoesLocatario, setSolicitacoesLocatario] = useState<RequestComStatus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasLoadedLocador, setHasLoadedLocador] = useState(false);
+  const [hasLoadedLocatario, setHasLoadedLocatario] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -44,19 +46,21 @@ export default function AtividadeScreen() {
   useFocusEffect(
     useCallback(() => {
       if (!userId) return;
-      setLoading(true);
+      
+      // Se já temos dados, não mostramos o loading full screen de novo para evitar "piscada"
+      if (solicitacoesLocador.length === 0 && solicitacoesLocatario.length === 0) {
+        setLoading(true);
+      }
+
       const unsubscribeLocador = Services.listenRequestLessor(
         userId,
         (solicitacoesFiltradas) => {
           setSolicitacoesLocador(solicitacoesFiltradas);
-          setLoading(false);
-          setLoading2(false);
+          setHasLoadedLocador(true);
         },
         (error) => {
           console.error('Erro ao buscar solicitações do locador:', error);
-          alert('Erro ao buscar solicitações do locador.');
-          setLoading(false);
-          setLoading2(false);
+          setHasLoadedLocador(true); // Evita travar loading em caso de erro
         }
       );
 
@@ -64,24 +68,27 @@ export default function AtividadeScreen() {
         userId,
         (solicitacoes) => {
           setSolicitacoesLocatario(solicitacoes);
-          setLoading(false);
-          setLoading2(false);
+          setHasLoadedLocatario(true);
         },
         (error) => {
           console.error('Erro ao buscar solicitações do locatário:', error);
-          alert('Erro ao buscar solicitações do locatário.');
-          setLoading(false);
-          setLoading2(false);
+          setHasLoadedLocatario(true); // Evita travar loading em caso de erro
         }
       );
 
       return () => {
         unsubscribeLocador();
         unsubscribeLocatario();
-        console.log(solicitacoesData);
       };
     }, [userId])
   );
+
+  useEffect(() => {
+    if (hasLoadedLocador && hasLoadedLocatario) {
+      setLoading(false);
+      setLoading2(false);
+    }
+  }, [hasLoadedLocador, hasLoadedLocatario]);
 
   return (
     <View style={styles.container}>

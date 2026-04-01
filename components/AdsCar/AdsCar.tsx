@@ -20,10 +20,10 @@ interface AdsCarProps {
 const AdsCar: React.FC<AdsCarProps> = ({ carroId, LocadorId }) => {
     const [modelo, setModelo] = useState('Não disponível');
     const [marca, setMarca] = useState('Não disponível');
-    const [ano, setAno] = useState(0);
+    const [ano, setAno] = useState('');
     const [placa, setPlaca] = useState('Não disponível');
     const [combustivel, setCombustivel] = useState('Não disponível');
-    const [QuantidadeLugares, setQuantidadeLugares] = useState(0);
+    const [QuantidadeLugares, setQuantidadeLugares] = useState('');
     const [selectedAr, setSelectedAr] = useState('Não disponível');
     const [selectedCambio, setSelectedCambio] = useState('Não disponível');
     const [selectedStep, setSelectedStep] = useState('Não disponível');

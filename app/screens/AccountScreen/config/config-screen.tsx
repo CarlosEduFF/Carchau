@@ -7,6 +7,7 @@ import styles from './StylesConfig';
 import colors from '~/constants/colors';
 import * as Notifications from 'expo-notifications';
 import * as Location from 'expo-location';
+import { Components } from '~/components';
 
 const SwitchComponent = () => {
   const [notificationsChecked, setNotificationsChecked] = useState(false);
@@ -95,6 +96,7 @@ const SwitchComponent = () => {
 
   return (
     <View style={styles.container}>
+      <Components.BackButton />
       <View style={styles.Topo}></View>
 
       {/* Notificações */}

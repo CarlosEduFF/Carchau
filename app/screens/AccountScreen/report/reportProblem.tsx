@@ -65,6 +65,7 @@ export default function ChatReport() {
 
     return (
         <View style={styles.container}>
+            <Components.BackButton />
             {(loading) && <Components.LoadingCarAnimation loading={loading}  />}
             <View style={styles.Topo}></View>
             <View style={styles.header}>

@@ -60,7 +60,7 @@ export default function LocacaoList() {
     };
 
     function Adicionar() {
-        router.replace(routes.addLocation);
+        router.push(routes.addLocation);
     }
 
 
@@ -68,6 +68,7 @@ export default function LocacaoList() {
 
     return (
         <View style={{ flex: 1 }}>
+            <Components.BackButton />
             {loading && <LoadingCarAnimation loading={loading} />}
             <ScrollView style={styles.container}>
 

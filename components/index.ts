@@ -20,6 +20,7 @@ import AdsCar from './AdsCar/AdsCar';
 import AdsEvalue from './AdsEvalue/AdsEvalue';
 import AddressForm from './AddressForm/AddressForm';
 import FloatingButton from './FloatingButton/FloatingButton';
+import BackButton from './BackButton/BackButton';
 
 export const Components = {
   BrandItem,
@@ -44,4 +45,5 @@ export const Components = {
   AdsEvalue,
   AddressForm,
   FloatingButton,
+  BackButton,
 };

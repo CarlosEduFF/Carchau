@@ -40,6 +40,7 @@ export default function Endereco() {
 
     return (
         <View style={styles.container}>
+            <Components.BackButton />
             {(loading) && <Components.LoadingCarAnimation loading={loading} />}
             <View>
                 <View style={{
@@ -48,7 +49,7 @@ export default function Endereco() {
                     alignItems: 'flex-end',
                     zIndex: 1000
                 }}>
-                    <TouchableOpacity style={{ marginTop: 30, width: 45, height: 45 }} onPress={() => router.replace(routes.editAddress)}>
+                    <TouchableOpacity style={{ marginTop: 30, width: 45, height: 45 }} onPress={() => router.push(routes.editAddress)}>
                         <Image
                             style={[styles.EditImage, { marginTop: 30 }]}
                             source={images.editIcon}

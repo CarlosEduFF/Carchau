@@ -25,11 +25,11 @@ const App = () => {
             </Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.replace("/screens/auth/login/loginScreen")}>
+        <TouchableOpacity style={styles.button} onPress={() => router.push("/screens/auth/login/loginScreen")}>
             <Text style={{ fontWeight: 'bold', color: 'white' }}>Já tenho uma conta</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttoncriar} onPress={() => router.replace(routes.viewRegister)}>
+        <TouchableOpacity style={styles.buttoncriar} onPress={() => router.push(routes.viewRegister)}>
             <Text style={{ fontWeight: 'bold', color: 'white' }}>Criar nova conta!</Text>
         </TouchableOpacity>
 

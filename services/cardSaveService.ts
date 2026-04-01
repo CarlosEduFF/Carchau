@@ -30,6 +30,10 @@ const saveCardData = async (
   expiryDate: string,
   cvv: string
 ) => {
+  // Validação
+  const error = validateCardData(expiryDate, cardNumber, cardName, cvv);
+  if (error) throw new Error(error);
+
   const cardsRef = firebase.firestore()
     .collection('Locatarios')
     .doc(uid)

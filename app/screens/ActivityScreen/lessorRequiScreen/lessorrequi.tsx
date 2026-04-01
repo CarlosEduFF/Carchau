@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
+import moment from 'moment';
 import styles from './StylesLessorRequi';
 import CustomModal from '~/components/CustomModal/CustomModal';
 import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
@@ -114,12 +115,16 @@ export default function AluguelScreen() {
     loadUserLocatario();
   });
 
+  const formattedDia = moment(Dia).isValid() ? moment(Dia).format('DD/MM/YYYY') : Dia;
+  const formattedInicio = moment(DataInicio).isValid() ? moment(DataInicio).format('DD/MM/YYYY') : DataInicio;
+  const formattedTermino = moment(DataTermino).isValid() ? moment(DataTermino).format('DD/MM/YYYY') : DataTermino;
+
   return (
     <View style={styles.container}>
       {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
       <View style={styles.Topo}></View>
       <Text style={styles.header}>Requisição de aluguel</Text>
-      <Text style={styles.date}>{Dia}</Text>
+      <Text style={styles.date}>{formattedDia}</Text>
       <View style={styles.userSection}>
         {/* Coluna para a imagem do perfil e o botão "Ver Perfil" */}
         <View style={{ alignItems: 'center', margin: 10 }}>
@@ -146,7 +151,7 @@ export default function AluguelScreen() {
       <Text style={styles.description}>
         Locatário <Text style={styles.foco}>{nome}</Text> possui o interesse em alugar o seu veiculo
         <Text style={styles.foco}> {marca} {modelo} {ano} </Text>
-        do dia <Text style={styles.foco}>{DataInicio}</Text> ao dia <Text style={styles.foco}>{DataTermino}</Text> (<Text style={styles.foco}>por {TotalDias} dias</Text>),
+        do dia <Text style={styles.foco}>{formattedInicio}</Text> ao dia <Text style={styles.foco}>{formattedTermino}</Text> (<Text style={styles.foco}>por {TotalDias} dias</Text>),
         optando pela modalidade <Text style={styles.foco}>{Modalidade}</Text>, no ponto de encontro <Text style={styles.foco}>{pontoencontro}</Text>. O valor total do aluguel
         ficou <Text style={styles.foco}> R$ {Total.toFixed(2)}</Text>. Deseja alugar o seu carro?
       </Text>

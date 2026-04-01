@@ -1,8 +1,10 @@
-// index.tsx (Root sem telas de carregamento)
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StripeProvider } from '@stripe/stripe-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import App from './screens/AppScreen/App';
+import { Components } from '~/components';
 
 const DEV_PUBLISHABLE_ENDPOINT = `https://carchau.onrender.com/stripe-publishable-key`;
 const PUBLISHABLE_KEY_ENDPOINT = DEV_PUBLISHABLE_ENDPOINT;
@@ -17,6 +19,7 @@ const fetchPublishableKey = async () => {
 
 const Root: React.FC = () => {
   const [publishableKey, setPublishableKey] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const loadKey = useCallback(async () => {
     try {
@@ -24,16 +27,38 @@ const Root: React.FC = () => {
       setPublishableKey(key);
     } catch (err: any) {
       console.warn('[Stripe] Could not fetch publishable key:', err?.message || err);
-      // fallback DEV apenas — remova em prod
       if (__DEV__) {
         setPublishableKey('pk_test_XXXXXXXXXXXXXXXXXXXXXXXX');
       }
     }
   }, []);
 
+  const checkAuth = useCallback(async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      if (userId) {
+        // Redireciona para Home se já estiver logado
+        router.replace('/(tabs)/home');
+      }
+    } catch (error) {
+      console.error('Erro ao verificar autenticação:', error);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadKey();
-  }, [loadKey]);
+    checkAuth();
+  }, [loadKey, checkAuth]);
+
+  if (isCheckingAuth) {
+    return (
+      <SafeAreaProvider>
+        <Components.LoadingCarAnimation loading={true} />
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <SafeAreaProvider>
@@ -42,7 +67,6 @@ const Root: React.FC = () => {
           <App />
         </StripeProvider>
       ) : (
-        // Enquanto não carrega, apenas renderiza o app SEM Stripe (funciona normal)
         <App />
       )}
     </SafeAreaProvider>

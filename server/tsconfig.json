@@ -12,6 +12,13 @@
     "sourceMap": true,
     "declaration": false
   },
-  "include": ["server.ts", "src/**/*.ts"],
-  "exclude": ["node_modules", "build"]
+  "include": [
+    "server.ts",
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build"
+  ],
+  "extends": "expo/tsconfig.base"
 }

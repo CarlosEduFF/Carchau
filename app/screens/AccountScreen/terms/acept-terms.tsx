@@ -8,6 +8,7 @@ import Terms  from '~/components/Terms/Terms';
 import { fetchLatestTermo } from '~/services/termsServices';
 import { routes } from '~/constants/routes';
 import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
+import { Components } from '~/components';
 
 export default function Privacidade() {
     const [termoAceito, setTermoAceito] = useState(false);
@@ -41,6 +42,7 @@ export default function Privacidade() {
 
     return (
         <View style={styles.containerPriva}>
+            <Components.BackButton />
             {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
             <ScrollView>
                 <View style={styles.Topo}></View>
@@ -67,7 +69,7 @@ export default function Privacidade() {
                     <TouchableOpacity
                         style={[styles.buttonPriva, { backgroundColor: termoAceito ? '#F2A51A' : '#022036', borderColor: termoAceito ? '#F2A51A' : '#888888' }]}
                         disabled={!termoAceito}
-                        onPress={() => router.replace(routes.account)}
+                        onPress={() => router.push(routes.account)}
                     >
                         <Text style={{ fontWeight: 'bold', color: termoAceito ? '#fff' : '#888888' }}>Entendi</Text>
                     </TouchableOpacity>

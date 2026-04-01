@@ -8,11 +8,11 @@ import { Services } from '~/services';
 import { Components } from '~/components';
 import Validators from '~/utils/Validators/index';
 import colors from '~/constants/colors';
+import { useLoading } from '~/context/LoadingContext';
 
 
 export default function Login() {
-  const [loading, setLoading] = useState(false);
-  const [loading2, setLoading2] = useState(false);
+  const { setLoading } = useLoading();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -37,36 +37,33 @@ export default function Login() {
 
 
   const handleLogin = async () => {
-    setLoading(true);
-    if (!email || !senha) {
-      showMessage("Por favor, preencha todos os campos.");
-      return;
-    }
-    if (!Validators.isValidPassword(senha)) {
-      setResu("A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, números e símbolos.");
-      setModalVisible(true)
-      return;
-    }
     try {
+      setLoading(true);
+      if (!email || !senha) {
+        showMessage("Por favor, preencha todos os campos.");
+        return;
+      }
+      if (!Validators.isValidPassword(senha)) {
+        setResu("A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, números e símbolos.");
+        setModalVisible(true)
+        return;
+      }
       const userId = await Services.loginUser(email, senha);
       router.replace(routes.home);
-      setLoading(false);
     } catch (error: any) {
-      setLoading(false);
       setResu(error.message);
       setModalVisible(true);
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
 
   const handlePasswordReset = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const message = await Services.ResetPassword(email);
       setResu(message);
       setModalVisible(true);
-      setLoading(false);
     } catch (error: any) {
       setResu(error.message);
       setModalVisible(true);
@@ -78,8 +75,8 @@ export default function Login() {
   return (
     <>
       <ScrollView>
+        <Components.BackButton />
         <View style={styles.container}>
-          {(loading || loading2) && <Components.LoadingCarAnimation loading={loading} loading2={loading2} />}
           <View>
             <Image style={styles.circuloam} source={images.circuloAmarelo} />
             <Image style={styles.segundocirculo} source={images.circuloAmarelo} />

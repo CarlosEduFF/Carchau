@@ -12,6 +12,8 @@ import { routes } from '~/constants/routes';
 import { salvarSolicitacaoAluguel } from '~/services/requestService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Services } from '~/services';
+import { useLoading } from '~/context/LoadingContext';
+import { Components } from '~/components';
 
 
 export default function AluguelScreen() {
@@ -19,11 +21,7 @@ export default function AluguelScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [situ, setSitu] = useState<string>('');
-  const [modelo, setModelo] = useState<string>('Não disponível');
-  const [marca, setMarca] = useState<string>('Não disponível');
-  const [ano, setAno] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [loading2, setLoading2] = useState<boolean>(false);
+  const { setLoading } = useLoading();
   const [laudImage, setLaudImage] = useState<string | null>(null);
   const [fotosCarro, setFotosCarro] = useState<string[]>([]);
   const [selectedPeriods, setSelectedPeriods] = useState<number[]>([]);
@@ -75,8 +73,6 @@ export default function AluguelScreen() {
       }
     } catch (error) {
       console.error("Erro ao buscar dados do carro: ", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -86,32 +82,39 @@ export default function AluguelScreen() {
       setLocadorNome(userDataLo.nome || 'Usuário');
       setLocadorPerfilImage(userDataLo.fotoPerfil || undefined);
     }
-    setLoading(false);
   };
   useEffect(() => {
-    const loadUserId = async () => {
+    const init = async () => {
       try {
+        setLoading(true);
         const id = await AsyncStorage.getItem('userId');
         if (id) {
           setUserId(id);
+          await Promise.all([
+            loadUser(id),
+            loadLocadorUser(),
+            fetchCarroData(),
+          ]);
         } else {
           console.warn('Nenhum userId encontrado no AsyncStorage');
-          setLoading(false);
         }
       } catch (error) {
-        console.error('Erro ao carregar userId:', error);
+        console.error('Erro ao inicializar dados:', error);
+      } finally {
         setLoading(false);
       }
     };
-    loadUserId();
+
+    init();
+    setDia(obterDiaAtualEmTexto());
   }, []);
-  const loadUser = async () => {
-    const userData = await fetchUserData(userId);
+  const loadUser = async (uId: string | null) => {
+    if (!uId) return;
+    const userData = await fetchUserData(uId);
     if (userData) {
       setLocatarioNome(userData.nome || 'Usuário');
       setLocatarioPerfilImage(userData.fotoPerfil || undefined);
     }
-    setLoading(false);
   };
 
   const obterDiaAtualEmTexto = () => {
@@ -126,59 +129,54 @@ export default function AluguelScreen() {
   };
 
   const handleSave = async () => {
-    setLoading(true);
-    setLoading2(true);
+    try {
+      setLoading(true);
 
-    const resultado = await salvarSolicitacaoAluguel({
-      valorTotal,
-      totalDias,
-      visto: visto ?? false,
-      dataInicio: dataInicio ?? "",
-      dataTermino: dataTermino ?? "",
-      locadorId: locadorId ?? "",
-      carroId: carroId ?? "",
-      caucao,
-      modalidadesAluguel: modalidade ?? "econômico",
-      pontoencontro,
-      dia: dia ?? "",
-      descricao: descrição ?? "Solicitação de Aluguel",
-      estado,
-      estadoPGCaucao: EstadoPGCaucao,
-      estadoPGAluguel: EstadoPGAluguel,
-      estadoavaliLT: EstadoAvaliLT,
-      estadoavaliLD: EstadoAvaliLD,
-      confirRecepLocata: "",
-      confirEntregaLocador: "",
-      confirRecepLocador: "",
-      confirDevoLocata: "",
-      locadornome,
-      locadorperfilImage: locadorperfilImage,
-      locatarionome,
-      locatarioperfilImage: locatarioperfilImage,
-    });
+      const resultado = await salvarSolicitacaoAluguel({
+        valorTotal,
+        totalDias,
+        visto: visto ?? false,
+        dataInicio: dataInicio ?? "",
+        dataTermino: dataTermino ?? "",
+        locadorId: locadorId ?? "",
+        carroId: carroId ?? "",
+        caucao,
+        modalidadesAluguel: modalidade ?? "econômico",
+        pontoencontro,
+        dia: dia ?? "",
+        descricao: descrição ?? "Solicitação de Aluguel",
+        estado,
+        estadoPGCaucao: EstadoPGCaucao,
+        estadoPGAluguel: EstadoPGAluguel,
+        estadoavaliLT: EstadoAvaliLT,
+        estadoavaliLD: EstadoAvaliLD,
+        confirRecepLocata: "",
+        confirEntregaLocador: "",
+        confirRecepLocador: "",
+        confirDevoLocata: "",
+        locadornome,
+        locadorperfilImage: locadorperfilImage,
+        locatarionome,
+        locatarioperfilImage: locatarioperfilImage,
+      });
 
 
-    if (resultado.success) {
-      setLoading2(false);
-      setModalVisible(true);
-    } else {
-      setSitu(resultado.error ?? "");
-      setModalVisible2(true);
+      if (resultado.success) {
+        setModalVisible(true);
+      } else {
+        setSitu(resultado.error ?? "");
+        setModalVisible2(true);
+      }
+    } catch (error) {
+      console.error("Erro ao salvar solicitação: ", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setLoading2(false);
   };
 
-  useEffect(() => {
-    loadUser();
-    loadLocadorUser();
-    fetchCarroData();
-    setDia(obterDiaAtualEmTexto());
-  }, []);
 
   return (
     <View style={styles.container}>
-      {loading && <LoadingCarAnimation loading={loading} loading2={loading2} />}
       <View style={styles.Topo} ></View>
       <Text style={styles.header}>Solicitação de aluguel</Text>
 
@@ -230,7 +228,7 @@ export default function AluguelScreen() {
         }>
           <Text style={styles.buttonText}>Cancelar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.acceptButton} onPress={() => { handleSave(), setLoading2(true) }}>
+        <TouchableOpacity style={styles.acceptButton} onPress={handleSave}>
           <Text style={styles.buttonText}>Confirmar</Text>
         </TouchableOpacity>
       </View>

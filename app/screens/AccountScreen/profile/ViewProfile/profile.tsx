@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { routes } from '~/constants/routes';
 import colors from '~/constants/colors';
 import { Evalue } from '~/types';
+import { Components } from '~/components';
 
 
 
@@ -76,10 +77,11 @@ export default function InformacoesPessoais() {
 
     return (
         <View style={styles.container}>
+            <Components.BackButton />
             {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
             <View>
                 <View style={styles.EditButton}>
-                    <TouchableOpacity style={styles.EditButton} onPress={() => router.replace(routes.editProfile)}>
+                    <TouchableOpacity style={styles.EditButton} onPress={() => router.push(routes.editProfile)}>
                         <Image
                             style={styles.EditImage}
                             source={images.editIcon}

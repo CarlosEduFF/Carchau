@@ -58,17 +58,13 @@ export default function CarRegistrationScreen() {
     const handleSave = async () => {
         try {
             setLoading2(true);
-            const quantidadeLugaresNum = Number(quantidadeLugares);
-            if (isNaN(quantidadeLugaresNum)) {
-                throw new Error("Quantidade de lugares inválida");
-            }
             const carData: Car = {
                 modelo,
                 marca,
-                ano: Number(ano),
+                ano,
                 placa,
                 combustivel,
-                quantidadeLugares: quantidadeLugaresNum,
+                quantidadeLugares,
                 arCondicionado: selectedAr,
                 step: selectedStep,
                 cambio: selectedCambio,
@@ -219,6 +215,7 @@ export default function CarRegistrationScreen() {
                     placeholderTextColor="#888888"
                     onChangeText={text => setAno(text)}
                     value={ano}
+                    keyboardType="default"
                 />
 
                 <Text style={styles.textocampo}>
@@ -265,6 +262,7 @@ export default function CarRegistrationScreen() {
                     placeholderTextColor="#888888"
                     onChangeText={text => setQuantidadeLugares(text)}
                     value={quantidadeLugares}
+                    keyboardType="default"
                 />
 
                 <Text style={styles.textocampo}>Ar-condicionado</Text>
@@ -644,8 +642,7 @@ export default function CarRegistrationScreen() {
                     onClose={() => setModalVisible2(false)}
                     message={situ}
                     onConfirm={() => {
-                        setModalVisible2(!modalVisible2);
-                        router.replace(routes.viewLocation);
+                        setModalVisible2(false);
                     }}
                 />
 

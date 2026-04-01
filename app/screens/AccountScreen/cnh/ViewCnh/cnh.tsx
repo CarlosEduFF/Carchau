@@ -11,6 +11,7 @@ import colors from '~/constants/colors';
 import { fetchLatestTermo } from '~/services/termsServices';
 import { fetchCnhData } from '~/services/CnhService/CnhService';
 import firebase from '~/config/firebase'; // usado apenas para fallback storage
+import { Components } from '~/components';
 
 type CnhStatus = 'valido' | 'invalido' | 'pendente' | null;
 
@@ -159,6 +160,7 @@ export default function CNH() {
   return (
     <ScrollView>
       <View style={styles.container}>
+        <Components.BackButton />
         {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
         <Text style={styles.text}>Visualize ou Cadastre sua CNH</Text>
         <Text style={styles.textocampo}>
@@ -211,14 +213,14 @@ export default function CNH() {
             acordo com os Termos de Uso e da Política de Privacidade, para formalizar a abertura do meu contrato junto
             a carchau e para os demais documentos inerentes ao aluguel.
             {'\n'}
-            <TouchableOpacity onPress={() => { router.replace(routes.termos); }}>
+            <TouchableOpacity onPress={() => { router.push(routes.termos); }}>
               <Text style={{ color: '#F2A51A', fontSize: 10 }}> Acessar termos de uso</Text>
             </TouchableOpacity>
           </Text>
         </View>
 
         <View style={{ alignItems: 'center', flexDirection: 'column' }}>
-          <TouchableOpacity style={styles.button} onPress={() => router.replace(routes.editCnh)}>
+          <TouchableOpacity style={styles.button} onPress={() => router.push(routes.editCnh)}>
             <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'white' }}>Tirar foto da CNH</Text>
           </TouchableOpacity>
         </View>

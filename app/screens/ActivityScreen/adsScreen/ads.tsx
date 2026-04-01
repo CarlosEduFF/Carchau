@@ -138,7 +138,9 @@ export default function Veiculo() {
 
   return (
     <>
-      <View style={styles.Topo}></View>
+      <View style={styles.Topo}>
+        <Components.BackButton />
+      </View>
       <ScrollView style={styles.container}>
 
         {(loading || loading2) && <Components.LoadingCarAnimation loading={loading} loading2={loading2} />}

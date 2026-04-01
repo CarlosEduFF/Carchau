@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
+import moment from 'moment';
 import styles from './StylesLesseeRequi';
 import images from '~/constants/images';
 import LoadingCarAnimation from '~/components/LoadingCarAnimation/LoadingCarAnimation';
@@ -103,6 +104,10 @@ export default function AluguelScreen() {
         fetchCarroData(locadorId);
     });
 
+    const formattedDia = moment(Dia).isValid() ? moment(Dia).format('DD/MM/YYYY') : Dia;
+    const formattedInicio = moment(DataInicio).isValid() ? moment(DataInicio).format('DD/MM/YYYY') : DataInicio;
+    const formattedTermino = moment(DataTermino).isValid() ? moment(DataTermino).format('DD/MM/YYYY') : DataTermino;
+
     const handleDelete = async () => {
         await deleteSolicitacao({
             soliciId,
@@ -117,7 +122,7 @@ export default function AluguelScreen() {
             {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
             <View style={styles.Topo}></View>
             <Text style={styles.header}>Requisição de aluguel</Text>
-            <Text style={styles.date}>{Dia}</Text>
+            <Text style={styles.date}>{formattedDia}</Text>
             <View style={styles.userSection}>
                 {/* Coluna para a imagem do perfil e o botão "Ver Perfil" */}
                 <View style={{ alignItems: 'center', margin: 10 }}>
@@ -139,7 +144,7 @@ export default function AluguelScreen() {
                 <Text style={styles.description}>
                     Você locatário <Text style={styles.foco}>{nome}</Text> confirma o interesse em alugar o veiculo
                     <Text style={styles.foco}> {marca} {modelo} {ano} </Text> do locador <Text style={styles.foco}>{NomeLocador}</Text>
-                    do dia <Text style={styles.foco}>{DataInicio}</Text> ao dia <Text style={styles.foco}>{DataTermino}</Text> (<Text style={styles.foco}>por {TotalDias} dias</Text>),
+                    do dia <Text style={styles.foco}>{formattedInicio}</Text> ao dia <Text style={styles.foco}>{formattedTermino}</Text> (<Text style={styles.foco}>por {TotalDias} dias</Text>),
                     tendo ciência da modalidade <Text style={styles.foco}>{Modalidade}</Text>, ponto de encontro <Text style={styles.foco}>{pontoencontro}.</Text>
                     {'\n'}O valor total do aluguel ficou <Text style={styles.foco}> R$ {TotalValor}</Text>.
                 </Text>

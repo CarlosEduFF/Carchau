@@ -11,6 +11,7 @@ import { Services } from '~/services';
 import Validators from '~/utils/Validators/index';
 import { Components } from '~/components';
 import colors from '~/constants/colors';
+import { useLoading } from '~/context/LoadingContext';
 
 export default function Cadastro() {
   const [nome, setNome] = useState("");
@@ -24,14 +25,35 @@ export default function Cadastro() {
   const [situ, setSitu] = useState("");
   const [termoAceito, setTermoAceito] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [loading2, setLoading2] = useState(false);
+  const { setLoading } = useLoading();
 
 
   const handleOpenModal = () => {
-    if (!email || !senha || !nome) {
-      alert("Por favor, preencha todos os campos para realizar o cadastro."); return;
-    } setModalVisible(true);
+    if (!nome || !cpf || !email || !senha) {
+      setModalMessage("Por favor, preencha todos os campos.");
+      setModalVisible2(true);
+      return;
+    }
+
+    if (!Validators.isValidCPF(cpf)) {
+      setModalMessage("CPF inválido!");
+      setModalVisible2(true);
+      return;
+    }
+
+    if (!Validators.isValidEmail(email)) {
+      setModalMessage("E-mail inválido!");
+      setModalVisible2(true);
+      return;
+    }
+
+    if (!Validators.isValidPassword(senha)) {
+      setModalMessage("A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, números e símbolos.");
+      setModalVisible2(true);
+      return;
+    }
+
+    setModalVisible(true);
   };
 
   const [modalMessage, setModalMessage] = useState(""); // Novo estado para mensagem do modal de erro
@@ -39,11 +61,13 @@ export default function Cadastro() {
   const handleCadastro = async () => {
     try {
       if (!Validators.isValidTerms(termoAceito)) return;
+      setLoading(true);
 
       // Validação da senha
       if (!Validators.isValidPassword(senha)) {
         setModalMessage("A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, números e símbolos.");
         setModalVisible2(true);
+        setLoading(false);
         return;
       }
 
@@ -66,6 +90,7 @@ export default function Cadastro() {
       if (mensagemErro) {
         setModalMessage(mensagemErro);
         setModalVisible2(true);
+        setLoading(false);
         return;
       }
 
@@ -74,6 +99,7 @@ export default function Cadastro() {
       if (!isUnique) {
         setModalMessage("Email ou CPF já cadastrado!");
         setModalVisible2(true);
+        setLoading(false);
         return;
       }
 
@@ -81,7 +107,6 @@ export default function Cadastro() {
       const userId = await Services.RegisterUserAuth(email, senha);
       await Services.TermsAcepted(userId, { nome, email, cpf });
       await Services.StorageService.setUserId(userId);
-
 
       setNome("");
       setEmail("");
@@ -93,6 +118,8 @@ export default function Cadastro() {
       console.error("Erro ao criar usuário: ", error);
       setModalMessage("Erro ao cadastrar o usuário: " + error);
       setModalVisible2(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,13 +128,12 @@ export default function Cadastro() {
 
   return (
     <>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <Components.BackButton />
         <View style={styles.container}>
-          {(loading || loading2) && <Components.LoadingCarAnimation loading={loading} loading2={loading2} />}
-          <View>
-            <Image style={styles.circuloam} source={images.circuloAmarelo} />
-            <Image style={styles.segundocirculo} source={images.circuloAmarelo} />
-          </View>
+          <Image style={styles.circuloam} source={images.circuloAmarelo} />
+          <Image style={styles.segundocirculo} source={images.circuloAmarelo} />
+
           <View style={styles.caixalogin}>
             <Text style={styles.title}>Criar perfil</Text>
             <View style={styles.form}>

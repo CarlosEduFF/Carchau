@@ -25,6 +25,7 @@ export const isValidExpiryDate = (expiry: string): boolean => {
   const currentYear = today.getFullYear();
 
   if (year < currentYear) return false;
+  if (year > currentYear + 20) return false; // Impede datas absurdas como 2099
   if (year === currentYear && month < currentMonth) return false;
 
   return true;
@@ -43,6 +44,12 @@ export const isValidCardName = (cardName: string): boolean => {
 // Valida se o CVV tem 3 dígitos numéricos
 export const isValidCVV = (cvv: string): boolean => {
   return /^\d{3}$/.test(cvv);
+};
+
+export const isValidPlaca = (placa: string): boolean => {
+  const mercosul = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/i;
+  const tradicional = /^[A-Z]{3}-?[0-9]{4}$/i;
+  return mercosul.test(placa) || tradicional.test(placa);
 };
 
 export const formatCardNumber = (number: string) => {
@@ -71,8 +78,9 @@ export const validateCarData = (data: Car): string | undefined => {
 
   if (!modelo.trim()) return 'Informe o modelo do carro.';
   if (!marca.trim()) return 'Informe a marca do carro.';
-  if (!ano || isNaN(ano)) return 'Informe o ano do carro.';
+  if (!ano || !ano.trim()) return 'Informe o ano do carro.';
   if (!placa.trim()) return 'Informe a placa do carro.';
+  if (!isValidPlaca(placa)) return 'Informe uma placa válida (ABC-1234 ou ABC1C23).';
   if (!combustivel.trim()) return 'Informe o combustível.';
   if (!arCondicionado.trim()) return 'Informe se possui ar-condicionado.';
   if (!step.trim()) return 'Informe se possui step.';
@@ -80,8 +88,8 @@ export const validateCarData = (data: Car): string | undefined => {
   if (!airbags.trim()) return 'Informe se possui airbags.';
   if (!pontoencontro.trim()) return 'Informe o ponto de encontro.';
 
-  if (!quantidadeLugares || quantidadeLugares <= 0) {
-    return 'Informe corretamente a quantidade de lugares.';
+  if (!quantidadeLugares || !quantidadeLugares.trim()) {
+    return 'Informe a quantidade de lugares.';
   }
 
   if (!caucao || caucao <= 0) {

@@ -30,7 +30,7 @@ export default function CarRegistrationScreen() {
     const [ano, setAno] = useState('');
     const [placa, setPlaca] = useState('');
     const [combustivel, setCombustivel] = useState('Gasolisolina');
-    const [quantidadeLugares, setQuantidadeLugares] = useState<number>(0);
+    const [quantidadeLugares, setQuantidadeLugares] = useState<string>('0');
     const [selectedAr, setSelectedAr] = useState('sim');
     const [selectedCambio, setSelectedCambio] = useState('manual');
     const [selectedStep, setSelectedStep] = useState('general');
@@ -115,7 +115,7 @@ export default function CarRegistrationScreen() {
                 ano,
                 placa,
                 combustivel,
-                quantidadeLugares: Number(quantidadeLugares),
+                quantidadeLugares,
                 arCondicionado: selectedAr,
                 cambio: selectedCambio,
                 step: selectedStep,
@@ -155,7 +155,7 @@ export default function CarRegistrationScreen() {
                     setAno(String(carro.ano));
                     setPlaca(carro.placa);
                     setCombustivel(carro.combustivel);
-                    setQuantidadeLugares(carro.quantidadeLugares);
+                    setQuantidadeLugares(String(carro.quantidadeLugares));
                     setSelectedAr(carro.arCondicionado);
                     setSelectedStep(carro.step);
                     setSelectedCambio(carro.cambio);
@@ -257,6 +257,7 @@ export default function CarRegistrationScreen() {
                             placeholderTextColor="#888888"
                             onChangeText={text => setAno(text)}
                             value={ano}
+                            keyboardType="default"
                         />
                     </View>
 
@@ -365,10 +366,10 @@ export default function CarRegistrationScreen() {
                                     <Text style={styles.caracteristicaTexto}>Lugares</Text>
                                 </View>
                                 <TextInput
-                                    value={String(quantidadeLugares)}
-                                    onChangeText={(text) => setQuantidadeLugares(Number(text))}
+                                    value={quantidadeLugares}
+                                    onChangeText={(text) => setQuantidadeLugares(text)}
                                     placeholder='5'
-                                    keyboardType="numeric"
+                                    keyboardType="default"
                                     style={styles.input}
                                     autoCapitalize="none"
                                     autoCorrect={false}

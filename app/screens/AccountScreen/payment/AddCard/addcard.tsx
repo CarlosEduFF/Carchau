@@ -12,6 +12,7 @@ import { routes } from '~/constants/routes';
 import { formatCardNumber, formatExpiryDate, isValidCardName, isValidCardNumber, isValidCVV, isValidExpiryDate } from '~/utils/validators';
 import { getUserId } from '~/services/carUpdateService';
 import saveCardData from '~/services/cardSaveService'
+import { Components } from '~/components';
 
 export default function CarRegistrationScreen() {
     // Estados para armazenar os dados do cartão
@@ -28,6 +29,28 @@ export default function CarRegistrationScreen() {
 
 
     const handleSave = async () => {
+        // Validação local antes de iniciar o processo
+        if (!isValidCardNumber(cardNumber)) {
+            setSitu('Número do cartão inválido!');
+            setModalVisible2(true);
+            return;
+        }
+        if (!isValidCardName(cardName)) {
+            setSitu('Digite o nome do titular do cartão!');
+            setModalVisible2(true);
+            return;
+        }
+        if (!isValidExpiryDate(expiryDate)) {
+            setSitu('Data de validade inválida!');
+            setModalVisible2(true);
+            return;
+        }
+        if (!isValidCVV(cvv)) {
+            setSitu('CVV inválido!');
+            setModalVisible2(true);
+            return;
+        }
+
         setLoading2(true);
 
         try {
@@ -38,7 +61,6 @@ export default function CarRegistrationScreen() {
             console.error('Erro ao salvar os dados do cartão: ', error);
             setSitu(error.message || 'Erro ao salvar os dados do cartão.');
             setModalVisible2(true);
-
         } finally {
             setLoading2(false);
         }
@@ -47,6 +69,7 @@ export default function CarRegistrationScreen() {
 
     return (
         <View style={styles.container}>
+            <Components.BackButton />
             {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
             <ScrollView>
                 <View style={styles.ViewCard}>
@@ -150,7 +173,7 @@ export default function CarRegistrationScreen() {
                 </View>
 
                 <View style={{ alignItems: 'center' }}>
-                    <TouchableOpacity style={styles.button} onPress={() => { handleSave(), setLoading2(true) }}>
+                    <TouchableOpacity style={styles.button} onPress={handleSave}>
                         <Text style={styles.TextButton}>Adicionar cartão</Text>
                     </TouchableOpacity>
                 </View>

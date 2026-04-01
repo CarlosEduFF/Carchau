@@ -2,11 +2,7 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     zIndex: 9999, // Garante que estará acima dos outros elementos
     justifyContent: 'center',
     alignItems: 'center',

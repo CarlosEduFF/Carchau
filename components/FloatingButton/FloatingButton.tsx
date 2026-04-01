@@ -5,6 +5,10 @@ import { Navigations } from "~/utils/navigations";
 import { Services } from "~/services";
 import Validators from "~/utils/Validators/index";
 import { Components } from "..";
+import { router } from "expo-router";
+import { routes } from "~/constants/routes";
+import images from "~/constants/images";
+import colors from "~/constants/colors";
 
 interface FloatingButtonProps {
   carroId: string;
@@ -54,6 +58,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [situ, setSitu] = useState("");
+  const [isProfileError, setIsProfileError] = useState(false);
 
   // --- loaders (não alteram loading diretamente) ---
   const loadLocadorUser = async () => {
@@ -187,6 +192,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
 
   // Mensagem amigável ao usuário (preparada no momento do clique)
   const handleAlugar = () => {
+    setIsProfileError(false);
     if (loading2) {
       setSitu("Aguarde, carregando seus dados...");
       setModalVisible2(true);
@@ -194,17 +200,34 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
     }
 
     if (!pessoalEnderecoResult.valido) {
-      setSitu("Preencha os campos obrigatórios: " + (pessoalEnderecoResult.camposVazios || []).join(", "));
+      const fieldLabels: Record<string, string> = {
+        nomeLocatario: 'Nome Completo',
+        nacionalidade: 'Nacionalidade',
+        telefone: 'Telefone',
+        email: 'E-mail',
+        profissao: 'Profissão',
+        cpf: 'CPF',
+        endereco: 'Endereço',
+        cep: 'CEP',
+        numero: 'Número',
+        bairro: 'Bairro',
+        cidade: 'Cidade',
+        estado: 'Estado',
+      };
+      
+      const missing = (pessoalEnderecoResult.camposVazios || []).map(f => fieldLabels[f] || f);
+      setSitu("Para alugar, você precisa completar seu perfil na aba Conta. Campos faltando:\n\n• " + missing.join("\n• "));
+      setIsProfileError(true);
       setModalVisible2(true);
       return;
     }
 
     if (!cnhResult.valido) {
-      // se houver mensagens específicas do validador, exiba-as; senão, use texto genérico
       const detalhes = (cnhResult.errosEspecificos && cnhResult.errosEspecificos.length > 0)
-        ? cnhResult.errosEspecificos.join(" ")
+        ? cnhResult.errosEspecificos.join("\n• ")
         : "Complete suas imagens da CNH e aguarde a validação.";
-      setSitu(detalhes);
+      setSitu("Sua CNH precisa de atenção:\n\n• " + detalhes);
+      setIsProfileError(true);
       setModalVisible2(true);
       return;
     }
@@ -235,12 +258,29 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ carroId, LocadorId }) =
       <Components.CustomModal
         visible={modalVisible2}
         onClose={() => setModalVisible2(false)}
-        message={situ}
-        confirmText="Entendi"
-        onConfirm={() => {
-          setModalVisible2(!modalVisible2);
-        }}
-      />
+        hideDefaultButton
+      >
+        <Text style={{ color: colors.amareloClaro, fontSize: 16, textAlign: 'center', marginBottom: 20 }}>{situ}</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
+          <Pressable 
+            style={{ backgroundColor: '#888', padding: 10, borderRadius: 10, minWidth: 100, alignItems: 'center' }} 
+            onPress={() => setModalVisible2(false)}
+          >
+            <Text style={{ color: 'white', fontWeight: 'bold' }}>Fechar</Text>
+          </Pressable>
+          {isProfileError && (
+            <Pressable 
+              style={{ backgroundColor: colors.amareloClaro, padding: 10, borderRadius: 10, minWidth: 100, alignItems: 'center' }} 
+              onPress={() => {
+                setModalVisible2(false);
+                router.replace(routes.account);
+              }}
+            >
+              <Text style={{ color: 'white', fontWeight: 'bold' }}>Ir para Perfil</Text>
+            </Pressable>
+          )}
+        </View>
+      </Components.CustomModal>
     </View>
   );
 };

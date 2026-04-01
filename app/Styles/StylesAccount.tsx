@@ -26,6 +26,10 @@ const styles = StyleSheet.create({
       width: 30,
       height: 30,
     },    
+    textLogout: {
+      fontWeight: 'bold',
+      color: 'red',
+    },
   
   });
   

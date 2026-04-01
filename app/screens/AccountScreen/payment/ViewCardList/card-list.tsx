@@ -58,7 +58,7 @@ export default function Cards() {
     return (
         <View style={styles.container}>
             {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
-            <TouchableOpacity style={styles.Button} onPress={() => router.replace(routes.addCard)}>
+            <TouchableOpacity style={styles.Button} onPress={() => router.push(routes.addCard)}>
                 <FontAwesome6 name="square-plus" size={28} color="white" />
                 <Text style={styles.text}>Adicionar cartão de crédito</Text>
             </TouchableOpacity>

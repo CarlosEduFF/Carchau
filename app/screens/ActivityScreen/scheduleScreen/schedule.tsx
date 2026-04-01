@@ -240,7 +240,6 @@ export default function AluguelVeiculo() {
             const currentDate = date || new Date();
             const formattedDate = moment(currentDate).format('YYYY-MM-DD');
 
-            // Verifica se a data está ocupada
             if (markedDates[formattedDate]?.disableTouchEvent) {
               setResu("Esta data já está ocupada.");
               setModalVisible(true);
@@ -249,10 +248,40 @@ export default function AluguelVeiculo() {
 
             setDataInicio(formattedDate);
             setMostrarDataInicio(false);
-            setMarkedDates(prevMarkedDates => ({
-              ...prevMarkedDates,
-              [formattedDate]: { selected: true, color: '#f2a51a', textColor: '#fff' },
-            }));
+            setDatadeInicio(moment(currentDate).format('DD/MM/YYYY'));
+
+            // Automação de data de término baseada na modalidade
+            let autoTerminoFormatted = null;
+            if (selectedModalidade === 'semana') {
+              autoTerminoFormatted = moment(currentDate).add(7, 'days').format('YYYY-MM-DD');
+            } else if (selectedModalidade === 'mes') {
+              autoTerminoFormatted = moment(currentDate).add(30, 'days').format('YYYY-MM-DD');
+            }
+
+            if (autoTerminoFormatted) {
+              setDataTermino(autoTerminoFormatted);
+              setDatadeTermino(moment(autoTerminoFormatted).format('DD/MM/YYYY'));
+              
+              // Atualiza marcação no calendário para o novo intervalo
+              const resultado = marcarIntervalo(
+                formattedDate,
+                autoTerminoFormatted,
+                {
+                  inicio: formattedDate,
+                  termino: autoTerminoFormatted,
+                  markedDates,
+                }
+              );
+              if (resultado?.updatedMarkedDates) {
+                setMarkedDates(resultado.updatedMarkedDates);
+              }
+            } else {
+              // Apenas marca o início se for diária ou modalidade não definida
+              setMarkedDates(prevMarkedDates => ({
+                ...prevMarkedDates,
+                [formattedDate]: { selected: true, color: '#f2a51a', textColor: '#fff' },
+              }));
+            }
           }}
         />
       )}

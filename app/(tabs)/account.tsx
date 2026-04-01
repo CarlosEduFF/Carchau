@@ -39,6 +39,7 @@ export default function Account() {
   const [loading, setLoading] = useState(true);   // controla primeiro carregamento
   const [loading2, setLoading2] = useState(false); // controle adicional (se usar)
   const [modalVisible, setModalVisible] = useState(false);
+  const [validationMessage, setValidationMessage] = useState('');
   const [cnhvalida, setCNHValida] = useState<'valido' | 'invalido' | 'pendente' | null>(null);
 
   // --- Funções de carregamento (não altere os nomes se Services dependem disso) ---
@@ -108,10 +109,60 @@ export default function Account() {
 
     loadAll();
 
+    loadAll();
+
     return () => {
       mounted = false;
     };
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await Services.StorageService.removeUserId();
+      router.replace('/');
+    } catch (err) {
+      console.error('Erro ao deslogar:', err);
+    }
+  };
+
+  const showValidationAlert = () => {
+    const fieldLabels: Record<string, string> = {
+      nome: 'Nome Completo',
+      nacionalidade: 'Nacionalidade',
+      telefone: 'Telefone',
+      email: 'E-mail',
+      profissao: 'Profissão',
+      cpf: 'CPF',
+      endereco: 'Endereço',
+      cep: 'CEP',
+      numero: 'Número',
+      bairro: 'Bairro',
+      cidade: 'Cidade',
+      estado: 'Estado',
+    };
+
+    const resPessoais = validarCampos(camposPessoaisDados, ['nome', 'nacionalidade', 'telefone', 'email', 'profissao', 'cpf']);
+    const resEndereco = validarCampos(enderecoDados, ['endereco', 'cep', 'numero', 'bairro', 'cidade', 'estado']);
+    const resCnh = validarCampos(cnhDadosParaValidar, []);
+
+    let missing: string[] = [];
+    if (!resPessoais.valido) {
+      missing.push(...resPessoais.camposVazios.map(f => fieldLabels[f] || f));
+    }
+    if (!resEndereco.valido) {
+      missing.push(...resEndereco.camposVazios.map(f => fieldLabels[f] || f));
+    }
+    if (!resCnh.valido && resCnh.errosEspecificos) {
+      missing.push(...resCnh.errosEspecificos);
+    }
+
+    if (missing.length > 0) {
+      setValidationMessage('Para regularizar sua conta, preencha os seguintes campos:\n\n• ' + missing.join('\n• '));
+    } else {
+      setValidationMessage('Todos os seus dados obrigatórios estão preenchidos corretamente!');
+    }
+    setModalVisible(true);
+  };
 
   // --- Chamada do validador: passamos explicitamente os nomes que o validator espera ---
   const camposPessoaisDados = {
@@ -167,66 +218,71 @@ export default function Account() {
     <View style={styles.container}>
       {(loading || loading2) && <LoadingCarAnimation loading={loading} loading2={loading2} />}
 
-      <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewProfile)}>
+      <TouchableOpacity style={styles.opcao} onPress={() => router.push(routes.viewProfile)}>
         <FontAwesome6 style={{ padding: 4 }} name="user-pen" size={20} color={colors.amareloClaro} />
         <Text style={styles.text}>Dados Pessoais</Text>
         {/* Só mostrar alerta depois de carregar */}
         {!loading && !dadosPessoaisValidos && (
-          <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.imageRight}>
+          <TouchableOpacity onPress={showValidationAlert} style={styles.imageRight}>
             <Image style={styles.imageRight} source={images.alertImage} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewAddress)}>
+      <TouchableOpacity style={styles.opcao} onPress={() => router.push(routes.viewAddress)}>
         <Entypo style={{ padding: 4 }} name="location" size={24} color={colors.amareloClaro} />
         <Text style={styles.text}>Endereço</Text>
         {!loading && !enderecoValido && (
-          <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.imageRight}>
+          <TouchableOpacity onPress={showValidationAlert} style={styles.imageRight}>
             <Image style={styles.imageRight} source={images.alertImage} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewCnh)}>
+      <TouchableOpacity style={styles.opcao} onPress={() => router.push(routes.viewCnh)}>
         <FontAwesome style={{ padding: 4 }} name="id-card" size={24} color={colors.amareloClaro} />
         <Text style={styles.text}>CNH</Text>
         {!loading && cnhIncompleta && (
-          <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.imageRight}>
+          <TouchableOpacity onPress={showValidationAlert} style={styles.imageRight}>
             <Image style={styles.imageRight} source={images.alertImage} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewCard)}>
+      <TouchableOpacity style={styles.opcao} onPress={() => router.push(routes.viewCard)}>
         <MaterialIcons style={{ padding: 4 }} name="add-card" size={28} color={colors.amareloClaro} />
         <Text style={styles.text}>Cartão de crédito</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.viewLocation)}>
+      <TouchableOpacity style={styles.opcao} onPress={() => router.push(routes.viewLocation)}>
         <MaterialCommunityIcons style={{ padding: 4 }} name="car-multiple" size={24} color={colors.amareloClaro} />
         <Text style={styles.text}>Minhas locações</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.report)}>
+      <TouchableOpacity style={styles.opcao} onPress={() => router.push(routes.report)}>
         <MaterialCommunityIcons style={{ padding: 4 }} name="wrench-outline" size={24} color={colors.amareloClaro} />
         <Text style={styles.text}>Relatar Problema</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.termos)}>
+      <TouchableOpacity style={styles.opcao} onPress={() => router.push(routes.termos)}>
         <MaterialIcons style={{ padding: 4 }} name="private-connectivity" size={26} color={colors.amareloClaro} />
         <Text style={styles.text}>Termos e Condições</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.opcao} onPress={() => router.replace(routes.config)}>
+      <TouchableOpacity style={styles.opcao} onPress={() => router.push(routes.config)}>
         <MaterialCommunityIcons style={{ padding: 4 }} name="cogs" size={24} color={colors.amareloClaro} />
         <Text style={styles.text}>Configurações</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.opcao} onPress={handleLogout}>
+        <MaterialIcons style={{ padding: 4 }} name="logout" size={24} color="red" />
+        <Text style={styles.textLogout}>Sair da conta</Text>
       </TouchableOpacity>
 
       <CustomModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        message="Antes de começar a usufruir do Aplicativo e de nossos serviços, regularize sua conta!"
+        message={validationMessage}
         confirmText="Entendi"
         onConfirm={() => {
           setModalVisible(false);

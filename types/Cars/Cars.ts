@@ -4,14 +4,14 @@ export type Car = {
   id?: string;
   modelo: string;
   marca: string;
-  quantidadeLugares: number;
+  quantidadeLugares: string;
   pontoencontro: string;
   precoDia: number;
   precoSemana: number;
   precoMes: number;
   nota?: number;
   primeiraFoto?: string | null;
-  ano: number;
+  ano: string;
   arCondicionado: string;
   cambio: string;
   caucao: number;
