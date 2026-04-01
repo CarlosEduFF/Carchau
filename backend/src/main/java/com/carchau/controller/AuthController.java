@@ -13,15 +13,15 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-@CrossOrigin(origins = "*") // Permite acesso do React local
+@CrossOrigin(origins = "http://localhost:3000") // Limita ao seu frontend local
 public class AuthController {
 
     private final AuthService authService;
 
-    // Login
+    // Login (Busca dados pós-autenticação no front)
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) throws Exception {
-        LoginResponse response = authService.login(request);
+    public ResponseEntity<LoginResponse> getUserInfo(@RequestBody LoginRequest request) throws Exception {
+        LoginResponse response = authService.getUserInfoByEmail(request);
         return ResponseEntity.ok(response);
     }
 
@@ -35,7 +35,6 @@ public class AuthController {
     // Logout
     @GetMapping("/logout")
     public ResponseEntity<String> logout() {
-        // Se precisar invalidar token ou sessão, faça no AuthService
         return ResponseEntity.ok("Logout realizado com sucesso");
     }
 }
