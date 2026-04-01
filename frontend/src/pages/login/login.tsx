@@ -1,35 +1,60 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from '../../config/firebaseConfig';
 import RoutesP from '../../constants/routes';
 import logo from "../../assets/icons/Logo-Carchau.png";
 import authService from '../../services/authService';
+import LoadingOverlay from '../../components/LoadingOverlay/LoadingOverlay';
 
 import '../login/login.css';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const navigate = useNavigate();
 
   const [isSignUp, setIsSignUp] = useState(false);
+  
+  // Estados para o Modal
+  const [modal, setModal] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    show: false,
+    title: '',
+    message: '',
+    type: 'success'
+  });
 
   const toggleForm = () => {
     setIsSignUp(!isSignUp);
   };
 
+  const closeModal = () => setModal(prev => ({ ...prev, show: false }));
+
+  const showNotification = (title: string, message: string, type: 'success' | 'error') => {
+    setModal({ show: true, title, message, type });
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError('');
-    setSuccess('');
+    setLoading(true);
     
+    // Remove espaços em branco acidentais
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+
     try {
       // 1. Autenticação com Firebase Client (Senha)
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('Firebase: Usuário logado');
+      console.log('[Auth] Tentando login no Firebase com:', cleanEmail);
+      const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
+      console.log('[Auth] Firebase: Login concluído');
 
       // 2. Captura o ID token JWT
       const idToken = await userCredential.user.getIdToken(true);
@@ -37,35 +62,54 @@ const Login: React.FC = () => {
       localStorage.setItem('userId', userCredential.user.uid);
 
       // 3. Chama o backend para buscar dados do Locatário
-      const userData = await authService.getUserInfo(email);
-      console.log('Backend: Perfil carregado com sucesso');
+      console.log('[Auth] Buscando perfil no Backend...');
+      try {
+        const userData = await authService.getUserInfo(cleanEmail);
+        console.log('[Auth] Backend: Perfil carregado');
 
-      // 4. Salva o perfil completo no localStorage
-      localStorage.setItem('user_profile', JSON.stringify(userData.locatario));
+        // 4. Salva o perfil completo
+        localStorage.setItem('user_profile', JSON.stringify(userData.locatario));
 
-      // 5. Navegar para o painel de controle
-      navigate(RoutesP.Control);
+        // 5. Navegar para o painel de controle
+        setLoading(false);
+        navigate(RoutesP.Control);
+      } catch (apiErr: any) {
+        setLoading(false);
+        console.error('[Auth] Erro na API do Backend:', apiErr);
+        const msg = apiErr?.response?.data?.message || 'O usuário existe no Firebase Auth, mas não foi encontrado no banco de dados do Backend.';
+        showNotification('Erro de Perfil', msg, 'error');
+      }
+
     } catch (err: any) {
-      console.error('Erro ao autenticar:', err);
-      setError('E-mail ou senha inválidos ou erro no servidor.');
+      setLoading(false);
+      console.error('[Auth] Erro no Firebase Auth:', err);
+      let msg = '';
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+         msg = 'E-mail ou senha incorretos.';
+      } else if (err.code === 'auth/user-not-found') {
+         msg = 'Usuário não encontrado.';
+      } else {
+         msg = `Erro de Autenticação (${err.code || 'Desconhecido'}): ${err.message || 'Tente novamente.'}`;
+      }
+      showNotification('Falha no Login', msg, 'error');
     }
   };
 
   const handlePasswordReset = async () => {
     if (!email) {
-      setError('Digite seu e-mail para redefinir a senha.');
-      setSuccess('');
+      showNotification('Atenção', 'Digite seu e-mail para redefinir a senha.', 'error');
       return;
     }
+    setLoading(true);
     try {
-      // Usa o backend para gerar/enviar o link de redefinição
-      await authService.resetPassword(email);
-      setSuccess('E-mail de redefinição enviado com sucesso!');
-      setError('');
+      // Usamos o SDK do Firebase diretamente para enviar o e-mail real de redefinição
+      await sendPasswordResetEmail(auth, email.trim());
+      setLoading(false);
+      showNotification('E-mail Enviado', 'Verifique sua caixa de entrada para redefinir sua senha.', 'success');
     } catch (err: any) {
-      console.error('Erro ao enviar e-mail de redefinição:', err);
-      setError('Erro ao enviar e-mail de redefinição (verifique se o e-mail está correto).');
-      setSuccess('');
+      setLoading(false);
+      console.error('[Auth] Erro ao redefinir:', err);
+      showNotification('Erro no Envio', `Não foi possível enviar o e-mail: ${err.message}`, 'error');
     }
   };
 
@@ -92,8 +136,6 @@ const Login: React.FC = () => {
       </div>
       <div className={`flip-card ${isSignUp ? "flipped" : ""}`}>
         <form onSubmit={handleSubmit}>
-          {error && <p className="error-message" style={{ color: 'red' }}>{error}</p>}
-          {success && <p className="success-message" style={{ color: 'green' }}>{success}</p>}
           {/* Frente (Login) */}
           <div className="flip-card-front">
             <h2>Login</h2>
@@ -142,6 +184,27 @@ const Login: React.FC = () => {
         </form>
       </div>
 
+      {/* Modal Premium */}
+      {modal.show && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className={`modal-content ${modal.type}`} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className={`material-symbols-outlined icon-${modal.type}`}>
+                {modal.type === 'success' ? 'check_circle' : 'error'}
+              </span>
+              <h3>{modal.title}</h3>
+            </div>
+            <div className="modal-body">
+              <p>{modal.message}</p>
+            </div>
+            <div className="modal-footer">
+              <button className="modal-button" onClick={closeModal}>Fechar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loading && <LoadingOverlay message="Autenticando..." />}
     </div>
   );
 };

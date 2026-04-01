@@ -1,18 +1,9 @@
 import { useEffect, useState } from "react";
 import "./control.css";
-import { IoConstructOutline } from "react-icons/io5";
 import ReportList from "../reportList/reportList";
 import CnhList from "../cnhList/cnhList";
-
-type Locatario = {
-  nome?: string;
-  email?: string;
-  cpf?: string;
-  profissao?: string;
-  telefone?: string;
-  nacionalidade?: string;
-  fotoPerfil?: string;
-};
+import authService from "../../services/authService";
+import { Locatario } from "../../types/Locatario";
 
 const Control: React.FC = () => {
   const [activeView, setActiveView] = useState<
@@ -25,29 +16,11 @@ const Control: React.FC = () => {
   useEffect(() => {
     const fetchLocatario = async () => {
       try {
-        const token = localStorage.getItem("fb_id_token");
-        if (!token) {
-          setError("Usuário não autenticado");
-          return;
-        }
-
-        const resp = await fetch("http://localhost:8080/api/locatarios/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!resp.ok) {
-          const text = await resp.text();
-          throw new Error(`Erro ${resp.status}: ${text}`);
-        }
-
-        const data: Locatario = await resp.json();
+        const data = await authService.getMyProfile();
         setLocatario(data);
       } catch (err: any) {
         console.error(err);
-        setError(err.message || "Erro ao buscar dados");
+        setError("Erro ao carregar dados do perfil. Verifique sua conexão ou login.");
       }
     };
 

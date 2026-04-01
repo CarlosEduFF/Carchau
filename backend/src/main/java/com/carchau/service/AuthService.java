@@ -26,15 +26,22 @@ public class AuthService {
      * A autenticação deve ser feita no frontend.
      */
     public LoginResponse getUserInfoByEmail(LoginRequest request) throws Exception {
+        log.info("[Auth] Recebida solicitação de perfil para: {}", request.getEmail());
         try {
             UserRecord userRecord = firebaseAuth.getUserByEmail(request.getEmail());
             String userId = userRecord.getUid();
+            log.info("[Auth] Usuário encontrado no Firebase Auth. UID: {}", userId);
+            
             Locatario locatario = locatarioService.getLocatarioById(userId);
+            log.info("[Auth] Perfil do locatário encontrado no Firestore.");
             
             return new LoginResponse(userId, userRecord.getEmail(), locatario);
         } catch (FirebaseAuthException e) {
-            log.error("Usuário não encontrado: {}", request.getEmail());
-            throw new RuntimeException("Usuário não encontrado ou credenciais inválidas");
+            log.error("[Auth] Erro no Firebase Admin SDK ao buscar e-mail {}: {}", request.getEmail(), e.getMessage());
+            throw new RuntimeException("Usuário não encontrado no sistema de autenticação.");
+        } catch (Exception e) {
+            log.error("[Auth] Erro ao buscar perfil no Firestore para UID: {}. Detalhe: {}", request.getEmail(), e.getMessage());
+            throw e; // Lança para o GlobalExceptionHandler tratar (provavelmente RuntimeException)
         }
     }
 
