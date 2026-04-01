@@ -14,4 +14,8 @@ public class ChatRoom {
     private List<String> participants;
     private String lastMessage;
     private Date lastUpdated;
+    
+    // Campos preenchidos sob demanda pelo backend (não persistidos na coleção principal necessariamente)
+    private String displayName;
+    private String avatar;
 }

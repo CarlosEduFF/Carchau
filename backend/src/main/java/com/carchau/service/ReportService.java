@@ -12,6 +12,7 @@ import com.carchau.model.chat.ChatRoom;
 import com.carchau.model.chat.Message;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
@@ -27,7 +28,7 @@ public class ReportService {
     private final Firestore firestore;
 
     /**
-     * Busca salas de chat onde o usuário participa.
+     * Busca salas de chat onde o usuário participa e resolve metadados (nome/foto).
      */
     public List<ChatRoom> getChatRoomsForUser(String userId) throws Exception {
         List<ChatRoom> rooms = new ArrayList<>();
@@ -42,6 +43,7 @@ public class ReportService {
         for (QueryDocumentSnapshot document : documents) {
             ChatRoom room = document.toObject(ChatRoom.class);
             room.setChatId(document.getId());
+            resolveOtherParticipantMetadata(room, userId);
             rooms.add(room);
         }
         
@@ -53,12 +55,53 @@ public class ReportService {
                 if (doc.getId().contains(userId)) {
                     ChatRoom room = doc.toObject(ChatRoom.class);
                     room.setChatId(doc.getId());
+                    resolveOtherParticipantMetadata(room, userId);
                     rooms.add(room);
                 }
             }
         }
         
         return rooms;
+    }
+
+    /**
+     * Resolve o nome e foto do outro participante da sala.
+     */
+    private void resolveOtherParticipantMetadata(ChatRoom room, String currentUserId) {
+        if (room.getParticipants() == null || room.getParticipants().isEmpty()) {
+            // Tenta extrair do chatId se o array participants estiver vazio (legado)
+            if (room.getChatId().contains("_")) {
+                String[] parts = room.getChatId().split("_");
+                for (String p : parts) {
+                    if (!p.equals(currentUserId)) {
+                        fetchLocatarioDetails(room, p);
+                        break;
+                    }
+                }
+            }
+            return;
+        }
+
+        for (String participantId : room.getParticipants()) {
+            if (!participantId.equals(currentUserId)) {
+                fetchLocatarioDetails(room, participantId);
+                break;
+            }
+        }
+    }
+
+    private void fetchLocatarioDetails(ChatRoom room, String otherUserId) {
+        try {
+            DocumentSnapshot locDoc = firestore.collection("Locatarios").document(otherUserId).get().get();
+            if (locDoc.exists()) {
+                room.setDisplayName(locDoc.getString("nome"));
+                room.setAvatar(locDoc.getString("fotoPerfil"));
+            } else {
+                room.setDisplayName("Usuário (" + otherUserId.substring(0, 5) + "...)");
+            }
+        } catch (Exception e) {
+            room.setDisplayName("Localizador: " + otherUserId);
+        }
     }
 
     /**

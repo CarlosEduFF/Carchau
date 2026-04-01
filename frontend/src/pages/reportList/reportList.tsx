@@ -1,149 +1,203 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import './reportList.css';
 import reportService, { ChatRoom, Message } from "../../services/reportService";
-import authService from "../../services/authService";
+import LoadingOverlay from "../../components/LoadingOverlay/LoadingOverlay";
 
-const DEFAULT_AVATAR = '/default-profile.png';
-const FIXED_ID = "OdxeqUU7SDNbBDzhN4ETeP2h1jI3";
+const DEFAULT_AVATAR = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+const ADMIN_ID = "OdxeqUU7SDNbBDzhN4ETeP2h1jI3";
 
 const ReportList: React.FC = () => {
-    const [userId] = useState<string>(FIXED_ID);
+    const [userId] = useState<string>(ADMIN_ID);
     const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
-    const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+    const [selectedChat, setSelectedChat] = useState<ChatRoom | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [messageText, setMessageText] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
-    const [perfilImage, setPerfilImage] = useState<string | null>(null);
-    const [nome, setNome] = useState<string | null>(null);
+    const [sending, setSending] = useState<boolean>(false);
     
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     // Carregar salas de chat ao iniciar
-    useEffect(() => {
-        const loadRooms = async () => {
-            setLoading(true);
-            try {
-                const rooms = await reportService.getRooms(userId);
-                setChatRooms(rooms);
-                if (rooms.length > 0 && !selectedChatId) {
-                    handleSelectChatRoom(rooms[0]);
-                }
-            } catch (err) {
-                console.error("Erro ao carregar salas:", err);
-            } finally {
-                setLoading(false);
+    const loadRooms = useCallback(async (autoSelect = false) => {
+        setLoading(true);
+        try {
+            const rooms = await reportService.getRooms(userId);
+            setChatRooms(rooms);
+            
+            if (autoSelect && rooms.length > 0) {
+                handleSelectChatRoom(rooms[0]);
             }
-        };
-        loadRooms();
+        } catch (err) {
+            console.error("Erro ao carregar salas:", err);
+        } finally {
+            setLoading(false);
+        }
     }, [userId]);
 
-    // Carregar mensagens quando a sala mudar (Simulando "real-time" com fetch simples ao trocar)
     useEffect(() => {
-        if (!selectedChatId) return;
+        loadRooms(true);
+    }, [loadRooms]);
+
+    // Carregar mensagens quando a sala mudar
+    useEffect(() => {
+        if (!selectedChat) return;
 
         const loadMessages = async () => {
             try {
-                const msgs = await reportService.getMessages(selectedChatId);
+                const msgs = await reportService.getMessages(selectedChat.chatId);
                 setMessages(msgs);
             } catch (err) {
                 console.error("Erro ao carregar mensagens:", err);
             }
         };
         loadMessages();
-    }, [selectedChatId]);
+        
+        // Polling simples a cada 5 segundos para simular real-time
+        const interval = setInterval(loadMessages, 5000);
+        return () => clearInterval(interval);
+    }, [selectedChat]);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    const handleSelectChatRoom = async (room: ChatRoom) => {
-        setSelectedChatId(room.chatId);
+    const handleSelectChatRoom = (room: ChatRoom) => {
+        setSelectedChat(room);
         setMessages([]);
-        // Em um app real, buscaríamos os dados do 'otherId' via backend também
-        setNome(room.displayName || "Usuário");
-        setPerfilImage(room.avatar || DEFAULT_AVATAR);
     };
 
-    const handleSend = useCallback(async () => {
-        if (!selectedChatId || messageText.trim() === "") return;
+    const handleSend = async () => {
+        if (!selectedChat || !messageText.trim() || sending) return;
 
+        setSending(true);
         try {
             const newMessage: Partial<Message> = {
                 text: messageText.trim(),
-                user: { _id: userId, name: "Admin" }
+                user: { _id: userId, name: "Admin Carchau" }
             };
-            await reportService.sendMessage(selectedChatId, newMessage);
+            await reportService.sendMessage(selectedChat.chatId, newMessage);
             setMessageText("");
             
-            // Recarregar mensagens após enviar
-            const msgs = await reportService.getMessages(selectedChatId);
+            // Recarregar imediatamente após enviar
+            const msgs = await reportService.getMessages(selectedChat.chatId);
             setMessages(msgs);
         } catch (err) {
             console.error("Erro ao enviar mensagem:", err);
+        } finally {
+            setSending(false);
         }
-    }, [selectedChatId, messageText, userId]);
+    };
 
     return (
-        <div className="app">
-            <div className="layout">
-                <aside className="sidebar-report">
+        <div className="report-page">
+            {loading && <LoadingOverlay message="Carregando denúncias..." />}
+            
+            <div className="report-container">
+                {/* Sidebar com Lista de Conversas */}
+                <aside className="report-sidebar">
+                    <header className="sidebar-header">
+                        <h2>Denúncias</h2>
+                        <button className="icon-btn" onClick={() => loadRooms(false)}>
+                            <span className="material-symbols-outlined">refresh</span>
+                        </button>
+                    </header>
+                    
                     <div className="conversation-list">
-                        {chatRooms.length === 0 ? (
-                            <div className="empty">Nenhum chat encontrado</div>
+                        {chatRooms.length === 0 && !loading ? (
+                            <div className="empty-state">
+                                <span className="material-symbols-outlined">chat_bubble_outline</span>
+                                <p>Nenhuma denúncia encontrada</p>
+                            </div>
                         ) : (
                             chatRooms.map((r) => (
                                 <div
                                     key={r.chatId}
-                                    className={`conversation-item ${selectedChatId === r.chatId ? "active" : ""}`}
+                                    className={`conversation-item ${selectedChat?.chatId === r.chatId ? "active" : ""}`}
                                     onClick={() => handleSelectChatRoom(r)}
                                 >
-                                    <div className="avatar size-10" style={{ backgroundImage: `url("${r.avatar || DEFAULT_AVATAR}")` }} />
-                                    <h3>{r.displayName || r.chatId}</h3>
+                                    <div 
+                                        className="avatar-chat" 
+                                        style={{ backgroundImage: `url("${r.avatar || DEFAULT_AVATAR}")` }} 
+                                    />
+                                    <div className="conversation-info">
+                                        <div className="conv-header">
+                                            <span className="conv-name">{r.displayName || "Usuário"}</span>
+                                            <span className="conv-time">
+                                                {r.lastUpdated ? new Date(r.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+                                            </span>
+                                        </div>
+                                        <p className="last-msg">{r.lastMessage || "Sem mensagens ainda"}</p>
+                                    </div>
                                 </div>
                             ))
                         )}
                     </div>
                 </aside>
 
-                <main className="chat-column">
-                    <div className="chat-wrap" style={{ height: '600px' }}>
-                        <header className="chat-header">
-                            <div className="left">
-                                <div className="avatar size-10" style={{ backgroundImage: `url("${perfilImage || DEFAULT_AVATAR}")` }} />
-                                <h3 className="nome">{nome ?? "Selecione um chat"}</h3>
-                            </div>
-                        </header>
+                {/* Área de Chat */}
+                <main className="chat-area">
+                    {selectedChat ? (
+                        <>
+                            <header className="chat-top-bar">
+                                <div className="user-info">
+                                    <div 
+                                        className="avatar-chat small" 
+                                        style={{ backgroundImage: `url("${selectedChat.avatar || DEFAULT_AVATAR}")` }} 
+                                    />
+                                    <div>
+                                        <h3 className="chat-name">{selectedChat.displayName}</h3>
+                                        <span className="chat-status">Online</span>
+                                    </div>
+                                </div>
+                                <div className="chat-actions">
+                                    <button className="icon-btn"><span className="material-symbols-outlined">more_vert</span></button>
+                                </div>
+                            </header>
 
-                        <section className="messages-area">
-                            <div className="messages-grid">
-                                {messages.map((m) => {
-                                    const outgoing = m.user?._id === userId;
-                                    return (
-                                        <div key={m._id} className={outgoing ? "msg-out" : "msg-in"}>
-                                            <div className={`msg-bubble ${outgoing ? "outgoing" : ""}`}>
-                                                <div>{m.text}</div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                <div ref={messagesEndRef} />
-                            </div>
-                        </section>
+                            <section className="chat-messages">
+                                <div className="msg-scroll">
+                                    {messages.length === 0 ? (
+                                        <div className="chat-empty">Inicie a conversa com este locatário.</div>
+                                    ) : (
+                                        messages.map((m) => {
+                                            const isMe = m.user?._id === userId;
+                                            return (
+                                                <div key={m._id} className={`message-wrapper ${isMe ? "me" : "other"}`}>
+                                                    <div className="message-bubble">
+                                                        <p>{m.text}</p>
+                                                        <span className="msg-time">
+                                                            {m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                    <div ref={messagesEndRef} />
+                                </div>
+                            </section>
 
-                        <footer className="composer">
-                            <input
-                                type="text"
-                                placeholder="Digite sua mensagem..."
-                                value={messageText}
-                                onChange={(e) => setMessageText(e.target.value)}
-                                onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
-                            />
-                            <button onClick={handleSend}>Enviar</button>
-                        </footer>
-                    </div>
+                            <footer className="chat-input-bar">
+                                <input
+                                    type="text"
+                                    placeholder="Escreva sua resposta..."
+                                    value={messageText}
+                                    onChange={(e) => setMessageText(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
+                                />
+                                <button className="send-btn" onClick={handleSend} disabled={!messageText.trim() || sending}>
+                                    <span className="material-symbols-outlined">send</span>
+                                </button>
+                            </footer>
+                        </>
+                    ) : (
+                        <div className="no-chat-selected">
+                            <span className="material-symbols-outlined">forum</span>
+                            <p>Selecione uma denúncia para visualizar a conversa</p>
+                        </div>
+                    )}
                 </main>
             </div>
-            {loading && <div className="loading-overlay">Carregando...</div>}
         </div>
     );
 }
