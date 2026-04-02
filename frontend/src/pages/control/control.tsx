@@ -115,23 +115,27 @@ const Control: React.FC = () => {
         )}
 
         {activeView === "reportList" && (
-          <div className="header">
-            <h2>Denúncias Recebidas</h2>
-            <p>Gerencie e resolva as denúncias de usuários.</p>
-            
+          <>
+            <div className="header">
+              <h2>Denúncias Recebidas</h2>
+              <p>Gerencie e resolva as denúncias de usuários.</p>
+            </div>
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', height: 'calc(100vh - 120px)' }}>
               <ReportList />
-  
-          </div>
+            </div>
+          </>
         )}
 
         {activeView === "cnhList" && (
-          <div className="header">
-            <h2>Validação de CNH</h2>
-            <p>Verifique e aprove os documentos enviados pelos usuários.</p>
-            <div style={{ marginTop: "1rem" }}>
+          <>
+            <div className="header">
+              <h2>Validação de CNH</h2>
+              <p>Verifique e aprove os documentos enviados pelos usuários.</p>
+            </div>
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', height: 'calc(100vh - 120px)' }}>
               <CnhList />
             </div>
-          </div>
+          </>
         )}
 
 

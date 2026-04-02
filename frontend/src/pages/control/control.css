@@ -6,12 +6,10 @@
 /* Layout */
 .dashboard {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   font-family: "Inter", sans-serif;
   background-color: #fff;
-
-
 }
 
 /* Sidebar */
@@ -105,28 +103,30 @@ button{
 /* Main */
 .main-content {
   flex: 1;
-  padding: 2rem;
   width: 100%;
-  align-content: stretch;
-  overflow-y: auto;    
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .header{
   width: 100%;
-  height: 20%;
+  margin: 0;
+  padding: 1rem 2rem 0.5rem 2rem;
+  flex-shrink: 0;
+  background-color: #f5f7fa;
 }
 
 .header h2 {
-  font-size: 2rem;
-  font-weight: 900;
+  font-size: 1.5rem;
+  font-weight: 700;
   margin: 0;
   color:#030728;
 }
 
 .header p {
-  color: #4c739a;
-  margin: 5px 0 20px;
+  color: #666;
+  margin: 5px 0 10px;
 }
 
 /* Barra de busca */
